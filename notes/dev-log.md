@@ -4,3 +4,4 @@
 2022-04-19 update exercise solutions
 2022-05-06 finish study guide
 2022-06-27 fix course notes
+2022-07-15 finish lab report
