@@ -5,3 +5,4 @@
 2022-05-06 finish study guide
 2022-06-27 fix course notes
 2022-07-15 finish lab report
+2022-07-29 clean up reading list
