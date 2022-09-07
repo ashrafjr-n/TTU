@@ -7,3 +7,4 @@
 2022-07-15 finish lab report
 2022-07-29 clean up reading list
 2022-08-11 add assignment
+2022-09-07 review reading list
