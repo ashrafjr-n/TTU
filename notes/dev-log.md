@@ -10,3 +10,4 @@
 2022-09-07 review reading list
 2022-09-22 review lecture notes
 2022-10-03 update lecture notes
+2022-10-21 review study guide
