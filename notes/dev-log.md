@@ -13,3 +13,4 @@
 2022-10-21 review study guide
 2022-11-03 update assignment
 2022-11-15 review study guide
+2022-12-16 clean up course notes
