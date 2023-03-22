@@ -17,3 +17,4 @@
 2022-12-30 add reading list
 2023-01-30 fix study guide
 2023-02-13 finish lab report
+2023-03-22 finish course notes
