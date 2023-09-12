@@ -23,3 +23,4 @@
 2023-07-06 add assignment
 2023-07-12 add lab report
 2023-09-09 review exercise solutions
+2023-09-12 add exercise solutions
