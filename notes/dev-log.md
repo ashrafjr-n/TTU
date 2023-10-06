@@ -25,3 +25,4 @@
 2023-09-09 review exercise solutions
 2023-09-12 add exercise solutions
 2023-09-24 finish assignment
+2023-10-06 fix project outline
