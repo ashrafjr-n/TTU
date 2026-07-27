@@ -7,7 +7,7 @@
 @include('partials.navbar')
 
 {{-- ============ الهيرو ============ --}}
-<section class="relative min-h-[106vh] overflow-hidden bg-ttu-cream" dir="ltr">
+<section class="relative h-screen overflow-hidden bg-ttu-cream" dir="ltr">
 
     <img src="{{ asset('images/hero-background.png') }}"
          alt=""
@@ -16,7 +16,7 @@
     <div class="absolute inset-0 bg-gradient-to-r from-black/75 via-black/45 to-black/10"></div>
 
     <div class="relative h-full flex items-center justify-end">
-        <div dir="rtl" class="w-full lg:w-[52%] px-6 lg:px-10 pt-24 lg:pt-32 pb-14 lg:pb-20 lg:-translate-x-8 xl:-translate-x-14 translate-y-16">
+        <div dir="rtl" class="w-full lg:w-[52%] px-6 lg:px-10">
 
             <h1 class="font-display text-4xl sm:text-5xl lg:text-[3.4rem] font-extrabold leading-[1.25] text-white">
                 رعايتك الصحية بخطوة واحدة.
@@ -31,7 +31,7 @@
             </p>
 
             <div class="mt-9">
-                <a href="#roles" class="btn-hero">
+                <a href="#roles" class="btn-hero cursor-pointer">
                     اختر نوع حسابك
                     <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2.2" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
@@ -39,15 +39,15 @@
                 </a>
             </div>
 
-            {{-- شريط معلومات — بدون ظل، بمظهر زجاجي خفيف --}}
-            <div class="mt-8 inline-flex items-stretch rounded-[24px] bg-white/10 backdrop-blur-md border border-white/20 divide-x divide-x-reverse divide-white/15 max-w-xl">
+            {{-- شريط معلومات — خلفية حليبية بدون ظل --}}
+            <div class="mt-8 inline-flex items-stretch rounded-[24px] bg-ttu-cream divide-x divide-x-reverse divide-black/5 max-w-xl">
                 <div class="flex items-center gap-3 px-5 py-4">
                     <svg class="w-5 h-5 text-ttu-red shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6l4 2M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                     <div class="leading-tight">
-                        <p class="text-[10px] text-white/70 font-semibold">الدوام</p>
-                        <p class="text-xs font-bold text-white">8 ص - 4 م</p>
+                        <p class="text-[10px] text-ttu-gray font-semibold">الدوام</p>
+                        <p class="text-xs font-bold text-ttu-black">8 ص - 4 م</p>
                     </div>
                 </div>
 
@@ -56,8 +56,8 @@
                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m4-9.5c0-1.38-1.79-2.5-4-2.5s-4 1.12-4 2.5S9.79 11 12 11s4 1.12 4 2.5S14.21 16 12 16s-4-1.12-4-2.5" />
                     </svg>
                     <div class="leading-tight">
-                        <p class="text-[10px] text-white/70 font-semibold">رسوم الحجز</p>
-                        <p class="text-xs font-bold text-white">0.25 د.أ</p>
+                        <p class="text-[10px] text-ttu-gray font-semibold">رسوم الحجز</p>
+                        <p class="text-xs font-bold text-ttu-black">0.25 د.أ</p>
                     </div>
                 </div>
 
@@ -67,38 +67,13 @@
                         <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-green-500"></span>
                     </span>
                     <div class="leading-tight">
-                        <p class="text-[10px] text-white/70 font-semibold">الحالة</p>
-                        <p class="text-xs font-bold text-white">الحجز متاح الآن</p>
+                        <p class="text-[10px] text-ttu-gray font-semibold">الحالة</p>
+                        <p class="text-xs font-bold text-ttu-black">الحجز متاح الآن</p>
                     </div>
                 </div>
             </div>
 
         </div>
-    </div>
-
-    {{-- موجة نهاية الهيرو --}}
-    <div class="absolute bottom-0 inset-x-0 leading-[0] z-10 pointer-events-none">
-        <svg class="w-full h-[70px] sm:h-[95px] lg:h-[120px]" viewBox="0 0 1440 120" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
-            <defs>
-                <linearGradient id="waveLineGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                    <stop offset="0%"  stop-color="#D6241C" stop-opacity="0" />
-                    <stop offset="50%" stop-color="#D6241C" stop-opacity="1" />
-                    <stop offset="100%" stop-color="#D6241C" stop-opacity="0" />
-                </linearGradient>
-            </defs>
-
-            {{-- طبقة خلفية خفيفة لعمق بصري --}}
-            <path fill="#FBF6EC" fill-opacity="0.6"
-                  d="M0,60 C240,20 480,90 720,55 C960,20 1200,80 1440,45 L1440,120 L0,120 Z"></path>
-
-            {{-- الطبقة الرئيسية --}}
-            <path fill="#FBF6EC"
-                  d="M0,70 C220,35 380,95 640,68 C900,42 1120,88 1440,52 L1440,120 L0,120 Z"></path>
-
-            {{-- خط زخرفي متدرج فوق الموجة الرئيسية --}}
-            <path d="M0,70 C220,35 380,95 640,68 C900,42 1120,88 1440,52"
-                  fill="none" stroke="url(#waveLineGradient)" stroke-width="2.5" stroke-linecap="round" />
-        </svg>
     </div>
 </section>
 
@@ -113,11 +88,11 @@
             <p class="mt-3 text-ttu-gray">سنوجهك مباشرة إلى الصفحة المناسبة حسب صفتك داخل الجامعة</p>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
 
             {{-- طالب --}}
             <a href="{{ route('register', ['role' => 'student']) }}"
-               class="group relative flex flex-col overflow-hidden p-8 pt-10 rounded-[2.5rem] neu-raised-white neu-card-hover">
+               class="group relative flex flex-col overflow-hidden p-8 pt-10 rounded-[2.5rem] neu-raised-white neu-card-hover cursor-pointer">
 
                 <div class="relative w-16 h-16 rounded-full neu-icon bg-ttu-cream flex items-center justify-center mb-6 group-hover:bg-ttu-red transition-colors duration-300">
                     <i data-lucide="graduation-cap" class="neu-wiggle w-7 h-7 text-ttu-red group-hover:text-white transition-colors duration-300" stroke-width="1.6"></i>
@@ -141,7 +116,7 @@
 
             {{-- موظف --}}
             <a href="{{ route('register', ['role' => 'staff']) }}"
-               class="group relative flex flex-col overflow-hidden p-8 pt-10 rounded-[2.5rem] neu-raised-white neu-card-hover">
+               class="group relative flex flex-col overflow-hidden p-8 pt-10 rounded-[2.5rem] neu-raised-white neu-card-hover cursor-pointer">
 
                 <div class="relative w-16 h-16 rounded-full neu-icon bg-ttu-cream flex items-center justify-center mb-6 group-hover:bg-ttu-red transition-colors duration-300">
                     <i data-lucide="briefcase" class="neu-wiggle w-7 h-7 text-ttu-red group-hover:text-white transition-colors duration-300" stroke-width="1.6"></i>
@@ -165,7 +140,7 @@
 
             {{-- دكتور --}}
             <a href="{{ route('login') }}"
-               class="group relative flex flex-col overflow-hidden p-8 pt-10 rounded-[2.5rem] neu-raised-white neu-card-hover">
+               class="group relative flex flex-col overflow-hidden p-8 pt-10 rounded-[2.5rem] neu-raised-white neu-card-hover cursor-pointer">
 
                 <div class="relative w-16 h-16 rounded-full neu-icon bg-ttu-cream flex items-center justify-center mb-6 group-hover:bg-ttu-red transition-colors duration-300">
                     <i data-lucide="stethoscope" class="neu-wiggle w-7 h-7 text-ttu-red group-hover:text-white transition-colors duration-300" stroke-width="1.6"></i>
@@ -176,6 +151,30 @@
                     إدارة جدول العيادة، ومراجعة طلبات الحجز واتخاذ القرار بشأنها.
                 </p>
                 <p class="relative text-xs text-ttu-red font-semibold mb-6">الدخول عبر البريد الجامعي</p>
+
+                <span class="relative mt-auto pt-5 flex items-center justify-between">
+                    <span class="text-sm font-semibold">تسجيل الدخول</span>
+                    <span class="w-10 h-10 rounded-full neu-icon bg-ttu-cream group-hover:bg-ttu-red flex items-center justify-center transition-colors duration-300">
+                        <svg class="w-4 h-4 text-ttu-red group-hover:text-white transition-colors" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+                        </svg>
+                    </span>
+                </span>
+            </a>
+
+            {{-- مدير --}}
+            <a href="{{ route('login') }}"
+               class="group relative flex flex-col overflow-hidden p-8 pt-10 rounded-[2.5rem] neu-raised-white neu-card-hover cursor-pointer">
+
+                <div class="relative w-16 h-16 rounded-full neu-icon bg-ttu-cream flex items-center justify-center mb-6 group-hover:bg-ttu-red transition-colors duration-300">
+                    <i data-lucide="shield-check" class="neu-wiggle w-7 h-7 text-ttu-red group-hover:text-white transition-colors duration-300" stroke-width="1.6"></i>
+                </div>
+
+                <h3 class="relative font-display text-xl font-bold mb-1.5">مدير</h3>
+                <p class="relative text-sm text-ttu-gray leading-relaxed mb-2">
+                    إشراف كامل على النظام وإدارة الحسابات والصلاحيات.
+                </p>
+                <p class="relative text-xs text-ttu-red font-semibold mb-6">الدخول عبر البريد الإداري</p>
 
                 <span class="relative mt-auto pt-5 flex items-center justify-between">
                     <span class="text-sm font-semibold">تسجيل الدخول</span>
@@ -325,7 +324,7 @@
 
 {{-- زر العودة للأعلى --}}
 <button id="scrollTopBtn" type="button" aria-label="العودة للأعلى"
-        class="btn-hero fixed bottom-6 left-6 z-50 !w-12 !h-12 !p-0 !rounded-full justify-center opacity-0 pointer-events-none translate-y-4 transition-all duration-300">
+        class="btn-hero cursor-pointer fixed bottom-6 left-6 z-50 !w-12 !h-12 !p-0 !rounded-full justify-center opacity-0 pointer-events-none translate-y-4 transition-all duration-300">
     <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke-width="2.2" stroke="currentColor">
         <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 15.75l7.5-7.5 7.5 7.5" />
     </svg>
