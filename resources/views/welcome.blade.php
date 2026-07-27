@@ -7,7 +7,7 @@
 @include('partials.navbar')
 
 {{-- ============ الهيرو ============ --}}
-<section class="relative min-h-[106vh] overflow-hidden" dir="ltr">
+<section class="relative min-h-[106vh] overflow-hidden bg-ttu-cream" dir="ltr">
 
     <img src="{{ asset('images/hero-background.png') }}"
          alt=""
@@ -30,40 +30,6 @@
                 نظام إلكتروني ذكي لتنظيم المواعيد وتقديم خدمة أفضل للجميع.
             </p>
 
-            {{-- شريط معلومات — نيومورفيزم بارز --}}
-            <div class="mt-10 inline-flex items-stretch rounded-[24px] neu-raised-white divide-x divide-x-reverse divide-black/5 max-w-xl">
-                <div class="flex items-center gap-3 px-5 py-4">
-                    <svg class="w-5 h-5 text-ttu-red shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6l4 2M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    <div class="leading-tight">
-                        <p class="text-[10px] text-ttu-gray font-semibold">الدوام</p>
-                        <p class="text-xs font-bold text-ttu-black">8 ص - 4 م</p>
-                    </div>
-                </div>
-
-                <div class="flex items-center gap-3 px-5 py-4">
-                    <svg class="w-5 h-5 text-ttu-red shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m4-9.5c0-1.38-1.79-2.5-4-2.5s-4 1.12-4 2.5S9.79 11 12 11s4 1.12 4 2.5S14.21 16 12 16s-4-1.12-4-2.5" />
-                    </svg>
-                    <div class="leading-tight">
-                        <p class="text-[10px] text-ttu-gray font-semibold">رسوم الحجز</p>
-                        <p class="text-xs font-bold text-ttu-black">0.25 د.أ</p>
-                    </div>
-                </div>
-
-                <div class="flex items-center gap-3 px-5 py-4">
-                    <span class="relative flex h-2.5 w-2.5 shrink-0">
-                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-500 opacity-60"></span>
-                        <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-green-500"></span>
-                    </span>
-                    <div class="leading-tight">
-                        <p class="text-[10px] text-ttu-gray font-semibold">الحالة</p>
-                        <p class="text-xs font-bold text-ttu-black">الحجز متاح الآن</p>
-                    </div>
-                </div>
-            </div>
-
             <div class="mt-9">
                 <a href="#roles" class="btn-hero">
                     اختر نوع حسابك
@@ -73,12 +39,46 @@
                 </a>
             </div>
 
+            {{-- شريط معلومات — بدون ظل، بمظهر زجاجي خفيف --}}
+            <div class="mt-8 inline-flex items-stretch rounded-[24px] bg-white/10 backdrop-blur-md border border-white/20 divide-x divide-x-reverse divide-white/15 max-w-xl">
+                <div class="flex items-center gap-3 px-5 py-4">
+                    <svg class="w-5 h-5 text-ttu-red shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6l4 2M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <div class="leading-tight">
+                        <p class="text-[10px] text-white/70 font-semibold">الدوام</p>
+                        <p class="text-xs font-bold text-white">8 ص - 4 م</p>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-3 px-5 py-4">
+                    <svg class="w-5 h-5 text-ttu-red shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m4-9.5c0-1.38-1.79-2.5-4-2.5s-4 1.12-4 2.5S9.79 11 12 11s4 1.12 4 2.5S14.21 16 12 16s-4-1.12-4-2.5" />
+                    </svg>
+                    <div class="leading-tight">
+                        <p class="text-[10px] text-white/70 font-semibold">رسوم الحجز</p>
+                        <p class="text-xs font-bold text-white">0.25 د.أ</p>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-3 px-5 py-4">
+                    <span class="relative flex h-2.5 w-2.5 shrink-0">
+                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-500 opacity-60"></span>
+                        <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-green-500"></span>
+                    </span>
+                    <div class="leading-tight">
+                        <p class="text-[10px] text-white/70 font-semibold">الحالة</p>
+                        <p class="text-xs font-bold text-white">الحجز متاح الآن</p>
+                    </div>
+                </div>
+            </div>
+
         </div>
     </div>
 
     {{-- موجة نهاية الهيرو --}}
     <div class="absolute bottom-0 inset-x-0 leading-[0] z-10 pointer-events-none">
-        <svg class="w-full h-[50px] sm:h-[65px] lg:h-[80px]" viewBox="0 0 1440 80" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+        <svg class="w-full h-[70px] sm:h-[95px] lg:h-[120px]" viewBox="0 0 1440 120" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
             <defs>
                 <linearGradient id="waveLineGradient" x1="0%" y1="0%" x2="100%" y2="0%">
                     <stop offset="0%"  stop-color="#D6241C" stop-opacity="0" />
@@ -86,8 +86,18 @@
                     <stop offset="100%" stop-color="#D6241C" stop-opacity="0" />
                 </linearGradient>
             </defs>
-            <path fill="#FFFFFF" d="M0,42 C360,70 1080,14 1440,38 L1440,80 L0,80 Z"></path>
-            <path d="M0,42 C360,70 1080,14 1440,38" fill="none" stroke="url(#waveLineGradient)" stroke-width="2.5" stroke-linecap="round" />
+
+            {{-- طبقة خلفية خفيفة لعمق بصري --}}
+            <path fill="#FBF6EC" fill-opacity="0.6"
+                  d="M0,60 C240,20 480,90 720,55 C960,20 1200,80 1440,45 L1440,120 L0,120 Z"></path>
+
+            {{-- الطبقة الرئيسية --}}
+            <path fill="#FBF6EC"
+                  d="M0,70 C220,35 380,95 640,68 C900,42 1120,88 1440,52 L1440,120 L0,120 Z"></path>
+
+            {{-- خط زخرفي متدرج فوق الموجة الرئيسية --}}
+            <path d="M0,70 C220,35 380,95 640,68 C900,42 1120,88 1440,52"
+                  fill="none" stroke="url(#waveLineGradient)" stroke-width="2.5" stroke-linecap="round" />
         </svg>
     </div>
 </section>
