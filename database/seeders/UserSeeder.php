@@ -35,6 +35,15 @@ class UserSeeder extends Seeder
             ['name' => 'د. خالد ناصر',   'email' => 'doctor-3@ttu.edu.jo'],
         ];
 
+// حساب المدير الثابت — لا يوجد تسجيل عام لهذا الدور
+User::create([
+    'name' => 'إدارة عيادة TTU',
+    'email' => 'admin@ttu.edu.jo',
+    'password' => Hash::make('password'),
+    'role' => 'admin',
+    'identifier' => 'admin@ttu.edu.jo',
+]);
+
         foreach ($doctors as $doctor) {
             User::create([
                 'name' => $doctor['name'],
