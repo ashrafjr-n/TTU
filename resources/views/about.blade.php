@@ -4,7 +4,7 @@
 
 @section('content')
 
-@include('partials.navbar')
+@include('partials.app-header')
 
 <div class="min-h-screen bg-ttu-cream">
 
