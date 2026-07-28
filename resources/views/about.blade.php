@@ -4,7 +4,7 @@
 
 @section('content')
 
-@include('partials.app-header')
+@include('partials.auth-header')
 
 <div class="min-h-screen bg-ttu-cream">
 
