@@ -4,6 +4,8 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\BookingController;
 use App\Http\Controllers\DoctorController;
+use App\Http\Controllers\AdminController;
+
 
 
 
@@ -29,6 +31,7 @@ Route::middleware('auth')->get('/dashboard', function () {
         'student' => redirect()->route('dashboard.student'),
         'staff' => redirect()->route('dashboard.staff'),
         'doctor' => redirect()->route('dashboard.doctor'),
+        'admin' => redirect()->route('admin.dashboard'),
     };
 })->name('dashboard');
 
@@ -63,6 +66,18 @@ Route::middleware(['auth', 'role:student,staff'])->group(function () {
     Route::post('/booking', [BookingController::class, 'store'])->name('booking.store');
     Route::post('/booking/request', [BookingController::class, 'requestBooking'])->name('booking.request');
     Route::delete('/booking/{booking}', [BookingController::class, 'destroy'])->name('booking.destroy');
+});
+
+
+Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/', [AdminController::class, 'index'])->name('dashboard');
+    Route::get('/users', [AdminController::class, 'users'])->name('users');
+    Route::post('/users/{user}/toggle', [AdminController::class, 'toggleUserStatus'])->name('users.toggle');
+    Route::get('/doctors/create', [AdminController::class, 'createDoctor'])->name('doctors.create');
+    Route::post('/doctors', [AdminController::class, 'storeDoctor'])->name('doctors.store');
+    Route::get('/records', [AdminController::class, 'records'])->name('records');
+    Route::post('/records', [AdminController::class, 'storeRecord'])->name('records.store');
+    Route::delete('/records/{record}', [AdminController::class, 'destroyRecord'])->name('records.destroy');
 });
 
 require __DIR__.'/auth.php';
