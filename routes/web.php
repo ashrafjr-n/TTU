@@ -19,6 +19,8 @@ Route::get('/', function () {
     return view('welcome');
 })->name('home');
 
+Route::view('/about', 'about')->name('about');
+
 // توجيه ذكي بعد تسجيل الدخول حسب الدور
 Route::middleware('auth')->get('/dashboard', function () {
     $user = auth()->user();

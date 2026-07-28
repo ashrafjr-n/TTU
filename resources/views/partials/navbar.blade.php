@@ -60,7 +60,7 @@
                     الرئيسية
                 </a>
                 <a href="#" class="nav-link">تواصل</a>
-                <a href="#" class="nav-link">حول</a>
+                <a href="{{ route('about') }}" class="nav-link">حول</a>
             </nav>
 
         </div>

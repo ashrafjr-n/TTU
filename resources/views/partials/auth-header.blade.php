@@ -55,7 +55,7 @@
             <nav class="hidden md:flex items-center gap-8 text-sm font-semibold">
                 <a href="{{ route('home') }}" class="text-ttu-black hover:text-ttu-red transition-colors">الرئيسية</a>
                 <a href="#" class="text-ttu-black hover:text-ttu-red transition-colors">تواصل</a>
-                <a href="#" class="text-ttu-black hover:text-ttu-red transition-colors">حول</a>
+                <a href="{{ route('about') }}" class="text-ttu-black hover:text-ttu-red transition-colors">حول</a>
             </nav>
 
         </div>
