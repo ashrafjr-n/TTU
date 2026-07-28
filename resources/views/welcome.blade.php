@@ -187,6 +187,51 @@
             </a>
 
         </div>
+
+        {{-- ============ كيف تحجز موعدك؟ ============ --}}
+        <div class="relative rounded-[2.5rem] neu-raised-white py-14 px-6 lg:px-12 mt-10">
+            <div class="text-center max-w-2xl mx-auto mb-12">
+                <span class="inline-block text-xs font-bold tracking-widest text-ttu-red mb-3">آلية العمل</span>
+                <h2 class="font-display text-2xl sm:text-3xl font-extrabold">كيف تحجز موعدك؟</h2>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+
+                <div class="relative rounded-2xl neu-pressed p-6 text-center">
+                    <span class="absolute -top-3 -right-3 w-8 h-8 rounded-full neu-badge flex items-center justify-center font-display font-extrabold text-ttu-red text-xs">01</span>
+                    <div class="w-12 h-12 rounded-full neu-icon bg-ttu-cream flex items-center justify-center mx-auto mb-4">
+                        <i data-lucide="user-plus" class="w-5 h-5 text-ttu-red" stroke-width="1.6"></i>
+                    </div>
+                    <p class="text-sm font-bold text-ttu-black">أنشئ حسابك</p>
+                </div>
+
+                <div class="relative rounded-2xl neu-pressed p-6 text-center">
+                    <span class="absolute -top-3 -right-3 w-8 h-8 rounded-full neu-badge flex items-center justify-center font-display font-extrabold text-ttu-red text-xs">02</span>
+                    <div class="w-12 h-12 rounded-full neu-icon bg-ttu-cream flex items-center justify-center mx-auto mb-4">
+                        <i data-lucide="calendar-search" class="w-5 h-5 text-ttu-red" stroke-width="1.6"></i>
+                    </div>
+                    <p class="text-sm font-bold text-ttu-black">اختر وقتًا متاحًا</p>
+                </div>
+
+                <div class="relative rounded-2xl neu-pressed p-6 text-center">
+                    <span class="absolute -top-3 -right-3 w-8 h-8 rounded-full neu-badge flex items-center justify-center font-display font-extrabold text-ttu-red text-xs">03</span>
+                    <div class="w-12 h-12 rounded-full neu-icon bg-ttu-cream flex items-center justify-center mx-auto mb-4">
+                        <i data-lucide="check-circle" class="w-5 h-5 text-ttu-red" stroke-width="1.6"></i>
+                    </div>
+                    <p class="text-sm font-bold text-ttu-black">أكّد حجزك</p>
+                </div>
+
+                <div class="relative rounded-2xl neu-pressed p-6 text-center">
+                    <span class="absolute -top-3 -right-3 w-8 h-8 rounded-full neu-badge flex items-center justify-center font-display font-extrabold text-ttu-red text-xs">04</span>
+                    <div class="w-12 h-12 rounded-full neu-icon bg-ttu-cream flex items-center justify-center mx-auto mb-4">
+                        <i data-lucide="footprints" class="w-5 h-5 text-ttu-red" stroke-width="1.6"></i>
+                    </div>
+                    <p class="text-sm font-bold text-ttu-black">احضر بالوقت المحدد</p>
+                </div>
+
+            </div>
+        </div>
+
     </div>
 </section>
 
