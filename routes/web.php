@@ -12,6 +12,7 @@ Route::middleware(['auth', 'role:doctor'])->group(function () {
     Route::post('/doctor/requests/{bookingRequest}/approve', [DoctorController::class, 'approve'])->name('doctor.requests.approve');
     Route::post('/doctor/requests/{bookingRequest}/reject', [DoctorController::class, 'reject'])->name('doctor.requests.reject');
     Route::post('/doctor/bookings/{booking}/cancel', [DoctorController::class, 'cancelBooking'])->name('doctor.bookings.cancel');
+    Route::delete('/booking/{booking}', [BookingController::class, 'destroy'])->name('booking.destroy');
 });
 
 // الصفحة الرئيسية - اختيار الدور

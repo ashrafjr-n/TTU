@@ -11,7 +11,6 @@ use Carbon\Carbon;
 
 class BookingController extends Controller
 {
-    // الإعدادات الثابتة للنظام
     const OPEN_HOUR = 8;
     const CLOSE_HOUR = 16;
     const STUDENT_CAPACITY = 9;
@@ -19,9 +18,6 @@ class BookingController extends Controller
     const REQUEST_EXPIRY_MINUTES = 15;
     const PRICE = 0.25;
 
-    /**
-     * عرض صفحة الحجز مع حساب حالة كل ساعة
-     */
     public function index()
     {
         $user = Auth::user();
@@ -35,9 +31,6 @@ class BookingController extends Controller
         return view('booking.index', ['slots' => $slots]);
     }
 
-    /**
-     * حساب حالة ساعة معينة (كم محجوز، شو الخيار المتاح للمستخدم الحالي)
-     */
     private function getSlotStatus(Carbon $date, int $hour, $user): array
     {
         $studentBooked = Booking::where('booking_date', $date)
@@ -55,12 +48,12 @@ class BookingController extends Controller
         $studentFull = $studentBooked >= self::STUDENT_CAPACITY;
         $staffFull = $staffBooked >= self::STAFF_CAPACITY;
 
-        // هل المستخدم الحالي عندو حجز أو طلب موجود مسبقًا بهاي الساعة؟
-        $alreadyBooked = Booking::where('user_id', $user->id)
+        // بدل exists()، منجيب الحجز نفسه عشان نقدر نلغيه لاحقًا (لو موجود)
+        $myBooking = Booking::where('user_id', $user->id)
             ->where('booking_date', $date)
             ->where('booking_hour', $hour)
             ->where('status', 'confirmed')
-            ->exists();
+            ->first();
 
         $pendingRequest = BookingRequest::where('user_id', $user->id)
             ->where('booking_date', $date)
@@ -68,11 +61,10 @@ class BookingController extends Controller
             ->where('status', 'pending')
             ->exists();
 
-        // تحديد الحالة حسب دور المستخدم (طالب أو موظف)
         if ($user->isStudent()) {
             $ownFull = $studentFull;
             $otherFull = $staffFull;
-        } else { // staff
+        } else {
             $ownFull = $staffFull;
             $otherFull = $studentFull;
         }
@@ -87,7 +79,8 @@ class BookingController extends Controller
             'student_capacity' => self::STUDENT_CAPACITY,
             'staff_booked' => $staffBooked,
             'staff_capacity' => self::STAFF_CAPACITY,
-            'already_booked' => $alreadyBooked,
+            'already_booked' => $myBooking !== null,
+            'my_booking_id' => $myBooking?->id,
             'pending_request' => $pendingRequest,
             'can_book_directly' => $canBookDirectly,
             'can_request' => $canRequest,
@@ -101,9 +94,6 @@ class BookingController extends Controller
         return "{$displayHour}:00 {$period}";
     }
 
-    /**
-     * حجز مباشر (لما فيه مجال ضمن الحصة العادية)
-     */
     public function store(Request $request)
     {
         $request->validate([
@@ -114,11 +104,8 @@ class BookingController extends Controller
         $date = Carbon::today();
         $hour = $request->input('hour');
 
-        // نستخدم Transaction + Lock عشان نمنع تعارض الحجز
-        // (لو شخصين ضغطو "احجز" بنفس اللحظة تمامًا على آخر مقعد فاضي)
         return DB::transaction(function () use ($user, $date, $hour) {
 
-            // نقفل الصفوف المتعلقة بهاي الساعة أثناء الفحص والحجز
             $capacity = $user->isStudent() ? self::STUDENT_CAPACITY : self::STAFF_CAPACITY;
 
             $currentCount = Booking::where('booking_date', $date)
@@ -132,7 +119,6 @@ class BookingController extends Controller
                 return back()->with('error', 'عذرًا، هذا الوقت أصبح محجوزًا بالكامل. حاول وقتًا آخر.');
             }
 
-            // تحقق إنو المستخدم ما عندوش حجز مسبق بنفس الساعة
             $alreadyBooked = Booking::where('user_id', $user->id)
                 ->where('booking_date', $date)
                 ->where('booking_hour', $hour)
@@ -155,9 +141,6 @@ class BookingController extends Controller
         });
     }
 
-    /**
-     * إرسال طلب حجز (لما الحصة الخاصة فيك مليانة، بس حصة الفئة التانية فيها مجال)
-     */
     public function requestBooking(Request $request)
     {
         $request->validate([
@@ -168,7 +151,6 @@ class BookingController extends Controller
         $date = Carbon::today();
         $hour = $request->input('hour');
 
-        // تحقق إنو ما في طلب pending مسبق لنفس المستخدم بنفس الساعة
         $existingRequest = BookingRequest::where('user_id', $user->id)
             ->where('booking_date', $date)
             ->where('booking_hour', $hour)
@@ -188,5 +170,24 @@ class BookingController extends Controller
         ]);
 
         return back()->with('success', 'تم إرسال طلبك، بانتظار موافقة الدكتور.');
+    }
+
+    /**
+     * إلغاء حجز — يقتصر على صاحب الحجز نفسه
+     */
+    public function destroy(Booking $booking)
+    {
+        // حماية: لا يقدر أي مستخدم يلغي حجز شخص تاني عن طريق تغيير الرقم بالرابط يدويًا
+        if ($booking->user_id !== Auth::id()) {
+            abort(403, 'ليس لديك صلاحية إلغاء هذا الحجز.');
+        }
+
+        if ($booking->status !== 'confirmed') {
+            return back()->with('error', 'هذا الحجز غير قابل للإلغاء.');
+        }
+
+        $booking->update(['status' => 'cancelled']);
+
+        return back()->with('success', 'تم إلغاء حجزك بنجاح.');
     }
 }

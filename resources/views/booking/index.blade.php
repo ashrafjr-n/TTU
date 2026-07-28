@@ -103,12 +103,23 @@
 
                         <div class="shrink-0">
                             @if ($status === 'mine')
-                                <span class="inline-flex items-center gap-1.5 rounded-full bg-blue-50 text-blue-600 text-xs font-bold px-4 py-2.5">
-                                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-                                    </svg>
-                                    لديك حجز
-                                </span>
+                                <div class="flex items-center gap-2">
+                                    <span class="inline-flex items-center gap-1.5 rounded-full bg-blue-50 text-blue-600 text-xs font-bold px-4 py-2.5">
+                                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                                        </svg>
+                                        لديك حجز
+                                    </span>
+
+                                    <button type="button"
+                                            onclick="openCancelModal({{ $slot['my_booking_id'] }}, '{{ $slot['time_label'] }}')"
+                                            class="neu-icon-btn w-9 h-9 rounded-full bg-ttu-cream text-ttu-red flex items-center justify-center hover:!bg-ttu-red hover:!text-white"
+                                            title="إلغاء الحجز">
+                                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                        </svg>
+                                    </button>
+                                </div>
 
                             @elseif ($status === 'pending')
                                 <span class="inline-flex items-center gap-1.5 rounded-full bg-amber-50 text-amber-600 text-xs font-bold px-4 py-2.5">
@@ -147,5 +158,81 @@
 
     </div>
 </div>
+
+{{-- ============ مودال تأكيد الإلغاء ============ --}}
+<div id="cancelModalOverlay" class="fixed inset-0 z-[100] hidden items-center justify-center bg-black/40 backdrop-blur-sm px-4">
+    <div id="cancelModalCard" class="w-full max-w-sm rounded-[2rem] neu-raised-white p-8 text-center scale-95 opacity-0 transition-all duration-300">
+
+        <div class="w-16 h-16 rounded-full neu-icon bg-ttu-cream flex items-center justify-center mx-auto mb-5">
+            <svg class="w-7 h-7 text-ttu-red" fill="none" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9.75 9.75l4.5 4.5m0-4.5l-4.5 4.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+        </div>
+
+        <h3 class="font-display text-xl font-extrabold mb-2">إلغاء الحجز؟</h3>
+        <p class="text-sm text-ttu-gray mb-8">
+            متأكد إنك بدك تلغي موعدك الساعة <span id="cancelModalTime" class="font-bold text-ttu-black"></span>؟
+            ما رح تقدر تتراجع عن هالإجراء.
+        </p>
+
+        <form id="cancelModalForm" method="POST" class="flex gap-3">
+            @csrf
+            @method('DELETE')
+
+            <button type="button" onclick="closeCancelModal()"
+                    class="flex-1 neu-icon-btn bg-ttu-cream text-ttu-black text-sm font-bold py-3 rounded-xl">
+                تراجع
+            </button>
+            <button type="submit"
+                    class="flex-1 neu-icon-btn bg-ttu-red text-white text-sm font-bold py-3 rounded-xl hover:!bg-ttu-red-dark">
+                نعم، ألغِ الحجز
+            </button>
+        </form>
+
+    </div>
+</div>
+
+<script>
+    function openCancelModal(bookingId, timeLabel) {
+        const overlay = document.getElementById('cancelModalOverlay');
+        const card = document.getElementById('cancelModalCard');
+        const form = document.getElementById('cancelModalForm');
+        const timeSpan = document.getElementById('cancelModalTime');
+
+        form.action = '/booking/' + bookingId;
+        timeSpan.textContent = timeLabel;
+
+        overlay.classList.remove('hidden');
+        overlay.classList.add('flex');
+
+        requestAnimationFrame(() => {
+            card.classList.remove('scale-95', 'opacity-0');
+            card.classList.add('scale-100', 'opacity-100');
+        });
+    }
+
+    function closeCancelModal() {
+        const overlay = document.getElementById('cancelModalOverlay');
+        const card = document.getElementById('cancelModalCard');
+
+        card.classList.remove('scale-100', 'opacity-100');
+        card.classList.add('scale-95', 'opacity-0');
+
+        setTimeout(() => {
+            overlay.classList.add('hidden');
+            overlay.classList.remove('flex');
+        }, 200);
+    }
+
+    // إغلاق المودال بالضغط خارج البطاقة
+    document.getElementById('cancelModalOverlay').addEventListener('click', function (e) {
+        if (e.target === this) closeCancelModal();
+    });
+
+    // إغلاق المودال بمفتاح Escape
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') closeCancelModal();
+    });
+</script>
 
 @endsection
