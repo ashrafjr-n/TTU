@@ -9,7 +9,7 @@
                 {{-- الإشعارات --}}
                 <button type="button" title="الإشعارات" aria-label="الإشعارات"
                         class="neu-icon-btn relative w-10 h-10 flex items-center justify-center rounded-full bg-ttu-cream">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-ttu-black" fill="none" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" />
                     </svg>
                     <span class="absolute -top-1 -left-1 w-4 h-4 rounded-full bg-ttu-red text-white text-[10px] font-bold flex items-center justify-center">
@@ -21,7 +21,7 @@
                 <div class="relative">
                     <button type="button" id="lang-toggle" title="تبديل اللغة" aria-label="تبديل اللغة"
                             class="neu-icon-btn w-10 h-10 flex items-center justify-center rounded-full bg-ttu-cream">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-ttu-black" fill="none" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9 9 0 100-18 9 9 0 000 18z" />
                             <path stroke-linecap="round" stroke-linejoin="round" d="M3.6 9h16.8M3.6 15h16.8M12 3c2.2 2.4 3.4 5.6 3.4 9s-1.2 6.6-3.4 9c-2.2-2.4-3.4-5.6-3.4-9s1.2-6.6 3.4-9z" />
                         </svg>
@@ -46,7 +46,7 @@
                 {{-- الوضع الليلي --}}
                 <button type="button" title="الوضع الليلي" aria-label="الوضع الليلي"
                         class="neu-icon-btn w-10 h-10 flex items-center justify-center rounded-full bg-ttu-cream">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-ttu-black" fill="none" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M21 12.8A9 9 0 1111.2 3a7 7 0 009.8 9.8z" />
                     </svg>
                 </button>
@@ -55,7 +55,7 @@
                 <form method="POST" action="{{ route('logout') }}">
                     @csrf
                     <button type="submit" title="تسجيل خروج" aria-label="تسجيل خروج"
-                            class="neu-icon-btn w-10 h-10 flex items-center justify-center rounded-full bg-ttu-cream hover:!bg-ttu-red hover:text-white">
+                            class="neu-icon-btn w-10 h-10 flex items-center justify-center rounded-full bg-ttu-cream text-ttu-black hover:!bg-ttu-red hover:!text-white">
                         <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75" />
                         </svg>
@@ -66,9 +66,9 @@
 
             {{-- روابط التنقل --}}
             <nav class="hidden md:flex items-center gap-8 text-sm font-semibold">
-                <a href="{{ route('home') }}" class="text-ttu-black hover:text-ttu-red transition-colors">الرئيسية</a>
-                <a href="#" class="text-ttu-black hover:text-ttu-red transition-colors">تواصل</a>
-                <a href="{{ route('about') }}" class="text-ttu-black hover:text-ttu-red transition-colors">حول</a>
+                <a href="{{ route('home') }}" class="nav-link-dark">الرئيسية</a>
+                <a href="#" class="nav-link-dark">تواصل</a>
+                <a href="{{ route('about') }}" class="nav-link-dark">حول</a>
             </nav>
 
         </div>
