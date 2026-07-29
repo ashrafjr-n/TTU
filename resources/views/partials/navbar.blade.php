@@ -67,7 +67,9 @@
 
         {{-- اللوغو --}}
         <a href="{{ route('home') }}" class="flex items-center shrink-0">
-            <img src="{{ asset('images/TTU-Clinic.png') }}" alt="عيادة TTU" class="h-24 sm:h-28 w-auto mt-3">
+            <span class="logo-badge rounded-2xl px-4 py-2 flex items-center">
+                <img src="{{ asset('images/TTU-Clinic.png') }}" alt="عيادة TTU" class="h-14 sm:h-16 w-auto">
+            </span>
         </a>
 
     </div>
