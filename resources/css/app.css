@@ -50,6 +50,29 @@ button,
 .nav-link:hover::after { opacity: 0; }
 .nav-link-active::after { opacity: 1; }
 
+/* نسخة من nav-link بنص أسود — للهيدرات ذات الخلفية الفاتحة (auth-header / app-header) */
+.nav-link-dark {
+    position: relative;
+    display: inline-block;
+    color: var(--color-ttu-black);
+    font-weight: 600;
+    padding-bottom: 6px;
+    transition: transform .3s ease, color .3s ease;
+}
+.nav-link-dark::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    left: 0;
+    bottom: 0;
+    height: 2px;
+    background-color: var(--color-ttu-red);
+    opacity: 1;
+    transition: opacity .3s ease;
+}
+.nav-link-dark:hover { color: var(--color-ttu-red); transform: scale(1.1); }
+.nav-link-dark:hover::after { opacity: 0; }
+
 /* =========================================================
    NEUMORPHISM PLAYFUL — نظام الظلال الأساسي
    ========================================================= */
@@ -190,3 +213,29 @@ button,
     border-color: rgba(214, 36, 28, .5);
 }
 .glass-icon-btn:active { transform: scale(.94); }
+
+/* ===== أزرار أيقونات الهيدر الأحمر (auth-header / app-header) ===== */
+.neu-icon-btn-onred {
+    background: rgba(255, 255, 255, .14);
+    border: 1px solid rgba(255, 255, 255, .18);
+    box-shadow: 4px 4px 10px rgba(0, 0, 0, .18), -3px -3px 8px rgba(255, 255, 255, .08);
+    transition: transform .3s var(--neu-bounce), background-color .3s ease, box-shadow .3s ease, color .3s ease;
+}
+.neu-icon-btn-onred:hover {
+    transform: translateY(-2px) rotate(-4deg);
+    background: rgba(255, 255, 255, .22);
+}
+.neu-icon-btn-onred:active {
+    transform: scale(.94);
+    box-shadow: inset 3px 3px 7px rgba(0, 0, 0, .25), inset -2px -2px 6px rgba(255, 255, 255, .1);
+}
+.neu-icon-btn-onred:hover.hover-fill-white {
+    background: #ffffff;
+    color: var(--color-ttu-red);
+}
+
+/* بطاقة اللوجو — خلفية فاتحة عشان يبين اللوجو الأحمر بوضوح فوق الهيدر الأحمر */
+.logo-badge {
+    background: linear-gradient(160deg, #FFFFFF, var(--color-ttu-cream) 130%);
+    box-shadow: 4px 4px 10px rgba(0, 0, 0, .18), -3px -3px 8px rgba(255, 255, 255, .1);
+}
