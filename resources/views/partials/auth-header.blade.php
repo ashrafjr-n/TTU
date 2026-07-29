@@ -53,14 +53,14 @@
             </div>
 
             <nav class="hidden md:flex items-center gap-8 text-sm font-semibold">
-                <a href="{{ route('home') }}" class="text-ttu-black hover:text-ttu-red transition-colors">الرئيسية</a>
-                <a href="#" class="text-ttu-black hover:text-ttu-red transition-colors">تواصل</a>
-                <a href="{{ route('about') }}" class="text-ttu-black hover:text-ttu-red transition-colors">حول</a>
+                <a href="{{ route('home') }}" class="nav-link-dark">الرئيسية</a>
+                <a href="#" class="nav-link-dark">تواصل</a>
+                <a href="{{ route('about') }}" class="nav-link-dark">حول</a>
             </nav>
 
         </div>
 
-        {{-- اللوجو (يسار) --}}
+        {{-- اللوجو --}}
         <a href="{{ route('home') }}" class="flex items-center shrink-0">
             <img src="{{ asset('images/TTU-Clinic.png') }}" alt="عيادة TTU" class="h-14 w-auto">
         </a>
