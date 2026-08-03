@@ -39,6 +39,48 @@
             </div>
         </div>
 
+        {{-- ============ بطاقة الحضور ============ --}}
+        <div class="rounded-[2rem] neu-raised-white p-6 mb-10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+                <p class="text-xs font-bold text-ttu-gray mb-1.5">حالة الحضور اليوم</p>
+                @if (!$todayAttendance)
+                    <p class="text-sm font-bold text-ttu-black flex items-center gap-1.5">
+                        <span class="w-2 h-2 rounded-full bg-ttu-gray"></span>
+                        لم تسجل حضورك بعد
+                    </p>
+                @elseif (!$todayAttendance->check_out_at)
+                    <p class="text-sm font-bold text-green-600 flex items-center gap-1.5">
+                        <span class="w-2 h-2 rounded-full bg-green-500"></span>
+                        متواجد الآن — دخلت الساعة {{ $todayAttendance->check_in_at->format('H:i') }}
+                    </p>
+                @else
+                    <p class="text-sm font-bold text-ttu-black flex items-center gap-1.5 flex-wrap">
+                        <span class="w-2 h-2 rounded-full bg-ttu-gray"></span>
+                        انتهى دوامك اليوم — {{ $todayAttendance->check_in_at->format('H:i') }} إلى {{ $todayAttendance->check_out_at->format('H:i') }}
+                        @if ($todayAttendance->is_auto_checkout)
+                            <span class="text-[11px] font-bold text-ttu-red bg-red-50 rounded-full px-2.5 py-1">تسجيل خروج تلقائي</span>
+                        @endif
+                    </p>
+                @endif
+            </div>
+
+            <div>
+                @if (!$todayAttendance)
+                    <form method="POST" action="{{ route('doctor.attendance.checkin') }}">
+                        @csrf
+                        <button type="submit" class="btn-hero !py-2.5 !px-6 text-sm">تسجيل الحضور</button>
+                    </form>
+                @elseif (!$todayAttendance->check_out_at)
+                    <form method="POST" action="{{ route('doctor.attendance.checkout') }}">
+                        @csrf
+                        <button type="submit" class="neu-icon-btn bg-ttu-cream text-ttu-red text-sm font-bold px-6 py-2.5 rounded-xl hover:!bg-ttu-red hover:!text-white">
+                            تسجيل الانصراف
+                        </button>
+                    </form>
+                @endif
+            </div>
+        </div>
+
         {{-- ============ الخدمات ============ --}}
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
 

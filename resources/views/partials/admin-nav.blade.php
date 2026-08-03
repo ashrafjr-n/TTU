@@ -15,6 +15,10 @@
        class="neu-icon-btn px-5 py-2.5 rounded-xl text-sm font-bold {{ request()->routeIs('admin.medications') ? '!bg-ttu-red !text-white' : 'bg-ttu-cream text-ttu-black' }}">
         الأدوية
     </a>
+    <a href="{{ route('admin.attendance') }}"
+       class="neu-icon-btn px-5 py-2.5 rounded-xl text-sm font-bold {{ request()->routeIs('admin.attendance') ? '!bg-ttu-red !text-white' : 'bg-ttu-cream text-ttu-black' }}">
+        حضور الأطباء
+    </a>
     <a href="{{ route('admin.doctors.create') }}"
        class="neu-icon-btn px-5 py-2.5 rounded-xl text-sm font-bold {{ request()->routeIs('admin.doctors.create') ? '!bg-ttu-red !text-white' : 'bg-ttu-cream text-ttu-black' }}">
         + إضافة دكتور

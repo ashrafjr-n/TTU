@@ -3,10 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Models\Booking;
+use App\Models\DoctorAttendance;
+use App\Models\DoctorSchedule;
 use App\Models\Medication;
 use App\Models\UniversityRecord;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
@@ -215,5 +218,73 @@ class AdminController extends Controller
 
         $status = $medication->is_active ? 'تفعيل' : 'تعطيل';
         return back()->with('success', "تم {$status} \"{$medication->name}\".");
+    }
+
+    /**
+     * صفحة الحضور: سجل يوم مختار (افتراضيًا اليوم) لكل الأطباء + المناوبون غدًا
+     * + فورم تعيين أيام العمل الأسبوعية لكل دكتور
+     */
+    public function attendance(Request $request)
+    {
+        $validated = $request->validate(['date' => 'nullable|date']);
+
+        $selectedDate = !empty($validated['date']) ? Carbon::parse($validated['date']) : Carbon::today();
+        $tomorrow = Carbon::today()->addDay();
+
+        $doctors = User::where('role', 'doctor')
+            ->with('doctorSchedule')
+            ->orderBy('name')
+            ->get();
+
+        $attendanceByDoctor = DoctorAttendance::whereDate('date', $selectedDate)
+            ->get()
+            ->keyBy('doctor_id');
+
+        $roster = $doctors->map(function (User $doctor) use ($selectedDate, $attendanceByDoctor) {
+            $attendance = $attendanceByDoctor->get($doctor->id);
+
+            return [
+                'doctor' => $doctor,
+                'scheduled' => $doctor->doctorSchedule?->isWorkingOn($selectedDate) ?? false,
+                'attendance' => $attendance,
+                'on_duty_now' => $selectedDate->isToday() && $attendance && !$attendance->check_out_at,
+            ];
+        });
+
+        $onDutyTomorrow = $doctors->filter(
+            fn (User $doctor) => $doctor->doctorSchedule?->isWorkingOn($tomorrow) ?? false
+        )->values();
+
+        return view('admin.attendance', [
+            'doctors' => $doctors,
+            'roster' => $roster,
+            'selectedDate' => $selectedDate,
+            'onDutyTomorrow' => $onDutyTomorrow,
+            'tomorrow' => $tomorrow,
+        ]);
+    }
+
+    /**
+     * تعيين/تعديل أيام العمل الأسبوعية لدكتور معيّن
+     */
+    public function updateDoctorSchedule(Request $request, User $doctor)
+    {
+        abort_unless($doctor->isDoctor(), 404);
+
+        $validated = $request->validate([
+            'working_days' => 'nullable|array',
+            'working_days.*' => 'integer|min:0|max:6',
+        ]);
+
+        // قيم checkbox تصل كنصوص دائمًا — لازم تحويلها لأرقام صحيحة، لأن
+        // isWorkingOn() تقارنها بـ Carbon::dayOfWeek بمقارنة صارمة (strict)
+        $workingDays = collect($validated['working_days'] ?? [])->map(fn ($day) => (int) $day)->values()->all();
+
+        DoctorSchedule::updateOrCreate(
+            ['doctor_id' => $doctor->id],
+            ['working_days' => $workingDays]
+        );
+
+        return back()->with('success', "تم تحديث جدول عمل \"{$doctor->name}\".");
     }
 }

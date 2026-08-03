@@ -12,6 +12,8 @@ Route::middleware(['auth', 'role:doctor'])->group(function () {
     Route::get('/dashboard/doctor', [DoctorController::class, 'index'])->name('dashboard.doctor');
     Route::post('/doctor/bookings/{booking}/cancel', [DoctorController::class, 'cancelBooking'])->name('doctor.bookings.cancel');
     Route::post('/doctor/bookings/{booking}/report', [VisitReportController::class, 'store'])->name('doctor.bookings.report.store');
+    Route::post('/doctor/attendance/check-in', [DoctorController::class, 'checkIn'])->name('doctor.attendance.checkin');
+    Route::post('/doctor/attendance/check-out', [DoctorController::class, 'checkOut'])->name('doctor.attendance.checkout');
 });
 
 // الصفحة الرئيسية - اختيار الدور
@@ -61,6 +63,8 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::put('/medications/{medication}', [AdminController::class, 'updateMedication'])->name('medications.update');
     Route::post('/medications/{medication}/restock', [AdminController::class, 'restockMedication'])->name('medications.restock');
     Route::post('/medications/{medication}/toggle', [AdminController::class, 'toggleMedicationStatus'])->name('medications.toggle');
+    Route::get('/attendance', [AdminController::class, 'attendance'])->name('attendance');
+    Route::put('/doctors/{doctor}/schedule', [AdminController::class, 'updateDoctorSchedule'])->name('doctors.schedule.update');
 });
 
 require __DIR__.'/auth.php';
