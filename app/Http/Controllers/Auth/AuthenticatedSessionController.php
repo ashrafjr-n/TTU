@@ -12,11 +12,18 @@ use Illuminate\View\View;
 class AuthenticatedSessionController extends Controller
 {
     /**
-     * Display the login view.
+     * Display the login view — يحمل نوع الحساب من الرابط (إن وُجد) فقط لأغراض
+     * العرض وربط رابط "إنشاء حساب"، الدخول نفسه غير مقيد بالدور.
      */
-    public function create(): View
+    public function create(Request $request): View
     {
-        return view('auth.login');
+        $role = $request->query('role');
+
+        if (!in_array($role, ['student', 'staff'], true)) {
+            $role = null;
+        }
+
+        return view('auth.login', ['role' => $role]);
     }
 
     /**

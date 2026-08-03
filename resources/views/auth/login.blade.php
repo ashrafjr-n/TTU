@@ -6,6 +6,11 @@
 
 @include('partials.auth-header')
 
+@php
+    $roleLabels = ['student' => 'الطالب', 'staff' => 'الموظف'];
+    $roleIcons = ['student' => '🎓', 'staff' => '💼'];
+@endphp
+
 <div class="min-h-screen flex flex-col items-center justify-center px-4 py-14 bg-ttu-cream">
 
     <div class="w-full max-w-md rounded-[2.5rem] neu-raised-white p-8">
@@ -14,8 +19,28 @@
             &larr; رجوع
         </a>
 
+        @if ($role)
+            {{-- شارة الدور — نفس نمط صفحة إنشاء الحساب --}}
+            <div class="flex items-center justify-between rounded-2xl neu-pressed px-4 py-3 mb-6">
+                <div class="flex items-center gap-2.5">
+                    <span class="w-10 h-10 rounded-full neu-icon bg-ttu-cream flex items-center justify-center text-lg">
+                        {{ $roleIcons[$role] }}
+                    </span>
+                    <div class="leading-tight">
+                        <p class="text-[11px] text-ttu-gray">نوع الحساب</p>
+                        <p class="text-sm font-bold text-ttu-black">{{ $roleLabels[$role] }}</p>
+                    </div>
+                </div>
+                <a href="{{ route('home') }}#roles" class="text-xs font-semibold text-ttu-red hover:underline">
+                    تغيير النوع
+                </a>
+            </div>
+        @endif
+
         <div class="text-center mb-8">
-            <h2 class="font-display text-2xl font-extrabold">تسجيل الدخول</h2>
+            <h2 class="font-display text-2xl font-extrabold">
+                {{ $role ? 'تسجيل دخول '.$roleLabels[$role] : 'تسجيل الدخول' }}
+            </h2>
         </div>
 
         @if (session('status'))
@@ -78,7 +103,10 @@
 
         <p class="text-center text-sm text-ttu-gray mt-6">
             ليس لديك حساب؟
-            <a href="{{ route('home') }}#roles" class="text-ttu-red font-semibold hover:underline">سجّل الآن</a>
+            <a href="{{ $role ? route('register', ['role' => $role]) : route('home').'#roles' }}"
+               class="text-ttu-red font-semibold hover:underline">
+                سجّل الآن
+            </a>
         </p>
 
     </div>

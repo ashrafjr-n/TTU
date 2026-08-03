@@ -91,7 +91,7 @@
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
 
             {{-- طالب --}}
-            <a href="{{ route('register', ['role' => 'student']) }}"
+            <a href="{{ route('login', ['role' => 'student']) }}"
                class="group relative flex flex-col overflow-hidden p-8 pt-10 rounded-[2.5rem] neu-raised-white neu-card-hover cursor-pointer">
 
                 <div class="relative w-16 h-16 rounded-full neu-icon bg-ttu-cream flex items-center justify-center mb-6 group-hover:bg-ttu-red transition-colors duration-300">
@@ -115,7 +115,7 @@
             </a>
 
             {{-- موظف --}}
-            <a href="{{ route('register', ['role' => 'staff']) }}"
+            <a href="{{ route('login', ['role' => 'staff']) }}"
                class="group relative flex flex-col overflow-hidden p-8 pt-10 rounded-[2.5rem] neu-raised-white neu-card-hover cursor-pointer">
 
                 <div class="relative w-16 h-16 rounded-full neu-icon bg-ttu-cream flex items-center justify-center mb-6 group-hover:bg-ttu-red transition-colors duration-300">
