@@ -115,4 +115,63 @@ class BookingSingleActiveTest extends TestCase
 
         $response->assertRedirect(route('booking.index'));
     }
+
+    // ------------------------------------------------------------------
+    // خانة موظف محررة تُحجز من طالب — الحجز يُنشأ بعد أن يبدأ وقته الأصلي
+    // فعليًا (وأحيانًا بعد انتهائه)، لذلك isUpcoming() العادية (بالاعتماد
+    // على نافذة الـ5 دقائق الأصلية) لا تصلح لتحديد "هل الحجز فعّال؟" هنا.
+    // ------------------------------------------------------------------
+
+    public function test_a_released_slot_booking_still_gates_the_booking_page(): void
+    {
+        // 9:45 خانة موظف — تتحرر للطلاب فور مرور 9:45، ونحجزها الساعة 9:46
+        // أي أن نافذتها الأصلية (تنتهي 9:50) تكاد تكون منتهية أصلًا وقت الحجز
+        Carbon::setTestNow(Carbon::today()->setTime(9, 46));
+        $user = $this->student();
+        $this->actingAs($user)->post(route('booking.store'), ['hour' => 9, 'minute' => 45]);
+        $this->assertDatabaseHas('bookings', ['user_id' => $user->id, 'booking_hour' => 9, 'booking_minute' => 45]);
+
+        // نتقدم بالوقت لما بعد نهاية النافذة الأصلية للخانة (9:50) بوقت طويل —
+        // الحجز يجب أن يبقى "فعّالًا" ويمنع حجزًا جديدًا رغم ذلك
+        Carbon::setTestNow(Carbon::today()->setTime(11, 0));
+
+        $response = $this->actingAs($user)->get(route('booking.index'));
+        $response->assertSee('لديك حجز حاليًا');
+        $response->assertSee('9:45 صباحًا');
+
+        $storeResponse = $this->actingAs($user)->post(route('booking.store'), ['hour' => 12, 'minute' => 30]);
+        $storeResponse->assertSessionHas('error');
+        $this->assertDatabaseMissing('bookings', ['user_id' => $user->id, 'booking_hour' => 12, 'booking_minute' => 30]);
+    }
+
+    public function test_cancelling_a_released_slot_booking_restores_the_slot_grid(): void
+    {
+        Carbon::setTestNow(Carbon::today()->setTime(9, 46));
+        $user = $this->student();
+        $this->actingAs($user)->post(route('booking.store'), ['hour' => 9, 'minute' => 45]);
+        $booking = Booking::where('user_id', $user->id)->first();
+
+        Carbon::setTestNow(Carbon::today()->setTime(11, 0));
+
+        $cancelResponse = $this->actingAs($user)->delete(route('booking.destroy', $booking));
+        $cancelResponse->assertRedirect(route('booking.index'));
+
+        $indexResponse = $this->actingAs($user)->get(route('booking.index'));
+        $indexResponse->assertSee('id="bookModalOverlay"', false);
+        $indexResponse->assertDontSee('لديك حجز حاليًا');
+    }
+
+    public function test_staff_own_released_hour_slot_still_uses_normal_expiry(): void
+    {
+        // الموظف يحجز خانته العادية (ليست عبر آلية التحرر) — قاعدة isUpcoming
+        // الأصلية يجب أن تبقى سارية عليه (تنتهي بانتهاء نافذتها الخاصة)
+        Carbon::setTestNow(Carbon::today()->setTime(8, 0));
+        $staff = User::factory()->create(['role' => 'staff', 'identifier' => fake()->unique()->numerify('####')]);
+        $this->actingAs($staff)->post(route('booking.store'), ['hour' => 9, 'minute' => 45]);
+
+        Carbon::setTestNow(Carbon::today()->setTime(9, 51));
+
+        $response = $this->actingAs($staff)->get(route('booking.index'));
+        $response->assertDontSee('لديك حجز حاليًا');
+    }
 }
