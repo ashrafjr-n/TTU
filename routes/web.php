@@ -6,10 +6,12 @@ use App\Http\Controllers\BookingController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DoctorController;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\VisitReportController;
 
 Route::middleware(['auth', 'role:doctor'])->group(function () {
     Route::get('/dashboard/doctor', [DoctorController::class, 'index'])->name('dashboard.doctor');
     Route::post('/doctor/bookings/{booking}/cancel', [DoctorController::class, 'cancelBooking'])->name('doctor.bookings.cancel');
+    Route::post('/doctor/bookings/{booking}/report', [VisitReportController::class, 'store'])->name('doctor.bookings.report.store');
 });
 
 // الصفحة الرئيسية - اختيار الدور
@@ -41,6 +43,7 @@ Route::middleware(['auth', 'role:student,staff'])->group(function () {
     Route::get('/booking', [BookingController::class, 'index'])->name('booking.index');
     Route::post('/booking', [BookingController::class, 'store'])->name('booking.store');
     Route::delete('/booking/{booking}', [BookingController::class, 'destroy'])->name('booking.destroy');
+    Route::get('/my-medications', [DashboardController::class, 'medications'])->name('medications.mine');
 });
 
 

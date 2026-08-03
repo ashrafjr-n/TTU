@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Booking;
+use App\Models\Medication;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 
@@ -20,16 +21,19 @@ class DoctorController extends Controller
             ? Carbon::parse($validated['date'])
             : Carbon::today();
 
-        $bookings = Booking::with('user')
+        $bookings = Booking::with(['user', 'visitReport.medications'])
             ->where('booking_date', $date->toDateString())
             ->where('status', 'confirmed')
             ->orderBy('booking_hour')
             ->orderBy('booking_minute')
             ->get();
 
+        $medications = Medication::orderBy('name')->get(['id', 'name', 'unit', 'stock_quantity']);
+
         return view('doctor.dashboard', [
             'bookings' => $bookings,
             'selectedDate' => $date,
+            'medications' => $medications,
         ]);
     }
 

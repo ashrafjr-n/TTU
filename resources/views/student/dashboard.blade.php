@@ -95,18 +95,18 @@
                 <p class="relative text-xs text-ttu-gray leading-relaxed">تواصل مع العيادة</p>
             </a>
 
-            {{-- أدويتي — ميزة مستقبلية --}}
-            <div class="group relative flex flex-col overflow-hidden p-7 rounded-[2rem] neu-raised-white opacity-70">
-                <span class="absolute top-4 left-4 text-[10px] font-bold text-ttu-red rounded-full neu-pressed px-2.5 py-1">قريبًا</span>
-                <div class="relative w-14 h-14 rounded-2xl neu-icon bg-ttu-cream flex items-center justify-center mb-5">
-                    <svg class="w-6 h-6 text-ttu-red" fill="none" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor">
+            {{-- أدويتي --}}
+            <a href="{{ route('medications.mine') }}"
+               class="group relative flex flex-col overflow-hidden p-7 rounded-[2rem] neu-raised-white neu-card-hover">
+                <div class="relative w-14 h-14 rounded-2xl neu-icon bg-ttu-cream flex items-center justify-center mb-5 group-hover:bg-ttu-red transition-colors duration-300">
+                    <svg class="neu-wiggle w-6 h-6 text-ttu-red group-hover:text-white transition-colors duration-300" fill="none" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor">
                         <rect x="3" y="9" width="18" height="6" rx="3" />
                         <line x1="12" y1="9" x2="12" y2="15" />
                     </svg>
                 </div>
                 <h3 class="relative font-display text-base font-bold mb-1.5">أدويتي</h3>
                 <p class="relative text-xs text-ttu-gray leading-relaxed">تقارير وأدوية وصفها الطبيب</p>
-            </div>
+            </a>
 
             {{-- تسجيل الخروج --}}
             <form method="POST" action="{{ route('logout') }}">

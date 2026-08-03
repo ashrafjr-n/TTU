@@ -89,6 +89,29 @@
 
             <div class="space-y-3">
                 @forelse ($bookings as $b)
+                    @php
+                        $existingReport = $b->visitReport;
+                        $reportPayload = [
+                            'bookingId' => $b->id,
+                            'isEdit' => (bool) $existingReport,
+                            'patientName' => $b->user->name,
+                            'patientIdentifier' => $b->user->identifier,
+                            'dateLabel' => $b->booking_date->translatedFormat('d F Y'),
+                            'timeLabel' => $b->timeLabel(),
+                            'condition' => $existingReport->condition ?? '',
+                            'examination' => $existingReport->examination ?? '',
+                            'diagnosis' => $existingReport->diagnosis ?? '',
+                            'treatmentPlan' => $existingReport->treatment_plan ?? '',
+                            'notes' => $existingReport->notes ?? '',
+                            'medications' => $existingReport
+                                ? $existingReport->medications->map(fn ($m) => [
+                                    'medication_id' => $m->id,
+                                    'name' => $m->name,
+                                    'quantity' => $m->pivot->quantity,
+                                ])->values()->all()
+                                : [],
+                        ];
+                    @endphp
                     <div class="flex items-center justify-between gap-4 rounded-2xl neu-pressed px-5 py-4">
                         <div class="flex items-center gap-4">
                             <span class="w-14 h-11 rounded-2xl neu-icon bg-ttu-cream flex items-center justify-center shrink-0 font-display font-extrabold text-xs text-ttu-red">
@@ -104,6 +127,14 @@
                             <span class="text-xs font-bold px-3 py-1.5 rounded-full neu-pressed {{ $b->user->role == 'student' ? 'text-blue-600' : 'text-green-600' }}">
                                 {{ $b->user->role == 'student' ? 'طالب' : 'موظف' }}
                             </span>
+
+                            <button type="button" onclick='openVisitReportModal(@json($reportPayload))'
+                                    class="neu-icon-btn bg-ttu-cream text-ttu-black text-xs font-bold px-3.5 py-2 rounded-xl flex items-center gap-1.5">
+                                <svg class="w-4 h-4 text-ttu-red" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                </svg>
+                                {{ $existingReport ? 'تعديل التقرير' : 'إرفاق تقرير' }}
+                            </button>
 
                             <form method="POST" action="{{ route('doctor.bookings.cancel', $b) }}"
                                   onsubmit="return confirm('متأكد من إلغاء هذا الحجز؟');">
@@ -131,5 +162,36 @@
 
     </div>
 </div>
+
+@include('doctor.partials.visit-report-modal', ['medications' => $medications])
+
+@php
+    $reopenBooking = old('booking_id') ? $bookings->firstWhere('id', (int) old('booking_id')) : null;
+@endphp
+
+@if ($reopenBooking)
+    @php
+        $reopenPayload = [
+            'bookingId' => $reopenBooking->id,
+            'isEdit' => (bool) $reopenBooking->visitReport,
+            'patientName' => $reopenBooking->user->name,
+            'patientIdentifier' => $reopenBooking->user->identifier,
+            'dateLabel' => $reopenBooking->booking_date->translatedFormat('d F Y'),
+            'timeLabel' => $reopenBooking->timeLabel(),
+            'condition' => old('condition', ''),
+            'examination' => old('examination', ''),
+            'diagnosis' => old('diagnosis', ''),
+            'treatmentPlan' => old('treatment_plan', ''),
+            'notes' => old('notes', ''),
+            'medications' => collect(old('medications', []))->values()->all(),
+            'errors' => $errors->toArray(),
+        ];
+    @endphp
+    <script>
+        document.addEventListener('alpine:initialized', function () {
+            openVisitReportModal(@json($reopenPayload));
+        });
+    </script>
+@endif
 
 @endsection

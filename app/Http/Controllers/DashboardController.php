@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Booking;
 use App\Models\User;
+use App\Models\VisitReport;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
 
@@ -26,6 +27,23 @@ class DashboardController extends Controller
         return view('staff.dashboard', [
             'recentBookings' => $this->recentBookingsFor($user),
             'activeBooking' => Booking::activeViewDataFor($user),
+        ]);
+    }
+
+    /**
+     * صفحة "أدويتي" — عرض قراءة فقط لتقارير زيارات المستخدم السابقة.
+     */
+    public function medications(): View
+    {
+        $user = Auth::user();
+
+        $reports = VisitReport::with(['medications', 'booking'])
+            ->whereHas('booking', fn ($q) => $q->where('user_id', $user->id))
+            ->orderByDesc('created_at')
+            ->get();
+
+        return view('medications.mine', [
+            'reports' => $reports,
         ]);
     }
 

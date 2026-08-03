@@ -11,6 +11,7 @@ class DatabaseSeeder extends Seeder
         $this->call([
             UniversityRecordSeeder::class,
             UserSeeder::class,
+            MedicationSeeder::class,
         ]);
     }
 }
