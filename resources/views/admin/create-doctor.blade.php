@@ -4,7 +4,7 @@
 
 @section('content')
 
-@include('partials.app-header')
+<x-app-header />
 
 <div class="min-h-[calc(100vh-80px)] bg-ttu-cream">
     <div class="max-w-6xl mx-auto px-6 py-16 lg:py-20">

@@ -4,7 +4,7 @@
 
 @section('content')
 
-@include('partials.app-header')
+<x-app-header />
 
 @php
     $roleLabel = auth()->user()->isStudent() ? 'الطالب' : 'الموظف';

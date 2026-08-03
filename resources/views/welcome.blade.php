@@ -4,7 +4,7 @@
 
 @section('content')
 
-@include('partials.navbar')
+<x-app-header transparent />
 
 {{-- ============ الهيرو ============ --}}
 <section class="relative h-screen overflow-hidden bg-ttu-cream" dir="ltr">

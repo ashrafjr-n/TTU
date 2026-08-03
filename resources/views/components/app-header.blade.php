@@ -1,15 +1,28 @@
-<header class="absolute top-0 inset-x-0 z-50 bg-white/0 backdrop-blur-none">
-    <div class="max-w-7xl mx-auto px-6 h-24 flex items-center justify-between gap-6">
+@props(['transparent' => false])
+
+@php
+    $headerClass = $transparent
+        ? 'absolute top-0 inset-x-0 z-50 bg-white/0'
+        : 'sticky top-0 z-50 bg-ttu-cream/90 backdrop-blur border-b border-black/5';
+
+    $heightClass = $transparent ? 'h-24' : 'h-20';
+    $iconBtnClass = $transparent ? 'glass-icon-btn' : 'neu-icon-btn bg-ttu-cream';
+    $iconColorClass = $transparent ? 'text-white' : 'text-ttu-black';
+    $navLinkClass = $transparent ? 'nav-link' : 'nav-link-dark';
+@endphp
+
+<header class="{{ $headerClass }}">
+    <div class="max-w-7xl mx-auto px-6 {{ $heightClass }} flex items-center justify-between gap-6">
 
         <div class="flex items-center gap-8">
 
-            {{-- الأيقونات أولًا (تظهر يمين) --}}
+            {{-- الأيقونات --}}
             <div class="flex items-center gap-2">
 
                 {{-- الإشعارات --}}
                 <button type="button" title="الإشعارات" aria-label="الإشعارات"
-                        class="glass-icon-btn relative w-10 h-10 flex items-center justify-center rounded-full">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor">
+                        class="{{ $iconBtnClass }} relative w-10 h-10 flex items-center justify-center rounded-full">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 {{ $iconColorClass }}" fill="none" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" />
                     </svg>
                     <span class="absolute -top-1 -left-1 w-4 h-4 rounded-full bg-ttu-red text-white text-[10px] font-bold flex items-center justify-center">
@@ -20,8 +33,8 @@
                 {{-- اللغة + البانل --}}
                 <div class="relative">
                     <button type="button" id="lang-toggle" title="تبديل اللغة" aria-label="تبديل اللغة"
-                            class="glass-icon-btn w-10 h-10 flex items-center justify-center rounded-full">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor">
+                            class="{{ $iconBtnClass }} w-10 h-10 flex items-center justify-center rounded-full">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 {{ $iconColorClass }}" fill="none" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9 9 0 100-18 9 9 0 000 18z" />
                             <path stroke-linecap="round" stroke-linejoin="round" d="M3.6 9h16.8M3.6 15h16.8M12 3c2.2 2.4 3.4 5.6 3.4 9s-1.2 6.6-3.4 9c-2.2-2.4-3.4-5.6-3.4-9s1.2-6.6 3.4-9z" />
                         </svg>
@@ -45,31 +58,41 @@
 
                 {{-- الوضع الليلي --}}
                 <button type="button" title="الوضع الليلي" aria-label="الوضع الليلي"
-                        class="glass-icon-btn w-10 h-10 flex items-center justify-center rounded-full">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor">
+                        class="{{ $iconBtnClass }} w-10 h-10 flex items-center justify-center rounded-full">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 {{ $iconColorClass }}" fill="none" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M21 12.8A9 9 0 1111.2 3a7 7 0 009.8 9.8z" />
                     </svg>
                 </button>
 
             </div>
 
-            {{-- الروابط بعدها --}}
+            {{-- روابط التنقل --}}
             <nav class="hidden md:flex items-center gap-8 text-sm font-semibold">
                 <a href="{{ route('home') }}"
-                   class="nav-link {{ request()->routeIs('home') ? 'nav-link-active' : '' }}">
+                   class="{{ $navLinkClass }} {{ $transparent && request()->routeIs('home') ? 'nav-link-active' : '' }}">
                     الرئيسية
                 </a>
-                <a href="#" class="nav-link">تواصل</a>
-                <a href="{{ route('about') }}" class="nav-link">حول</a>
+                <a href="{{ route('about') }}" class="{{ $navLinkClass }}">حول</a>
+                @auth
+                    <a href="#" class="{{ $navLinkClass }}">أدويتي</a>
+                    <form method="POST" action="{{ route('logout') }}">
+                        @csrf
+                        <button type="submit" class="{{ $navLinkClass }}">تسجيل الخروج</button>
+                    </form>
+                @endauth
             </nav>
 
         </div>
 
-        {{-- اللوغو --}}
+        {{-- اللوجو --}}
         <a href="{{ route('home') }}" class="flex items-center shrink-0">
-            <span class="logo-badge rounded-2xl px-4 py-2 flex items-center">
-                <img src="{{ asset('images/TTU-Clinic.png') }}" alt="عيادة TTU" class="h-14 sm:h-16 w-auto">
-            </span>
+            @if ($transparent)
+                <span class="logo-badge rounded-2xl px-4 py-2 flex items-center">
+                    <img src="{{ asset('images/TTU-Clinic.png') }}" alt="عيادة TTU" class="h-14 sm:h-16 w-auto">
+                </span>
+            @else
+                <img src="{{ asset('images/TTU-Clinic.png') }}" alt="عيادة TTU" class="h-14 w-auto">
+            @endif
         </a>
 
     </div>

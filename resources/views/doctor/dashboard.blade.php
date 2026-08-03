@@ -4,7 +4,7 @@
 
 @section('content')
 
-@include('partials.app-header')
+<x-app-header />
 
 @php
     $initial = mb_substr(auth()->user()->name, 0, 1);
