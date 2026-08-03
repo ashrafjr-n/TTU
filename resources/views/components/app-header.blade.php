@@ -73,13 +73,6 @@
                     الرئيسية
                 </a>
                 <a href="{{ route('about') }}" class="{{ $navLinkClass }}">حول</a>
-                @auth
-                    <a href="#" class="{{ $navLinkClass }}">أدويتي</a>
-                    <form method="POST" action="{{ route('logout') }}">
-                        @csrf
-                        <button type="submit" class="{{ $navLinkClass }}">تسجيل الخروج</button>
-                    </form>
-                @endauth
             </nav>
 
         </div>
