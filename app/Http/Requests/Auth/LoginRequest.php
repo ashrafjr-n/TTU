@@ -25,6 +25,14 @@ class LoginRequest extends FormRequest
         ];
     }
 
+    public function messages(): array
+    {
+        return [
+            'login.required' => 'الرجاء إدخال البريد الإلكتروني أو الرقم الجامعي/الوظيفي.',
+            'password.required' => 'الرجاء إدخال كلمة المرور.',
+        ];
+    }
+
     /**
      * محاولة تسجيل الدخول — تقبل البريد الإلكتروني أو الرقم الجامعي/الوظيفي
      * بنفس الخانة، وتحوّلها داخليًا لبريد المستخدم الحقيقي للمصادقة.
@@ -37,8 +45,10 @@ class LoginRequest extends FormRequest
 
         $login = trim((string) $this->input('login'));
 
+        // البريد يُطبَّع لحالة أحرف صغيرة دائمًا (يطابق كيفية تخزينه عند التسجيل)
+        // بدل الاعتماد على collation قاعدة البيانات، الذي يختلف بين البيئات.
         $email = filter_var($login, FILTER_VALIDATE_EMAIL)
-            ? $login
+            ? Str::lower($login)
             : optional(User::where('identifier', $login)->first())->email;
 
         if (!$email || !Auth::attempt(['email' => $email, 'password' => $this->input('password')], $this->boolean('remember'))) {
@@ -78,6 +88,8 @@ class LoginRequest extends FormRequest
 
     public function throttleKey(): string
     {
-        return Str::transliterate(Str::lower($this->string('login')).'|'.$this->ip());
+        // trim مطابق تمامًا لما يُستخدم في authenticate()، وإلا يمكن تجاوز
+        // حد المحاولات بمجرد إضافة مسافات مختلفة حول نفس القيمة في كل محاولة.
+        return Str::transliterate(Str::lower(trim($this->string('login'))).'|'.$this->ip());
     }
 }

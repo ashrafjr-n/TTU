@@ -54,6 +54,7 @@ class RegisteredUserController extends Controller
         $request->merge(['email' => strtolower(trim((string) $request->input('email')))]);
 
         $digitsRule = $role === 'student' ? 'digits:8' : 'digits:4';
+        $identifierLabel = $role === 'student' ? 'الرقم الجامعي' : 'الرقم الوظيفي';
 
         $validated = $request->validate([
             'name' => 'required|string|max:255',
@@ -61,6 +62,14 @@ class RegisteredUserController extends Controller
             'identifier' => ['required', $digitsRule, 'unique:'.User::class.',identifier'],
             'email' => 'required|string|lowercase|email|max:255|unique:'.User::class,
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
+        ], [
+            'identifier.required' => "الرجاء إدخال {$identifierLabel}.",
+            'identifier.digits' => $role === 'student'
+                ? 'الرقم الجامعي يجب أن يتكون من 8 أرقام بالضبط.'
+                : 'الرقم الوظيفي يجب أن يتكون من 4 أرقام بالضبط.',
+            'identifier.unique' => "هذا {$identifierLabel} مستخدم بالفعل من قبل حساب آخر.",
+            'email.unique' => 'هذا البريد الإلكتروني مستخدم بالفعل من قبل حساب آخر.',
+            'password.confirmed' => 'كلمتا المرور غير متطابقتين.',
         ]);
 
         // التحقق من الرقم عبر قاعدة بيانات الجامعة الوهمية
@@ -87,6 +96,10 @@ class RegisteredUserController extends Controller
 
         Auth::login($user);
 
-        return redirect(route('dashboard'));
+        // إعادة توليد الجلسة بعد تسجيل الدخول التلقائي (مطابقة لما يحصل عند
+        // تسجيل الدخول العادي) لمنع session fixation.
+        $request->session()->regenerate();
+
+        return redirect()->route('dashboard.'.$role);
     }
 }
