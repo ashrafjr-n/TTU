@@ -66,11 +66,30 @@
                 @endif
             </div>
 
+            {{-- ============ تبويبات الساعات ============ --}}
+            <div class="flex flex-wrap gap-2.5 mb-6" role="tablist" aria-label="اختر الساعة">
+                @foreach ($hours as $hourBlock)
+                    <button type="button"
+                            role="tab"
+                            id="hour-tab-{{ $hourBlock['hour'] }}"
+                            data-hour="{{ $hourBlock['hour'] }}"
+                            aria-selected="{{ $hourBlock['hour'] === $defaultHour ? 'true' : 'false' }}"
+                            onclick="selectHour({{ $hourBlock['hour'] }})"
+                            @class([
+                                'hour-tab rounded-xl px-4 py-2.5 text-xs font-bold whitespace-nowrap transition-colors',
+                                'neu-pressed text-ttu-red' => $hourBlock['hour'] === $defaultHour,
+                                'neu-icon-btn bg-ttu-cream text-ttu-black' => $hourBlock['hour'] !== $defaultHour,
+                            ])>
+                        {{ $hourBlock['label'] }}
+                    </button>
+                @endforeach
+            </div>
+
             {{-- ============ خانات الأوقات (كل ساعة مقسّمة لـ5 دقائق) ============ --}}
             <div class="space-y-4">
                 @foreach ($hours as $hourBlock)
-                    <div class="rounded-[2rem] neu-raised-white p-6 sm:p-7">
-                        <p class="text-sm font-bold text-ttu-black mb-4">{{ $hourBlock['label'] }}</p>
+                    <div id="hour-panel-{{ $hourBlock['hour'] }}"
+                         class="hour-panel rounded-[2rem] neu-raised-white p-6 sm:p-7 {{ $hourBlock['hour'] === $defaultHour ? '' : 'hidden' }}">
 
                         <div class="flex flex-wrap gap-2.5">
                             @foreach ($hourBlock['slots'] as $slot)
@@ -147,6 +166,22 @@
     </div>
 
     <script>
+        function selectHour(hour) {
+            document.querySelectorAll('.hour-tab').forEach(function (tab) {
+                const isActive = Number(tab.dataset.hour) === hour;
+                tab.setAttribute('aria-selected', isActive ? 'true' : 'false');
+                tab.classList.toggle('neu-pressed', isActive);
+                tab.classList.toggle('text-ttu-red', isActive);
+                tab.classList.toggle('neu-icon-btn', !isActive);
+                tab.classList.toggle('bg-ttu-cream', !isActive);
+                tab.classList.toggle('text-ttu-black', !isActive);
+            });
+
+            document.querySelectorAll('.hour-panel').forEach(function (panel) {
+                panel.classList.toggle('hidden', panel.id !== 'hour-panel-' + hour);
+            });
+        }
+
         function openBookModal(hour, minute, timeLabel) {
             document.getElementById('bookModalHour').value = hour;
             document.getElementById('bookModalMinute').value = minute;

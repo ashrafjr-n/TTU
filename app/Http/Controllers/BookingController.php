@@ -23,6 +23,7 @@ class BookingController extends Controller
             return view('booking.index', [
                 'hours' => [],
                 'activeBooking' => Booking::activeViewDataFor($user),
+                'defaultHour' => null,
             ]);
         }
 
@@ -41,7 +42,32 @@ class BookingController extends Controller
             ];
         }
 
-        return view('booking.index', ['hours' => $hours, 'activeBooking' => null]);
+        return view('booking.index', [
+            'hours' => $hours,
+            'activeBooking' => null,
+            'defaultHour' => $this->defaultHour($hours),
+        ]);
+    }
+
+    /**
+     * الساعة المختارة افتراضيًا عند فتح الصفحة: أول ساعة فيها خانة (من خانات
+     * الدور الأساسية، دون احتساب خانات الموظفين المحرَّرة للطلاب لأنها تبقى
+     * متاحة طوال اليوم ولا تعكس "الآن") لم يفت وقتها بعد — أي أقرب ساعة
+     * قادمة/جارية اليوم. لو كل الخانات انتهى وقتها، تُختار آخر ساعة باليوم.
+     */
+    private function defaultHour(array $hours): ?int
+    {
+        foreach ($hours as $hourBlock) {
+            $hasUpcoming = collect($hourBlock['slots'])
+                ->reject(fn ($slot) => $slot['released'])
+                ->contains(fn ($slot) => !$slot['is_past']);
+
+            if ($hasUpcoming) {
+                return $hourBlock['hour'];
+            }
+        }
+
+        return empty($hours) ? null : end($hours)['hour'];
     }
 
     /**
