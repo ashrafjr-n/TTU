@@ -30,7 +30,84 @@ class AdminController extends Controller
                 ->count(),
         ];
 
-        return view('admin.dashboard', compact('stats'));
+        $dayLabels = ['الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
+
+        // الأسبوع الحالي: أحد إلى سبت (بغض النظر عن لغة النظام)، متسق مع
+        // تسمية الأيام المستخدمة في صفحة جدول عمل الأطباء
+        $weekStart = Carbon::today()->startOfWeek(Carbon::SUNDAY);
+        $weekEnd = $weekStart->copy()->endOfWeek(Carbon::SATURDAY);
+
+        $dailyCounts = Booking::where('status', 'confirmed')
+            ->whereBetween('booking_date', [$weekStart->toDateString(), $weekEnd->toDateString()])
+            ->selectRaw('booking_date, count(*) as c')
+            ->groupBy('booking_date')
+            ->pluck('c', 'booking_date');
+
+        $weekChart = ['labels' => [], 'data' => []];
+        for ($d = $weekStart->copy(); $d->lte($weekEnd); $d->addDay()) {
+            $weekChart['labels'][] = $dayLabels[$d->dayOfWeek];
+            $weekChart['data'][] = (int) ($dailyCounts[$d->toDateString()] ?? 0);
+        }
+
+        $weekBookingsTotal = array_sum($weekChart['data']);
+
+        // طلاب مقابل موظفين خلال الأسبوع الحالي
+        $roleCounts = Booking::join('users', 'users.id', '=', 'bookings.user_id')
+            ->where('bookings.status', 'confirmed')
+            ->whereBetween('bookings.booking_date', [$weekStart->toDateString(), $weekEnd->toDateString()])
+            ->selectRaw('users.role, count(*) as c')
+            ->groupBy('users.role')
+            ->pluck('c', 'role');
+
+        $roleChart = [
+            'labels' => ['طلاب', 'موظفون'],
+            'data' => [(int) ($roleCounts['student'] ?? 0), (int) ($roleCounts['staff'] ?? 0)],
+        ];
+
+        // نسبة الإشغال لكل ساعة من ساعات الدوام الثمانية — على كامل السجل
+        // التاريخي المتوفر (وليس أسبوعًا واحدًا) حتى تعكس نمطًا "معتادًا"
+        $hourCounts = Booking::where('status', 'confirmed')
+            ->selectRaw('booking_hour, count(*) as c')
+            ->groupBy('booking_hour')
+            ->pluck('c', 'booking_hour');
+
+        $distinctDays = max(
+            Booking::where('status', 'confirmed')->groupBy('booking_date')->pluck('booking_date')->count(),
+            1
+        );
+
+        $slotsPerHour = count(Booking::STUDENT_MINUTES) + count(Booking::STAFF_MINUTES);
+        $capacityPerHour = $slotsPerHour * $distinctDays;
+
+        $hourlyChart = ['labels' => [], 'rates' => [], 'hours' => []];
+        for ($h = Booking::OPEN_HOUR; $h < Booking::CLOSE_HOUR; $h++) {
+            $booked = (int) ($hourCounts[$h] ?? 0);
+            $rate = $capacityPerHour > 0 ? round($booked / $capacityPerHour * 100, 1) : 0;
+
+            $hourlyChart['hours'][] = $h;
+            $hourlyChart['labels'][] = sprintf('%d %s', $h > 12 ? $h - 12 : $h, $h < 12 ? 'ص' : 'م');
+            $hourlyChart['rates'][] = $rate;
+        }
+
+        // أكثر الساعات ازدحامًا — نفس بيانات الإشغال، مرتّبة تنازليًا
+        $busiestHours = collect($hourlyChart['hours'])
+            ->map(fn ($h, $i) => [
+                'hour' => $h,
+                'label' => $hourlyChart['labels'][$i],
+                'rate' => $hourlyChart['rates'][$i],
+            ])
+            ->sortByDesc('rate')
+            ->values()
+            ->take(3);
+
+        return view('admin.dashboard', [
+            'stats' => $stats,
+            'weekChart' => $weekChart,
+            'weekBookingsTotal' => $weekBookingsTotal,
+            'roleChart' => $roleChart,
+            'hourlyChart' => $hourlyChart,
+            'busiestHours' => $busiestHours,
+        ]);
     }
 
     /**
