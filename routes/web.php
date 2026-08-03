@@ -7,6 +7,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DoctorController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\VisitReportController;
+use App\Http\Controllers\NotificationController;
 
 Route::middleware(['auth', 'role:doctor'])->group(function () {
     Route::get('/dashboard/doctor', [DoctorController::class, 'index'])->name('dashboard.doctor');
@@ -34,6 +35,11 @@ Route::middleware('auth')->get('/dashboard', function () {
         'admin' => redirect()->route('admin.dashboard'),
     };
 })->name('dashboard');
+
+Route::middleware('auth')->group(function () {
+    Route::post('/notifications/{notification}/read', [NotificationController::class, 'markRead'])->name('notifications.read');
+    Route::post('/notifications/mark-all-read', [NotificationController::class, 'markAllRead'])->name('notifications.read-all');
+});
 
 // لوحتا الطالب والموظف
 Route::middleware(['auth', 'role:student'])->get('/dashboard/student', [DashboardController::class, 'student'])->name('dashboard.student');

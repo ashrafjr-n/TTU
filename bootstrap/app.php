@@ -21,6 +21,9 @@ return Application::configure(basePath: dirname(__DIR__))
         // نهاية دوام العيادة (Booking::CLOSE_HOUR = 16) — تسجيل انصراف تلقائي
         // لأي دكتور سجّل حضوره ولم يسجّل انصرافه
         $schedule->command('attendance:auto-checkout')->dailyAt('16:00');
+
+        // تذكير بالمواعيد التي تقترب خلال ساعة تقريبًا
+        $schedule->command('notifications:send-reminders')->everyFiveMinutes();
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(

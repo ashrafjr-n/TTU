@@ -7,6 +7,7 @@ use App\Models\Booking;
 use App\Models\Medication;
 use App\Models\VisitReport;
 use App\Models\VisitReportMedication;
+use App\Notifications\VisitReportCompleted;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -107,6 +108,9 @@ class VisitReportController extends Controller
             $wasEdit ? 'visit_report_edited' : 'visit_report_created',
             ($wasEdit ? 'تعديل تقرير زيارة للمريض ' : 'إنشاء تقرير زيارة للمريض ').$booking->user->name
         );
+
+        $report = VisitReport::where('booking_id', $booking->id)->with('medications')->first();
+        $booking->user->notify(new VisitReportCompleted($report));
 
         return back()->with('success', 'تم حفظ تقرير الزيارة بنجاح.');
     }
