@@ -22,11 +22,7 @@ class BookingController extends Controller
         if ($activeBooking) {
             return view('booking.index', [
                 'hours' => [],
-                'activeBooking' => [
-                    'id' => $activeBooking->id,
-                    'time_label' => $this->formatHour($activeBooking->booking_hour, $activeBooking->booking_minute),
-                    'date_label' => $activeBooking->booking_date->translatedFormat('d F Y'),
-                ],
+                'activeBooking' => Booking::activeViewDataFor($user),
             ]);
         }
 
@@ -58,41 +54,7 @@ class BookingController extends Controller
      */
     private function findActiveBooking($user, Carbon $date, bool $lock = false): ?Booking
     {
-        $query = Booking::where('user_id', $user->id)
-            ->where('booking_date', $date)
-            ->where('status', 'confirmed');
-
-        if ($lock) {
-            $query->lockForUpdate();
-        }
-
-        return $query->get()->first(fn (Booking $b) => $this->isBookingActive($b, $user));
-    }
-
-    /**
-     * هل هذا الحجز لا يزال "فعّالًا" (يمنع حجزًا جديدًا)؟
-     *
-     * حجز طالب على خانة موظف محررة استثناء مهم: isUpcoming() العادية تقارن
-     * بنافذة الخانة الأصلية الضيقة (5 دقائق) — لكن هذه الخانة أساسًا لا
-     * "تتحرر" للطلاب إلا بعد أن يبدأ وقتها الأصلي فعليًا (وغالبًا ينتهي
-     * خلال دقائق من الحجز نفسه)، فتصبح isUpcoming() خاطئة على الفور تقريبًا
-     * رغم أن الحجز جديد فعلًا — ما يجعل القاعدة بأكملها بلا أثر لهذا النوع
-     * من الحجوزات (وهذا بالضبط ما كان يسمح بحجوزات متعددة عبر هذا المسار).
-     * لذلك تبقى هذه الحجوزات "فعّالة" حتى نهاية دوام العيادة اليوم، بدل
-     * الالتزام بنافذتها الأصلية.
-     */
-    private function isBookingActive(Booking $booking, $user): bool
-    {
-        if ($booking->status !== 'confirmed') {
-            return false;
-        }
-
-        if ($user->isStudent() && $booking->isStaffMinute()) {
-            return $booking->booking_date->isToday()
-                && now()->lt($booking->booking_date->copy()->setTime(Booking::CLOSE_HOUR, 0));
-        }
-
-        return $booking->isUpcoming();
+        return Booking::findActiveFor($user, $date, $lock);
     }
 
     private function buildSlotsForHour(Carbon $date, int $hour, $user, $todaysBookings): array

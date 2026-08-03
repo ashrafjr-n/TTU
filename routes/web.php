@@ -5,9 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\BookingController;
 use App\Http\Controllers\DoctorController;
 use App\Http\Controllers\AdminController;
-
-
-
+use App\Models\Booking;
 
 Route::middleware(['auth', 'role:doctor'])->group(function () {
     Route::get('/dashboard/doctor', [DoctorController::class, 'index'])->name('dashboard.doctor');
@@ -35,7 +33,9 @@ Route::middleware('auth')->get('/dashboard', function () {
 
 // لوحة الطالب
 Route::get('/dashboard/student', function () {
-    $bookings = auth()->user()->bookings()
+    $user = auth()->user();
+
+    $bookings = $user->bookings()
         ->where('status', 'confirmed')
         ->orderByDesc('booking_date')
         ->orderByDesc('booking_hour')
@@ -43,12 +43,17 @@ Route::get('/dashboard/student', function () {
         ->take(5)
         ->get();
 
-    return view('student.dashboard', ['recentBookings' => $bookings]);
+    return view('student.dashboard', [
+        'recentBookings' => $bookings,
+        'activeBooking' => Booking::activeViewDataFor($user),
+    ]);
 })->name('dashboard.student');
 
 // لوحة الموظف
 Route::get('/dashboard/staff', function () {
-    $bookings = auth()->user()->bookings()
+    $user = auth()->user();
+
+    $bookings = $user->bookings()
         ->where('status', 'confirmed')
         ->orderByDesc('booking_date')
         ->orderByDesc('booking_hour')
@@ -56,7 +61,10 @@ Route::get('/dashboard/staff', function () {
         ->take(5)
         ->get();
 
-    return view('staff.dashboard', ['recentBookings' => $bookings]);
+    return view('staff.dashboard', [
+        'recentBookings' => $bookings,
+        'activeBooking' => Booking::activeViewDataFor($user),
+    ]);
 })->name('dashboard.staff');
 
 

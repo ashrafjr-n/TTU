@@ -58,17 +58,30 @@
 
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-14">
 
-            {{-- حجز موعد --}}
-            <a href="{{ route('booking.index') }}"
-               class="group relative flex flex-col overflow-hidden p-7 rounded-[2rem] neu-raised-white neu-card-hover">
-                <div class="relative w-14 h-14 rounded-2xl neu-icon bg-ttu-cream flex items-center justify-center mb-5 group-hover:bg-ttu-red transition-colors duration-300">
-                    <svg class="neu-wiggle w-6 h-6 text-ttu-red group-hover:text-white transition-colors duration-300" fill="none" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
-                    </svg>
-                </div>
-                <h3 class="relative font-display text-base font-bold mb-1.5">حجز موعد</h3>
-                <p class="relative text-xs text-ttu-gray leading-relaxed">احجز وقتك خلال ثوانٍ</p>
-            </a>
+            {{-- حجز موعد — إن وُجد حجز فعّال، الزر يفتح مودال التحذير في مكانه بدل الانتقال لصفحة الحجز --}}
+            @if ($activeBooking)
+                <button type="button" onclick="openActiveBookingModal()"
+                        class="group relative flex flex-col overflow-hidden p-7 rounded-[2rem] neu-raised-white neu-card-hover text-right">
+                    <div class="relative w-14 h-14 rounded-2xl neu-icon bg-ttu-cream flex items-center justify-center mb-5 group-hover:bg-ttu-red transition-colors duration-300">
+                        <svg class="neu-wiggle w-6 h-6 text-ttu-red group-hover:text-white transition-colors duration-300" fill="none" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
+                        </svg>
+                    </div>
+                    <h3 class="relative font-display text-base font-bold mb-1.5">حجز موعد</h3>
+                    <p class="relative text-xs text-ttu-gray leading-relaxed">لديك حجز حاليًا — اضغط للتفاصيل</p>
+                </button>
+            @else
+                <a href="{{ route('booking.index') }}"
+                   class="group relative flex flex-col overflow-hidden p-7 rounded-[2rem] neu-raised-white neu-card-hover">
+                    <div class="relative w-14 h-14 rounded-2xl neu-icon bg-ttu-cream flex items-center justify-center mb-5 group-hover:bg-ttu-red transition-colors duration-300">
+                        <svg class="neu-wiggle w-6 h-6 text-ttu-red group-hover:text-white transition-colors duration-300" fill="none" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
+                        </svg>
+                    </div>
+                    <h3 class="relative font-display text-base font-bold mb-1.5">حجز موعد</h3>
+                    <p class="relative text-xs text-ttu-gray leading-relaxed">احجز وقتك خلال ثوانٍ</p>
+                </a>
+            @endif
 
             {{-- استفسار --}}
             <a href="#"
@@ -149,5 +162,9 @@
 
     </div>
 </div>
+
+@if ($activeBooking)
+    @include('booking.partials.active-booking-modal', ['activeBooking' => $activeBooking, 'autoOpen' => false])
+@endif
 
 @endsection

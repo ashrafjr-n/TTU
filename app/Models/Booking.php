@@ -82,4 +82,79 @@ class Booking extends Model
     {
         return $this->status === 'confirmed' && now()->lt($this->slotEnd());
     }
+
+    /**
+     * هل هذا الحجز لا يزال "فعّالًا" (يمنع حجزًا جديدًا) بالنسبة لهذا المستخدم؟
+     *
+     * حجز طالب على خانة موظف محررة استثناء مهم: isUpcoming() العادية تقارن
+     * بنافذة الخانة الأصلية الضيقة (5 دقائق) — لكن هذه الخانة أساسًا لا
+     * "تتحرر" للطلاب إلا بعد أن يبدأ وقتها الأصلي فعليًا (وغالبًا ينتهي خلال
+     * دقائق من الحجز نفسه)، فتصبح isUpcoming() خاطئة على الفور تقريبًا رغم
+     * أن الحجز جديد فعلًا. لذلك تبقى هذه الحجوزات "فعّالة" حتى نهاية دوام
+     * العيادة اليوم، بدل الالتزام بنافذتها الأصلية.
+     */
+    public function isActiveFor(User $user): bool
+    {
+        if ($this->status !== 'confirmed') {
+            return false;
+        }
+
+        if ($user->isStudent() && $this->isStaffMinute()) {
+            return $this->booking_date->isToday()
+                && now()->lt($this->booking_date->copy()->setTime(self::CLOSE_HOUR, 0));
+        }
+
+        return $this->isUpcoming();
+    }
+
+    /**
+     * حجز المستخدم الوحيد "الفعّال" حاليًا لتاريخ معيّن، إن وُجد. مستخدَمة من
+     * كل من BookingController (بوابة /booking) ومسارات لوحات التحكم (بوابة
+     * الداشبورد) لضمان نفس تعريف "الفعّال" في كلا المكانين.
+     */
+    public static function findActiveFor(User $user, \Carbon\Carbon $date, bool $lock = false): ?self
+    {
+        $query = self::where('user_id', $user->id)
+            ->where('booking_date', $date)
+            ->where('status', 'confirmed');
+
+        if ($lock) {
+            $query->lockForUpdate();
+        }
+
+        return $query->get()->first(fn (self $b) => $b->isActiveFor($user));
+    }
+
+    /**
+     * تسمية وقت الحجز المعروضة (مثال: "9:45 صباحًا") — تُستخدم في مودال
+     * "لديك حجز حاليًا" أينما ظهر (لوحة التحكم أو صفحة الحجز).
+     */
+    public function timeLabel(): string
+    {
+        $hour = $this->booking_hour;
+        $period = $hour < 12 ? 'صباحًا' : 'مساءً';
+        $displayHour = $hour <= 12 ? $hour : $hour - 12;
+
+        return sprintf('%d:%02d %s', $displayHour, $this->booking_minute, $period);
+    }
+
+    /**
+     * بيانات حجز المستخدم "الفعّال" اليوم (إن وُجد)، بالشكل الجاهز لمودال
+     * "لديك حجز حاليًا" — تُستخدم من لوحات التحكم (لعرض المودال في مكانه)
+     * ومن BookingController (بوابة /booking).
+     */
+    public static function activeViewDataFor(User $user): ?array
+    {
+        $booking = self::findActiveFor($user, \Illuminate\Support\Carbon::today());
+
+        if (!$booking) {
+            return null;
+        }
+
+        return [
+            'id' => $booking->id,
+            'time_label' => $booking->timeLabel(),
+            'date_label' => $booking->booking_date->translatedFormat('d F Y'),
+        ];
+    }
 }
