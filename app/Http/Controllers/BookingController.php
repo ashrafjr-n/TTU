@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\ActivityLog;
 use App\Models\Booking;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -233,6 +234,12 @@ class BookingController extends Controller
                 return back()->with('error', 'عذرًا، هذا الوقت تم حجزه للتو. حاول وقتًا آخر.');
             }
 
+            ActivityLog::record(
+                $user->id,
+                'booking_created',
+                "حجز موعد بتاريخ {$date->toDateString()} الساعة {$this->formatHour($hour, $minute)}"
+            );
+
             return redirect()->route('dashboard.'.$user->role)->with('success', 'تم حجز موعدك بنجاح!');
         });
     }
@@ -252,6 +259,12 @@ class BookingController extends Controller
         }
 
         $booking->update(['status' => 'cancelled']);
+
+        ActivityLog::record(
+            $booking->user_id,
+            'booking_cancelled',
+            "إلغاء حجز بتاريخ {$booking->booking_date->toDateString()} الساعة {$this->formatHour($booking->booking_hour, $booking->booking_minute)}"
+        );
 
         return redirect()->route('booking.index')->with('success', 'تم إلغاء حجزك بنجاح.');
     }

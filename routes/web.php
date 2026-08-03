@@ -53,6 +53,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::get('/', [AdminController::class, 'index'])->name('dashboard');
     Route::get('/users', [AdminController::class, 'users'])->name('users');
     Route::post('/users/{user}/toggle', [AdminController::class, 'toggleUserStatus'])->name('users.toggle');
+    Route::get('/users/{user}/activity', [AdminController::class, 'userActivity'])->name('users.activity');
     Route::get('/doctors/create', [AdminController::class, 'createDoctor'])->name('doctors.create');
     Route::post('/doctors', [AdminController::class, 'storeDoctor'])->name('doctors.store');
     Route::get('/records', [AdminController::class, 'records'])->name('records');
@@ -65,6 +66,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::post('/medications/{medication}/toggle', [AdminController::class, 'toggleMedicationStatus'])->name('medications.toggle');
     Route::get('/attendance', [AdminController::class, 'attendance'])->name('attendance');
     Route::put('/doctors/{doctor}/schedule', [AdminController::class, 'updateDoctorSchedule'])->name('doctors.schedule.update');
+    Route::get('/activity-log', [AdminController::class, 'activityLog'])->name('activity-log');
 });
 
 require __DIR__.'/auth.php';

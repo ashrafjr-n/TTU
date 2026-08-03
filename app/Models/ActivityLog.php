@@ -20,4 +20,16 @@ class ActivityLog extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+    /**
+     * تسجيل حدث نشاط — واجهة موحّدة لكل نقاط التسجيل بالتطبيق
+     */
+    public static function record(int $userId, string $action, ?string $description = null): self
+    {
+        return static::create([
+            'user_id' => $userId,
+            'action' => $action,
+            'description' => $description,
+        ]);
+    }
 }

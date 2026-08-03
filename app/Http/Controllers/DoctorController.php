@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\ActivityLog;
 use App\Models\Booking;
 use App\Models\DoctorAttendance;
 use App\Models\Medication;
@@ -58,6 +59,8 @@ class DoctorController extends Controller
             return back()->with('error', 'لقد سجّلت حضورك اليوم مسبقًا.');
         }
 
+        ActivityLog::record(Auth::id(), 'doctor_check_in', 'تسجيل حضور');
+
         return back()->with('success', 'تم تسجيل حضورك بنجاح.');
     }
 
@@ -79,6 +82,8 @@ class DoctorController extends Controller
         }
 
         $attendance->update(['check_out_at' => now()]);
+
+        ActivityLog::record(Auth::id(), 'doctor_check_out', 'تسجيل انصراف');
 
         return back()->with('success', 'تم تسجيل انصرافك بنجاح.');
     }

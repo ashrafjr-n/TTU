@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\ActivityLog;
 use App\Models\Booking;
 use App\Models\Medication;
 use App\Models\VisitReport;
@@ -36,14 +37,17 @@ class VisitReportController extends Controller
         $newMeds = collect($validated['medications'] ?? [])
             ->mapWithKeys(fn ($row) => [(int) $row['medication_id'] => (int) $row['quantity']]);
 
+        $wasEdit = false;
+
         try {
-            DB::transaction(function () use ($booking, $validated, $newMeds) {
+            DB::transaction(function () use ($booking, $validated, $newMeds, &$wasEdit) {
                 // قفل صف الحجز نفسه أولًا: يسلسل أي طلبات متزامنة لإرفاق/تعديل
                 // تقرير هذا الحجز (سواء كانت أول عملية إنشاء أو تعديلات متتالية)،
                 // فلا يقرأ طلبان "لا يوجد تقرير بعد" معًا قبل أي كومِت.
                 Booking::where('id', $booking->id)->lockForUpdate()->first();
 
                 $report = VisitReport::where('booking_id', $booking->id)->lockForUpdate()->first();
+                $wasEdit = (bool) $report;
 
                 // الكميات القديمة تُقرأ هنا (بعد القفل)، وليس من بيانات محمّلة
                 // مسبقًا عند فتح المودال — حتى لا يُحسب الفرق مقابل حالة قديمة.
@@ -97,6 +101,12 @@ class VisitReportController extends Controller
         } catch (ValidationException $e) {
             return back()->withErrors($e->errors())->withInput();
         }
+
+        ActivityLog::record(
+            Auth::id(),
+            $wasEdit ? 'visit_report_edited' : 'visit_report_created',
+            ($wasEdit ? 'تعديل تقرير زيارة للمريض ' : 'إنشاء تقرير زيارة للمريض ').$booking->user->name
+        );
 
         return back()->with('success', 'تم حفظ تقرير الزيارة بنجاح.');
     }

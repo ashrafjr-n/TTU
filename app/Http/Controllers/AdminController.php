@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\ActivityLog;
 use App\Models\Booking;
 use App\Models\DoctorAttendance;
 use App\Models\DoctorSchedule;
@@ -10,6 +11,7 @@ use App\Models\UniversityRecord;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
@@ -147,6 +149,13 @@ class AdminController extends Controller
         $user->update(['is_active' => !$user->is_active]);
 
         $status = $user->is_active ? 'تفعيل' : 'تعطيل';
+
+        ActivityLog::record(
+            Auth::id(),
+            $user->is_active ? 'user_activated' : 'user_deactivated',
+            "{$status} حساب \"{$user->name}\""
+        );
+
         return back()->with('success', "تم {$status} حساب {$user->name}.");
     }
 
@@ -176,6 +185,8 @@ class AdminController extends Controller
             'role' => 'doctor',
             'identifier' => $validated['email'],
         ]);
+
+        ActivityLog::record(Auth::id(), 'doctor_created', "إنشاء حساب دكتور: {$validated['name']} ({$validated['email']})");
 
         return redirect()->route('admin.users')->with('success', 'تم إضافة حساب الدكتور بنجاح.');
     }
@@ -212,6 +223,9 @@ class AdminController extends Controller
             'is_valid' => true,
         ]);
 
+        $typeLabel = $validated['type'] === 'student' ? 'طالب' : 'موظف';
+        ActivityLog::record(Auth::id(), 'university_record_added', "إضافة رقم {$validated['identifier']} ({$typeLabel})");
+
         return back()->with('success', 'تمت إضافة الرقم بنجاح.');
     }
 
@@ -220,7 +234,10 @@ class AdminController extends Controller
      */
     public function destroyRecord(UniversityRecord $record)
     {
+        $identifier = $record->identifier;
         $record->delete();
+
+        ActivityLog::record(Auth::id(), 'university_record_removed', "حذف رقم {$identifier}");
 
         return back()->with('success', 'تم حذف السجل بنجاح.');
     }
@@ -249,6 +266,8 @@ class AdminController extends Controller
 
         Medication::create($validated);
 
+        ActivityLog::record(Auth::id(), 'medication_added', "إضافة دواء: {$validated['name']}");
+
         return back()->with('success', 'تمت إضافة الدواء بنجاح.');
     }
 
@@ -266,6 +285,8 @@ class AdminController extends Controller
 
         $medication->update($validated);
 
+        ActivityLog::record(Auth::id(), 'medication_edited', "تعديل بيانات دواء: {$medication->name}");
+
         return back()->with('success', 'تم تحديث بيانات الدواء بنجاح.');
     }
 
@@ -279,6 +300,8 @@ class AdminController extends Controller
         ]);
 
         $medication->increment('stock_quantity', $validated['amount']);
+
+        ActivityLog::record(Auth::id(), 'medication_restocked', "إضافة {$validated['amount']} إلى مخزون \"{$medication->name}\"");
 
         return back()->with('success', "تمت إضافة {$validated['amount']} إلى مخزون \"{$medication->name}\".");
     }
@@ -362,6 +385,31 @@ class AdminController extends Controller
             ['working_days' => $workingDays]
         );
 
+        ActivityLog::record(Auth::id(), 'doctor_schedule_updated', "تحديث جدول عمل \"{$doctor->name}\"");
+
         return back()->with('success', "تم تحديث جدول عمل \"{$doctor->name}\".");
+    }
+
+    /**
+     * سجل نشاط مستخدم معيّن (أي دور) — تُفتح من صفحة إدارة المستخدمين
+     */
+    public function userActivity(User $user)
+    {
+        $logs = $user->activityLogs()->latest()->paginate(20);
+
+        return view('admin.user-activity', ['targetUser' => $user, 'logs' => $logs]);
+    }
+
+    /**
+     * سجل نشاط الإدارة العام — كل الأحداث المسجّلة تحت أي حساب مدير
+     */
+    public function activityLog()
+    {
+        $logs = ActivityLog::whereHas('user', fn ($q) => $q->where('role', 'admin'))
+            ->with('user')
+            ->latest()
+            ->paginate(20);
+
+        return view('admin.activity-log', compact('logs'));
     }
 }
