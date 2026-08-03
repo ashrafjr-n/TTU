@@ -88,11 +88,21 @@
             <p class="mt-3 text-ttu-gray">سنوجهك مباشرة إلى الصفحة المناسبة حسب صفتك داخل الجامعة</p>
         </div>
 
+        @php
+            $currentRole = auth()->check() ? auth()->user()->role : null;
+        @endphp
+
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
 
             {{-- طالب --}}
-            <a href="{{ route('login', ['role' => 'student']) }}"
-               class="group relative flex flex-col overflow-hidden p-8 pt-10 rounded-[2.5rem] neu-raised-white neu-card-hover cursor-pointer">
+            @php $locked = $currentRole && $currentRole !== 'student'; @endphp
+            <a @if (!$locked) href="{{ route('login', ['role' => 'student']) }}" @endif
+               @if ($locked) aria-disabled="true" tabindex="-1" @endif
+               @class([
+                   'group relative flex flex-col overflow-hidden p-8 pt-10 rounded-[2.5rem]',
+                   'neu-raised-white neu-card-hover cursor-pointer' => !$locked,
+                   'role-locked pointer-events-none cursor-not-allowed' => $locked,
+               ])>
 
                 <div class="relative w-16 h-16 rounded-full neu-icon bg-ttu-cream flex items-center justify-center mb-6 group-hover:bg-ttu-red transition-colors duration-300">
                     <i data-lucide="graduation-cap" class="neu-wiggle w-7 h-7 text-ttu-red group-hover:text-white transition-colors duration-300" stroke-width="1.6"></i>
@@ -115,8 +125,14 @@
             </a>
 
             {{-- موظف --}}
-            <a href="{{ route('login', ['role' => 'staff']) }}"
-               class="group relative flex flex-col overflow-hidden p-8 pt-10 rounded-[2.5rem] neu-raised-white neu-card-hover cursor-pointer">
+            @php $locked = $currentRole && $currentRole !== 'staff'; @endphp
+            <a @if (!$locked) href="{{ route('login', ['role' => 'staff']) }}" @endif
+               @if ($locked) aria-disabled="true" tabindex="-1" @endif
+               @class([
+                   'group relative flex flex-col overflow-hidden p-8 pt-10 rounded-[2.5rem]',
+                   'neu-raised-white neu-card-hover cursor-pointer' => !$locked,
+                   'role-locked pointer-events-none cursor-not-allowed' => $locked,
+               ])>
 
                 <div class="relative w-16 h-16 rounded-full neu-icon bg-ttu-cream flex items-center justify-center mb-6 group-hover:bg-ttu-red transition-colors duration-300">
                     <i data-lucide="briefcase" class="neu-wiggle w-7 h-7 text-ttu-red group-hover:text-white transition-colors duration-300" stroke-width="1.6"></i>
@@ -139,8 +155,14 @@
             </a>
 
             {{-- دكتور --}}
-            <a href="{{ route('login') }}"
-               class="group relative flex flex-col overflow-hidden p-8 pt-10 rounded-[2.5rem] neu-raised-white neu-card-hover cursor-pointer">
+            @php $locked = $currentRole && $currentRole !== 'doctor'; @endphp
+            <a @if (!$locked) href="{{ route('login') }}" @endif
+               @if ($locked) aria-disabled="true" tabindex="-1" @endif
+               @class([
+                   'group relative flex flex-col overflow-hidden p-8 pt-10 rounded-[2.5rem]',
+                   'neu-raised-white neu-card-hover cursor-pointer' => !$locked,
+                   'role-locked pointer-events-none cursor-not-allowed' => $locked,
+               ])>
 
                 <div class="relative w-16 h-16 rounded-full neu-icon bg-ttu-cream flex items-center justify-center mb-6 group-hover:bg-ttu-red transition-colors duration-300">
                     <i data-lucide="stethoscope" class="neu-wiggle w-7 h-7 text-ttu-red group-hover:text-white transition-colors duration-300" stroke-width="1.6"></i>
@@ -163,8 +185,14 @@
             </a>
 
             {{-- مدير --}}
-            <a href="{{ route('login') }}"
-               class="group relative flex flex-col overflow-hidden p-8 pt-10 rounded-[2.5rem] neu-raised-white neu-card-hover cursor-pointer">
+            @php $locked = $currentRole && $currentRole !== 'admin'; @endphp
+            <a @if (!$locked) href="{{ route('login') }}" @endif
+               @if ($locked) aria-disabled="true" tabindex="-1" @endif
+               @class([
+                   'group relative flex flex-col overflow-hidden p-8 pt-10 rounded-[2.5rem]',
+                   'neu-raised-white neu-card-hover cursor-pointer' => !$locked,
+                   'role-locked pointer-events-none cursor-not-allowed' => $locked,
+               ])>
 
                 <div class="relative w-16 h-16 rounded-full neu-icon bg-ttu-cream flex items-center justify-center mb-6 group-hover:bg-ttu-red transition-colors duration-300">
                     <i data-lucide="shield-check" class="neu-wiggle w-7 h-7 text-ttu-red group-hover:text-white transition-colors duration-300" stroke-width="1.6"></i>

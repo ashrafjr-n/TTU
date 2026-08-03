@@ -156,6 +156,23 @@ button,
     box-shadow: inset 3px 3px 7px var(--neu-dark), inset -3px -3px 7px var(--neu-light);
 }
 
+/* بطاقة دور مقفلة — لمستخدم مسجّل دخوله يزور الرئيسية، لبطاقات الأدوار غير دوره */
+.role-locked {
+    background: #E3E3E3 !important;
+    box-shadow: inset 3px 3px 8px rgba(0, 0, 0, .07), inset -3px -3px 8px rgba(255, 255, 255, .5) !important;
+    transform: none !important;
+}
+.role-locked, .role-locked * {
+    color: #9C9C9C !important;
+    animation: none !important;
+    transition: none !important;
+}
+.role-locked svg { color: #9C9C9C !important; }
+.role-locked .neu-icon {
+    background: #D2D2D2 !important;
+    box-shadow: none !important;
+}
+
 @media (prefers-reduced-motion: reduce) {
     .neu-raised, .neu-raised-white, .neu-icon, .btn-hero, .neu-card-hover {
         transition: none !important;
