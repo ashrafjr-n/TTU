@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Booking;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -15,6 +16,19 @@ class BookingController extends Controller
     {
         $user = Auth::user();
         $date = Carbon::today();
+
+        $activeBooking = $this->findActiveBooking($user, $date);
+
+        if ($activeBooking) {
+            return view('booking.index', [
+                'hours' => [],
+                'activeBooking' => [
+                    'id' => $activeBooking->id,
+                    'time_label' => $this->formatHour($activeBooking->booking_hour, $activeBooking->booking_minute),
+                    'date_label' => $activeBooking->booking_date->translatedFormat('d F Y'),
+                ],
+            ]);
+        }
 
         // كل حجوزات اليوم المؤكدة، مفهرسة بالساعة والدقيقة لتفادي استعلامات متكررة
         $todaysBookings = Booking::where('booking_date', $date)
@@ -31,7 +45,28 @@ class BookingController extends Controller
             ];
         }
 
-        return view('booking.index', ['hours' => $hours]);
+        return view('booking.index', ['hours' => $hours, 'activeBooking' => null]);
+    }
+
+    /**
+     * حجز المستخدم الوحيد "الفعّال" حاليًا (مؤكد ولم يمر وقته بعد)، إن وُجد.
+     * يُستخدم لفرض قاعدة "حجز فعّال واحد بالمستخدم بأي وقت".
+     *
+     * lockForUpdate عند $lock=true (داخل transaction الحجز) — بدونه، طلبان
+     * متزامنان لنفس المستخدم (تبويبان، أو نقرة مزدوجة) لخانتين مختلفتين
+     * يقدران يقرآ "لا يوجد حجز فعّال" معًا قبل أي كومِت، فينجح كلاهما.
+     */
+    private function findActiveBooking($user, Carbon $date, bool $lock = false): ?Booking
+    {
+        $query = Booking::where('user_id', $user->id)
+            ->where('booking_date', $date)
+            ->where('status', 'confirmed');
+
+        if ($lock) {
+            $query->lockForUpdate();
+        }
+
+        return $query->get()->first(fn (Booking $b) => $b->isUpcoming());
     }
 
     private function buildSlotsForHour(Carbon $date, int $hour, $user, $todaysBookings): array
@@ -40,14 +75,14 @@ class BookingController extends Controller
         $slots = [];
 
         foreach ($minutes as $minute) {
-            $slots[] = $this->describeSlot($date, $hour, $minute, $user, $todaysBookings, released: false);
+            $slots[] = $this->describeSlot($date, $hour, $minute, $todaysBookings, released: false);
         }
 
         // الطلاب فقط: أضف خانات الموظفين غير المحجوزة التي "تحررت" لأن وقتها بدأ فعليًا اليوم
         if ($user->isStudent()) {
             foreach (Booking::STAFF_MINUTES as $minute) {
                 if ($this->isReleasedToStudents($date, $hour, $minute, $todaysBookings)) {
-                    $slots[] = $this->describeSlot($date, $hour, $minute, $user, $todaysBookings, released: true);
+                    $slots[] = $this->describeSlot($date, $hour, $minute, $todaysBookings, released: true);
                 }
             }
         }
@@ -55,7 +90,15 @@ class BookingController extends Controller
         return $slots;
     }
 
-    private function describeSlot(Carbon $date, int $hour, int $minute, $user, $todaysBookings, bool $released): array
+    /**
+     * @param  \Illuminate\Support\Collection  $todaysBookings
+     *
+     * ملاحظة: هذه الدالة تُستدعى فقط عندما لا يوجد للمستخدم أي حجز فعّال
+     * (راجع index())، لذلك أي خانة ضمن هذه القائمة تخص المستخدم نفسه تكون
+     * بالضرورة حجزًا انتهى وقته فعليًا — تُعرض كـ"منتهية" مثل أي خانة أخرى
+     * بدل عرضها كحجز قابل للإلغاء (فلا معنى لإلغاء موعد مضى وقته).
+     */
+    private function describeSlot(Carbon $date, int $hour, int $minute, $todaysBookings, bool $released): array
     {
         $key = "{$hour}:{$minute}";
         $existing = $todaysBookings->get($key);
@@ -64,17 +107,13 @@ class BookingController extends Controller
         $slotEnd = $slotStart->copy()->addMinutes(Booking::SLOT_MINUTES);
         $isPast = $released ? false : now()->gte($slotEnd);
 
-        $isMine = $existing && $existing->user_id === $user->id;
-
         return [
             'hour' => $hour,
             'minute' => $minute,
             'time_label' => $this->formatHour($hour, $minute),
             'released' => $released,
             'is_past' => $isPast,
-            'is_mine' => $isMine,
-            'booking_id' => $isMine ? $existing->id : null,
-            'is_taken' => $existing !== null && !$isMine,
+            'is_taken' => $existing !== null,
         ];
     }
 
@@ -141,6 +180,19 @@ class BookingController extends Controller
                 return back()->with('error', 'انتهى وقت هذا الموعد.');
             }
 
+            // قفل صف المستخدم نفسه أولًا (موجود دائمًا، بعكس صفوف الحجوزات) لضمان
+            // تسلسل أي طلبات متزامنة لنفس المستخدم — بدونه، طلبان متزامنان من
+            // مستخدم بلا أي حجز حاليًا يقدران يقرآ "لا يوجد حجز فعّال" معًا قبل
+            // أي كومِت، فينجح كلاهما على خانتين مختلفتين (نفس ثغرة الحجز المكرر
+            // الأصلية، لكن على مستوى المستخدم بدل الخانة).
+            User::where('id', $user->id)->lockForUpdate()->first();
+
+            // قاعدة: حجز فعّال واحد فقط بالمستخدم بأي وقت — يجب إلغاء الحجز
+            // الحالي أولًا قبل حجز موعد جديد (بغض النظر عن الساعة).
+            if ($this->findActiveBooking($user, $date, lock: true)) {
+                return back()->with('error', 'لديك حجز فعّال بالفعل. يجب إلغاؤه أولًا قبل حجز موعد جديد.');
+            }
+
             $existing = Booking::where('booking_date', $date)
                 ->where('booking_hour', $hour)
                 ->where('booking_minute', $minute)
@@ -150,16 +202,6 @@ class BookingController extends Controller
 
             if ($existing) {
                 return back()->with('error', 'عذرًا، هذا الوقت تم حجزه للتو. حاول وقتًا آخر.');
-            }
-
-            $alreadyBookedThisHour = Booking::where('user_id', $user->id)
-                ->where('booking_date', $date)
-                ->where('booking_hour', $hour)
-                ->where('status', 'confirmed')
-                ->exists();
-
-            if ($alreadyBookedThisHour) {
-                return back()->with('error', 'لديك حجز مسبق ضمن هذه الساعة.');
             }
 
             try {
@@ -177,7 +219,7 @@ class BookingController extends Controller
                 return back()->with('error', 'عذرًا، هذا الوقت تم حجزه للتو. حاول وقتًا آخر.');
             }
 
-            return back()->with('success', 'تم حجز موعدك بنجاح!');
+            return redirect()->route('dashboard.'.$user->role)->with('success', 'تم حجز موعدك بنجاح!');
         });
     }
 
@@ -192,11 +234,11 @@ class BookingController extends Controller
         }
 
         if ($booking->status !== 'confirmed') {
-            return back()->with('error', 'هذا الحجز غير قابل للإلغاء.');
+            return redirect()->route('booking.index')->with('error', 'هذا الحجز غير قابل للإلغاء.');
         }
 
         $booking->update(['status' => 'cancelled']);
 
-        return back()->with('success', 'تم إلغاء حجزك بنجاح.');
+        return redirect()->route('booking.index')->with('success', 'تم إلغاء حجزك بنجاح.');
     }
 }

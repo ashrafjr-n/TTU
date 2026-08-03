@@ -63,4 +63,23 @@ class Booking extends Model
     {
         return in_array($this->booking_minute, self::STAFF_MINUTES, true);
     }
+
+    public function slotStart(): \Illuminate\Support\Carbon
+    {
+        return $this->booking_date->copy()->setTime($this->booking_hour, $this->booking_minute, 0);
+    }
+
+    public function slotEnd(): \Illuminate\Support\Carbon
+    {
+        return $this->slotStart()->addMinutes(self::SLOT_MINUTES);
+    }
+
+    /**
+     * حجز مؤكد ولم يمر وقته بعد — هذا هو المقياس الوحيد لـ"حجز فعّال" في
+     * قاعدة "حجز واحد فعّال بالمستخدم في نفس الوقت".
+     */
+    public function isUpcoming(): bool
+    {
+        return $this->status === 'confirmed' && now()->lt($this->slotEnd());
+    }
 }
