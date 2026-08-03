@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
@@ -39,6 +40,27 @@ class User extends Authenticatable
     public function bookings(): HasMany
     {
         return $this->hasMany(Booking::class);
+    }
+
+    public function activityLogs(): HasMany
+    {
+        return $this->hasMany(ActivityLog::class);
+    }
+
+    // علاقات خاصة بالدكتور فقط، لكنها متاحة على User عمومًا (role='doctor')
+    public function doctorSchedule(): HasOne
+    {
+        return $this->hasOne(DoctorSchedule::class, 'doctor_id');
+    }
+
+    public function doctorAttendance(): HasMany
+    {
+        return $this->hasMany(DoctorAttendance::class, 'doctor_id');
+    }
+
+    public function visitReportsAsDoctor(): HasMany
+    {
+        return $this->hasMany(VisitReport::class, 'doctor_id');
     }
 
     // Helper methods مفيدة لاحقًا بالكود (تسهل قراءة الشروط)
