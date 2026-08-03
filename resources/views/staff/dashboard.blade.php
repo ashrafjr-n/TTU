@@ -137,7 +137,7 @@
                                     <p class="text-sm font-bold text-ttu-black">
                                         {{ \Carbon\Carbon::parse($booking->booking_date)->translatedFormat('d F Y') }}
                                     </p>
-                                    <p class="text-xs text-ttu-gray mt-0.5">الساعة {{ $booking->booking_hour }}:00</p>
+                                    <p class="text-xs text-ttu-gray mt-0.5">الساعة {{ sprintf('%d:%02d', $booking->booking_hour, $booking->booking_minute) }}</p>
                                 </div>
                             </div>
                             <span class="text-xs font-bold text-green-600 bg-green-50 rounded-full px-3 py-1.5">مؤكد</span>

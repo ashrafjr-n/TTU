@@ -39,11 +39,6 @@ class User extends Authenticatable
         return $this->hasMany(Booking::class);
     }
 
-    public function bookingRequests(): HasMany
-    {
-        return $this->hasMany(BookingRequest::class);
-    }
-
     // Helper methods مفيدة لاحقًا بالكود (تسهل قراءة الشروط)
     public function isStudent(): bool
     {

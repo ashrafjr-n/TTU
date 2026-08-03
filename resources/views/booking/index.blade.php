@@ -53,107 +53,78 @@
                 <span class="w-3 h-3 rounded-full bg-green-500"></span> متاح
             </span>
             <span class="flex items-center gap-2 text-xs text-ttu-gray">
-                <span class="w-3 h-3 rounded-full bg-ttu-red"></span> محجوز بالكامل
-            </span>
-            <span class="flex items-center gap-2 text-xs text-ttu-gray">
-                <span class="w-3 h-3 rounded-full bg-ttu-yellow"></span> طلب موافقة
+                <span class="w-3 h-3 rounded-full bg-ttu-red"></span> محجوز
             </span>
             <span class="flex items-center gap-2 text-xs text-ttu-gray">
                 <span class="w-3 h-3 rounded-full bg-blue-500"></span> حجزك أنت
             </span>
+            <span class="flex items-center gap-2 text-xs text-ttu-gray">
+                <span class="w-3 h-3 rounded-full bg-ttu-gray/40"></span> انتهى وقته
+            </span>
+            @if (auth()->user()->isStudent())
+                <span class="flex items-center gap-2 text-xs text-ttu-gray">
+                    <span class="w-3 h-3 rounded-full bg-ttu-yellow"></span> وقت إضافي محرر من حصة الموظفين
+                </span>
+            @endif
         </div>
 
-        {{-- ============ خانات الأوقات ============ --}}
-        <div class="rounded-[2.5rem] neu-raised-white p-6 sm:p-8">
-            <div class="space-y-3">
-                @foreach ($slots as $slot)
-                    @php
-                        $status = $slot['already_booked']
-                            ? 'mine'
-                            : ($slot['pending_request']
-                                ? 'pending'
-                                : ($slot['can_book_directly']
-                                    ? 'available'
-                                    : ($slot['can_request'] ? 'request' : 'full')));
-                    @endphp
+        {{-- ============ خانات الأوقات (كل ساعة مقسّمة لـ5 دقائق) ============ --}}
+        <div class="space-y-4">
+            @foreach ($hours as $hourBlock)
+                <div class="rounded-[2rem] neu-raised-white p-6 sm:p-7">
+                    <p class="text-sm font-bold text-ttu-black mb-4">{{ $hourBlock['label'] }}</p>
 
-                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-2xl neu-pressed px-5 py-4">
+                    <div class="flex flex-wrap gap-2.5">
+                        @foreach ($hourBlock['slots'] as $slot)
+                            @php
+                                $state = $slot['is_mine']
+                                    ? 'mine'
+                                    : ($slot['is_taken']
+                                        ? 'taken'
+                                        : ($slot['is_past'] ? 'past' : 'available'));
+                            @endphp
 
-                        <div class="flex items-center gap-4">
-                            <span @class([
-                                'w-14 h-14 rounded-2xl neu-icon flex items-center justify-center shrink-0 font-display font-extrabold text-sm',
-                                'bg-blue-500 text-white' => $status === 'mine',
-                                'bg-ttu-yellow text-white' => $status === 'pending',
-                                'bg-green-500 text-white' => $status === 'available',
-                                'bg-ttu-yellow/90 text-white' => $status === 'request',
-                                'bg-ttu-red text-white' => $status === 'full',
-                            ])>
-                                {{ $slot['hour'] }}:00
-                            </span>
+                            @if ($state === 'mine')
+                                <button type="button"
+                                        onclick="openCancelModal({{ $slot['booking_id'] }}, '{{ $slot['time_label'] }}')"
+                                        class="neu-icon-btn rounded-xl px-3.5 py-2.5 text-xs font-bold bg-blue-500 text-white flex items-center gap-1.5 hover:!bg-ttu-red transition-colors"
+                                        title="إلغاء الحجز">
+                                    {{ $slot['time_label'] }}
+                                    <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                </button>
 
-                            <div>
-                                <p class="text-sm font-bold text-ttu-black">{{ $slot['time_label'] }}</p>
-                                <p class="text-xs text-ttu-gray mt-1">
-                                    طلاب: {{ $slot['student_booked'] }}/{{ $slot['student_capacity'] }}
-                                    &nbsp;·&nbsp;
-                                    موظفين: {{ $slot['staff_booked'] }}/{{ $slot['staff_capacity'] }}
-                                </p>
-                            </div>
-                        </div>
-
-                        <div class="shrink-0">
-                            @if ($status === 'mine')
-                                <div class="flex items-center gap-2">
-                                    <span class="inline-flex items-center gap-1.5 rounded-full bg-blue-50 text-blue-600 text-xs font-bold px-4 py-2.5">
-                                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-                                        </svg>
-                                        لديك حجز
-                                    </span>
-
-                                    <button type="button"
-                                            onclick="openCancelModal({{ $slot['my_booking_id'] }}, '{{ $slot['time_label'] }}')"
-                                            class="neu-icon-btn w-9 h-9 rounded-full bg-ttu-cream text-ttu-red flex items-center justify-center hover:!bg-ttu-red hover:!text-white"
-                                            title="إلغاء الحجز">
-                                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-                                        </svg>
-                                    </button>
-                                </div>
-
-                            @elseif ($status === 'pending')
-                                <span class="inline-flex items-center gap-1.5 rounded-full bg-amber-50 text-amber-600 text-xs font-bold px-4 py-2.5">
-                                    ⏱ قيد المراجعة
-                                </span>
-
-                            @elseif ($status === 'available')
+                            @elseif ($state === 'available')
                                 <form method="POST" action="{{ route('booking.store') }}">
                                     @csrf
                                     <input type="hidden" name="hour" value="{{ $slot['hour'] }}">
-                                    <button type="submit" class="neu-icon-btn bg-ttu-cream text-green-600 text-sm font-bold px-6 py-2.5 rounded-xl hover:!bg-green-600 hover:!text-white transition-colors">
-                                        احجز الآن
+                                    <input type="hidden" name="minute" value="{{ $slot['minute'] }}">
+                                    <button type="submit"
+                                            @class([
+                                                'neu-icon-btn rounded-xl px-3.5 py-2.5 text-xs font-bold transition-colors',
+                                                'bg-ttu-cream text-ttu-yellow hover:!bg-ttu-yellow hover:!text-white' => $slot['released'],
+                                                'bg-ttu-cream text-green-600 hover:!bg-green-600 hover:!text-white' => !$slot['released'],
+                                            ])
+                                            title="{{ $slot['released'] ? 'وقت إضافي محرر من حصة الموظفين' : 'احجز هذا الوقت' }}">
+                                        {{ $slot['time_label'] }}
                                     </button>
                                 </form>
 
-                            @elseif ($status === 'request')
-                                <form method="POST" action="{{ route('booking.request') }}">
-                                    @csrf
-                                    <input type="hidden" name="hour" value="{{ $slot['hour'] }}">
-                                    <button type="submit" class="neu-icon-btn bg-ttu-cream text-ttu-yellow text-sm font-bold px-6 py-2.5 rounded-xl hover:!bg-ttu-yellow hover:!text-white transition-colors">
-                                        إرسال طلب
-                                    </button>
-                                </form>
+                            @elseif ($state === 'taken')
+                                <span class="neu-pressed rounded-xl px-3.5 py-2.5 text-xs font-bold text-ttu-red/70">
+                                    {{ $slot['time_label'] }}
+                                </span>
 
                             @else
-                                <span class="inline-flex items-center gap-1.5 rounded-full bg-ttu-cream text-ttu-gray text-xs font-bold px-4 py-2.5">
-                                    محجوز بالكامل
+                                <span class="neu-pressed rounded-xl px-3.5 py-2.5 text-xs font-bold text-ttu-gray/50">
+                                    {{ $slot['time_label'] }}
                                 </span>
                             @endif
-                        </div>
-
+                        @endforeach
                     </div>
-                @endforeach
-            </div>
+                </div>
+            @endforeach
         </div>
 
     </div>
