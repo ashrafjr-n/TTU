@@ -99,9 +99,9 @@
             <a @if (!$locked) href="{{ route('login', ['role' => 'student']) }}" @endif
                @if ($locked) aria-disabled="true" tabindex="-1" @endif
                @class([
-                   'group relative flex flex-col overflow-hidden p-8 pt-10 rounded-[2.5rem]',
-                   'neu-raised-white neu-card-hover cursor-pointer' => !$locked,
-                   'role-locked pointer-events-none cursor-not-allowed' => $locked,
+                   'group relative flex flex-col overflow-hidden p-8 pt-10 rounded-[2.5rem] neu-raised-white',
+                   'neu-card-hover cursor-pointer' => !$locked,
+                   'role-locked pointer-events-none' => $locked,
                ])>
 
                 <div class="relative w-16 h-16 rounded-full neu-icon bg-ttu-cream flex items-center justify-center mb-6 group-hover:bg-ttu-red transition-colors duration-300">
@@ -129,9 +129,9 @@
             <a @if (!$locked) href="{{ route('login', ['role' => 'staff']) }}" @endif
                @if ($locked) aria-disabled="true" tabindex="-1" @endif
                @class([
-                   'group relative flex flex-col overflow-hidden p-8 pt-10 rounded-[2.5rem]',
-                   'neu-raised-white neu-card-hover cursor-pointer' => !$locked,
-                   'role-locked pointer-events-none cursor-not-allowed' => $locked,
+                   'group relative flex flex-col overflow-hidden p-8 pt-10 rounded-[2.5rem] neu-raised-white',
+                   'neu-card-hover cursor-pointer' => !$locked,
+                   'role-locked pointer-events-none' => $locked,
                ])>
 
                 <div class="relative w-16 h-16 rounded-full neu-icon bg-ttu-cream flex items-center justify-center mb-6 group-hover:bg-ttu-red transition-colors duration-300">
@@ -159,9 +159,9 @@
             <a @if (!$locked) href="{{ route('login') }}" @endif
                @if ($locked) aria-disabled="true" tabindex="-1" @endif
                @class([
-                   'group relative flex flex-col overflow-hidden p-8 pt-10 rounded-[2.5rem]',
-                   'neu-raised-white neu-card-hover cursor-pointer' => !$locked,
-                   'role-locked pointer-events-none cursor-not-allowed' => $locked,
+                   'group relative flex flex-col overflow-hidden p-8 pt-10 rounded-[2.5rem] neu-raised-white',
+                   'neu-card-hover cursor-pointer' => !$locked,
+                   'role-locked pointer-events-none' => $locked,
                ])>
 
                 <div class="relative w-16 h-16 rounded-full neu-icon bg-ttu-cream flex items-center justify-center mb-6 group-hover:bg-ttu-red transition-colors duration-300">
@@ -189,9 +189,9 @@
             <a @if (!$locked) href="{{ route('login') }}" @endif
                @if ($locked) aria-disabled="true" tabindex="-1" @endif
                @class([
-                   'group relative flex flex-col overflow-hidden p-8 pt-10 rounded-[2.5rem]',
-                   'neu-raised-white neu-card-hover cursor-pointer' => !$locked,
-                   'role-locked pointer-events-none cursor-not-allowed' => $locked,
+                   'group relative flex flex-col overflow-hidden p-8 pt-10 rounded-[2.5rem] neu-raised-white',
+                   'neu-card-hover cursor-pointer' => !$locked,
+                   'role-locked pointer-events-none' => $locked,
                ])>
 
                 <div class="relative w-16 h-16 rounded-full neu-icon bg-ttu-cream flex items-center justify-center mb-6 group-hover:bg-ttu-red transition-colors duration-300">

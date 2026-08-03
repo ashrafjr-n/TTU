@@ -156,14 +156,14 @@ button,
     box-shadow: inset 3px 3px 7px var(--neu-dark), inset -3px -3px 7px var(--neu-light);
 }
 
-/* بطاقة دور مقفلة — لمستخدم مسجّل دخوله يزور الرئيسية، لبطاقات الأدوار غير دوره */
+/* بطاقة دور مقفلة — لمستخدم مسجّل دخوله يزور الرئيسية، لبطاقات الأدوار غير دوره.
+   نفس خلفية وظل الكارت العادي (neu-raised-white) — فقط باهتة بالشفافية بدل رمادي مصمت،
+   حتى تبقى ضمن نفس لغة التصميم (نيومورفيزم) بدل كسرها بخلفية مسطحة. */
 .role-locked {
-    background: #E3E3E3 !important;
-    box-shadow: inset 3px 3px 8px rgba(0, 0, 0, .07), inset -3px -3px 8px rgba(255, 255, 255, .5) !important;
-    transform: none !important;
+    opacity: .55;
+    cursor: not-allowed;
 }
 .role-locked, .role-locked * {
-    color: #9C9C9C !important;
     animation: none !important;
     transition: none !important;
 }
