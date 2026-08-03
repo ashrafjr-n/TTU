@@ -28,7 +28,7 @@ class DoctorController extends Controller
             ->orderBy('booking_minute')
             ->get();
 
-        $medications = Medication::orderBy('name')->get(['id', 'name', 'unit', 'stock_quantity']);
+        $medications = Medication::where('is_active', true)->orderBy('name')->get(['id', 'name', 'unit', 'stock_quantity']);
 
         return view('doctor.dashboard', [
             'bookings' => $bookings,

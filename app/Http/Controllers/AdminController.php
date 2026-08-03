@@ -3,10 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Models\Booking;
+use App\Models\Medication;
 use App\Models\UniversityRecord;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
 
 class AdminController extends Controller
@@ -141,5 +143,77 @@ class AdminController extends Controller
         $record->delete();
 
         return back()->with('success', 'تم حذف السجل بنجاح.');
+    }
+
+    /**
+     * عرض كتالوج الأدوية
+     */
+    public function medications()
+    {
+        $medications = Medication::orderBy('name')->paginate(15);
+
+        return view('admin.medications', compact('medications'));
+    }
+
+    /**
+     * إضافة دواء جديد للكتالوج
+     */
+    public function storeMedication(Request $request)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255|unique:medications,name',
+            'stock_quantity' => 'required|integer|min:0',
+            'unit' => 'nullable|string|max:50',
+            'low_stock_threshold' => 'required|integer|min:0',
+        ]);
+
+        Medication::create($validated);
+
+        return back()->with('success', 'تمت إضافة الدواء بنجاح.');
+    }
+
+    /**
+     * تعديل بيانات دواء (الاسم/الوحدة/حد التنبيه) — لا يغيّر الكمية،
+     * فذلك مسؤولية "إضافة كمية" حصرًا
+     */
+    public function updateMedication(Request $request, Medication $medication)
+    {
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'max:255', Rule::unique('medications', 'name')->ignore($medication->id)],
+            'unit' => 'nullable|string|max:50',
+            'low_stock_threshold' => 'required|integer|min:0',
+        ]);
+
+        $medication->update($validated);
+
+        return back()->with('success', 'تم تحديث بيانات الدواء بنجاح.');
+    }
+
+    /**
+     * إضافة كمية لمخزون دواء موجود (الإجراء الأكثر استخدامًا)
+     */
+    public function restockMedication(Request $request, Medication $medication)
+    {
+        $validated = $request->validate([
+            'amount' => 'required|integer|min:1',
+        ]);
+
+        $medication->increment('stock_quantity', $validated['amount']);
+
+        return back()->with('success', "تمت إضافة {$validated['amount']} إلى مخزون \"{$medication->name}\".");
+    }
+
+    /**
+     * تفعيل/تعطيل دواء — بديل عن الحذف الفعلي: حذف الدواء يحذف معه (cascade)
+     * كل سجلات visit_report_medications المرتبطة به، ما يمحو تاريخ الوصفات
+     * الطبية من صفحة "أدويتي" للمرضى. التعطيل يخفيه من قائمة الأدوية عند
+     * إرفاق تقرير جديد دون المساس بالتقارير القديمة.
+     */
+    public function toggleMedicationStatus(Medication $medication)
+    {
+        $medication->update(['is_active' => !$medication->is_active]);
+
+        $status = $medication->is_active ? 'تفعيل' : 'تعطيل';
+        return back()->with('success', "تم {$status} \"{$medication->name}\".");
     }
 }

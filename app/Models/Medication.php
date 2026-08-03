@@ -15,6 +15,7 @@ class Medication extends Model
         'stock_quantity',
         'low_stock_threshold',
         'unit',
+        'is_active',
     ];
 
     protected function casts(): array
@@ -22,6 +23,7 @@ class Medication extends Model
         return [
             'stock_quantity' => 'integer',
             'low_stock_threshold' => 'integer',
+            'is_active' => 'boolean',
         ];
     }
 

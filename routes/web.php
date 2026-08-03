@@ -56,6 +56,11 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::get('/records', [AdminController::class, 'records'])->name('records');
     Route::post('/records', [AdminController::class, 'storeRecord'])->name('records.store');
     Route::delete('/records/{record}', [AdminController::class, 'destroyRecord'])->name('records.destroy');
+    Route::get('/medications', [AdminController::class, 'medications'])->name('medications');
+    Route::post('/medications', [AdminController::class, 'storeMedication'])->name('medications.store');
+    Route::put('/medications/{medication}', [AdminController::class, 'updateMedication'])->name('medications.update');
+    Route::post('/medications/{medication}/restock', [AdminController::class, 'restockMedication'])->name('medications.restock');
+    Route::post('/medications/{medication}/toggle', [AdminController::class, 'toggleMedicationStatus'])->name('medications.toggle');
 });
 
 require __DIR__.'/auth.php';

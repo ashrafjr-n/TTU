@@ -1,0 +1,146 @@
+@extends('layouts.main')
+
+@section('title', 'إدارة الأدوية')
+
+@section('content')
+
+<x-app-header />
+
+<div class="min-h-[calc(100vh-80px)] bg-ttu-cream">
+    <div class="max-w-6xl mx-auto px-6 py-16 lg:py-20">
+
+        <h2 class="font-display text-2xl sm:text-3xl font-extrabold mb-8">إدارة الأدوية</h2>
+
+        @if (session('success'))
+            <div class="rounded-2xl neu-pressed text-green-700 text-sm px-5 py-3.5 mb-6">{{ session('success') }}</div>
+        @endif
+        @if ($errors->any())
+            <div class="rounded-2xl neu-pressed text-red-600 text-sm px-5 py-3.5 mb-6">
+                @foreach ($errors->all() as $error)
+                    <p>{{ $error }}</p>
+                @endforeach
+            </div>
+        @endif
+
+        @include('partials.admin-nav')
+
+        {{-- فورم إضافة دواء جديد --}}
+        <div class="rounded-[2rem] neu-raised-white p-6 mb-6">
+            <h3 class="font-bold text-sm mb-4">إضافة دواء جديد</h3>
+            <form method="POST" action="{{ route('admin.medications.store') }}" class="flex flex-wrap gap-3">
+                @csrf
+                <input type="text" name="name" value="{{ old('name') }}" placeholder="اسم الدواء" required
+                       class="flex-1 min-w-[200px] rounded-xl neu-pressed bg-ttu-cream border-0 px-4 py-2.5 text-sm focus:ring-2 focus:ring-ttu-red/30 outline-none">
+                <input type="number" name="stock_quantity" value="{{ old('stock_quantity') }}" min="0" placeholder="الكمية الابتدائية" required
+                       class="w-44 rounded-xl neu-pressed bg-ttu-cream border-0 px-4 py-2.5 text-sm focus:ring-2 focus:ring-ttu-red/30 outline-none">
+                <input type="text" name="unit" value="{{ old('unit') }}" placeholder="الوحدة (شريط، علبة...)"
+                       class="w-44 rounded-xl neu-pressed bg-ttu-cream border-0 px-4 py-2.5 text-sm focus:ring-2 focus:ring-ttu-red/30 outline-none">
+                <input type="number" name="low_stock_threshold" value="{{ old('low_stock_threshold', 10) }}" min="0" placeholder="حد التنبيه" required
+                       class="w-36 rounded-xl neu-pressed bg-ttu-cream border-0 px-4 py-2.5 text-sm focus:ring-2 focus:ring-ttu-red/30 outline-none">
+                <button type="submit" class="btn-hero !py-2.5 text-sm">إضافة</button>
+            </form>
+        </div>
+
+        {{-- القائمة --}}
+        <div class="rounded-[2.5rem] neu-raised-white p-6 sm:p-8">
+            <div class="space-y-3">
+                @forelse ($medications as $m)
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-2xl neu-pressed px-5 py-4
+                        {{ $m->isLowStock() ? '!bg-red-50' : '' }} {{ !$m->is_active ? 'opacity-60' : '' }}">
+                        <div class="flex items-center gap-4">
+                            <span class="w-11 h-11 rounded-full neu-icon bg-ttu-cream flex items-center justify-center shrink-0 font-display font-bold text-ttu-red">
+                                {{ mb_substr($m->name, 0, 1) }}
+                            </span>
+                            <div>
+                                <p class="text-sm font-bold text-ttu-black">{{ $m->name }}</p>
+                                <p class="text-xs text-ttu-gray mt-0.5">
+                                    الوحدة: {{ $m->unit ?: '—' }} · حد التنبيه: {{ $m->low_stock_threshold }}
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="flex flex-wrap items-center gap-3">
+                            <div class="text-center rounded-xl neu-pressed px-4 py-2 min-w-[90px]">
+                                <p class="text-[10px] text-ttu-gray">الكمية الحالية</p>
+                                <p class="text-sm font-bold {{ $m->isLowStock() ? 'text-red-600' : 'text-ttu-black' }}">{{ $m->stock_quantity }}</p>
+                            </div>
+
+                            @if ($m->isLowStock())
+                                <span class="text-xs font-bold px-3 py-1.5 rounded-full bg-red-100 text-red-600">⚠ مخزون منخفض</span>
+                            @endif
+
+                            @unless ($m->is_active)
+                                <span class="text-xs font-bold px-3 py-1.5 rounded-full bg-gray-100 text-gray-500">غير نشط</span>
+                            @endunless
+
+                            {{-- إضافة كمية --}}
+                            <form method="POST" action="{{ route('admin.medications.restock', $m) }}" class="flex items-center gap-1.5">
+                                @csrf
+                                <input type="number" name="amount" min="1" required placeholder="الكمية"
+                                       class="w-20 rounded-lg neu-pressed bg-ttu-cream border-0 px-2 py-2 text-sm text-center outline-none">
+                                <button type="submit" class="neu-icon-btn bg-ttu-cream text-ttu-black text-xs font-bold px-3 py-2 rounded-lg whitespace-nowrap">
+                                    + إضافة كمية
+                                </button>
+                            </form>
+
+                            <button type="button" onclick="document.getElementById('edit-med-{{ $m->id }}').classList.toggle('hidden')"
+                                    class="neu-icon-btn bg-ttu-cream text-ttu-black text-xs font-bold px-3 py-2 rounded-lg">
+                                تعديل
+                            </button>
+
+                            <form method="POST" action="{{ route('admin.medications.toggle', $m) }}">
+                                @csrf
+                                <button type="submit" class="neu-icon-btn text-xs font-bold px-3 py-2 rounded-lg {{ $m->is_active ? 'bg-ttu-cream text-ttu-red hover:!bg-ttu-red hover:!text-white' : 'bg-ttu-cream text-green-600 hover:!bg-green-600 hover:!text-white' }}">
+                                    {{ $m->is_active ? 'تعطيل' : 'تفعيل' }}
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+
+                    {{-- فورم التعديل (مخفي افتراضيًا) --}}
+                    <div id="edit-med-{{ $m->id }}" class="hidden rounded-2xl neu-pressed p-5">
+                        <form method="POST" action="{{ route('admin.medications.update', $m) }}" class="flex flex-wrap gap-3 items-end">
+                            @csrf
+                            @method('PUT')
+                            <input type="hidden" name="medication_id" value="{{ $m->id }}">
+                            <div class="flex-1 min-w-[160px]">
+                                <label class="block text-xs font-bold text-ttu-gray mb-1">الاسم</label>
+                                <input type="text" name="name" value="{{ old('name', $m->name) }}" required
+                                       class="w-full rounded-lg border-0 bg-white px-3 py-2 text-sm focus:ring-2 focus:ring-ttu-red/30 outline-none">
+                            </div>
+                            <div class="w-32">
+                                <label class="block text-xs font-bold text-ttu-gray mb-1">الوحدة</label>
+                                <input type="text" name="unit" value="{{ old('unit', $m->unit) }}"
+                                       class="w-full rounded-lg border-0 bg-white px-3 py-2 text-sm focus:ring-2 focus:ring-ttu-red/30 outline-none">
+                            </div>
+                            <div class="w-32">
+                                <label class="block text-xs font-bold text-ttu-gray mb-1">حد التنبيه</label>
+                                <input type="number" name="low_stock_threshold" min="0" value="{{ old('low_stock_threshold', $m->low_stock_threshold) }}" required
+                                       class="w-full rounded-lg border-0 bg-white px-3 py-2 text-sm focus:ring-2 focus:ring-ttu-red/30 outline-none">
+                            </div>
+                            <button type="submit" class="btn-hero !py-2.5 !px-5 text-sm">حفظ</button>
+                        </form>
+                    </div>
+                @empty
+                    <p class="text-center text-sm text-ttu-gray py-10">لا يوجد أدوية في الكتالوج</p>
+                @endforelse
+            </div>
+
+            <div class="mt-6">
+                {{ $medications->links() }}
+            </div>
+        </div>
+
+    </div>
+</div>
+
+@if ($errors->any() && old('medication_id'))
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var panel = document.getElementById('edit-med-{{ old('medication_id') }}');
+            if (panel) panel.classList.remove('hidden');
+        });
+    </script>
+@endif
+
+@endsection
