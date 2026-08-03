@@ -3,10 +3,10 @@
 @theme {
     --color-ttu-black: #0A0A0A;
     --color-ttu-white: #FFFFFF;
-    --color-ttu-offwhite: #FAF9F6;
-    --color-ttu-cream: #FBF6EC;
-    --color-ttu-red: #D6241C;
-    --color-ttu-red-dark: #A81810;
+    --color-ttu-offwhite: #F6F9FA;
+    --color-ttu-cream: #ECF6FB;
+    --color-ttu-red: #1D4ED8;
+    --color-ttu-red-dark: #1E40AF;
     --color-ttu-yellow: #F5B700;
     --color-ttu-gray: #6B6B6B;
 
@@ -117,17 +117,17 @@ button,
     font-weight: 700;
     padding: .85rem 2rem;
     border-radius: 999px;
-    box-shadow: 7px 7px 16px rgba(168, 24, 16, .45), -5px -5px 14px rgba(255, 120, 105, .3);
+    box-shadow: 7px 7px 16px rgba(30, 64, 175, .45), -5px -5px 14px rgba(105, 120, 255, .3);
     text-decoration: none;
     transition: transform .3s var(--neu-bounce), box-shadow .3s ease;
 }
 .btn-hero:hover {
     transform: translateY(-3px);
-    box-shadow: 9px 9px 20px rgba(168, 24, 16, .5), -7px -7px 18px rgba(255, 120, 105, .35);
+    box-shadow: 9px 9px 20px rgba(30, 64, 175, .5), -7px -7px 18px rgba(105, 120, 255, .35);
 }
 .btn-hero:active {
     transform: translateY(1px) scale(.97);
-    box-shadow: inset 4px 4px 10px rgba(120, 15, 10, .5), inset -3px -3px 8px rgba(255, 150, 140, .3);
+    box-shadow: inset 4px 4px 10px rgba(20, 40, 109, .5), inset -3px -3px 8px rgba(140, 150, 255, .3);
 }
 
 /* كروت الأدوار / كروت "لماذا نظامنا" — رفع لفوق فقط عند الهوفر بدون ميلان */
@@ -227,7 +227,7 @@ button,
 .glass-icon-btn:hover {
     transform: translateY(-2px) rotate(-4deg);
     background: rgba(255, 255, 255, .2);
-    border-color: rgba(214, 36, 28, .5);
+    border-color: rgba(29, 78, 216, .5);
 }
 .glass-icon-btn:active { transform: scale(.94); }
 
