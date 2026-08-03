@@ -42,4 +42,27 @@ class EntryFlowTest extends TestCase
 
         $response->assertRedirect('/login?role=staff');
     }
+
+    public function test_register_page_renders_when_a_registrable_role_is_given(): void
+    {
+        $response = $this->get('/register?role=student');
+
+        $response->assertStatus(200);
+        $response->assertSee('إنشاء حساب طالب');
+    }
+
+    public function test_register_page_redirects_to_role_picker_without_a_valid_role(): void
+    {
+        $response = $this->get('/register');
+
+        $response->assertRedirect(route('home').'#roles');
+    }
+
+    public function test_register_page_redirects_for_a_non_registrable_role(): void
+    {
+        // الدكتور مستثنى من التسجيل الذاتي — حساباته ثابتة عبر Seeder فقط
+        $response = $this->get('/register?role=doctor');
+
+        $response->assertRedirect(route('home').'#roles');
+    }
 }

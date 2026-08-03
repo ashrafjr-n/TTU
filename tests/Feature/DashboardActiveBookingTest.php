@@ -102,6 +102,34 @@ class DashboardActiveBookingTest extends TestCase
         $response->assertDontSee('لديك حجز حاليًا');
     }
 
+    public function test_guest_is_redirected_to_login_instead_of_crashing_on_student_dashboard(): void
+    {
+        $response = $this->get(route('dashboard.student'));
+
+        $response->assertRedirect(route('login'));
+    }
+
+    public function test_guest_is_redirected_to_login_instead_of_crashing_on_staff_dashboard(): void
+    {
+        $response = $this->get(route('dashboard.staff'));
+
+        $response->assertRedirect(route('login'));
+    }
+
+    public function test_staff_cannot_access_the_student_dashboard(): void
+    {
+        $response = $this->actingAs($this->staff())->get(route('dashboard.student'));
+
+        $response->assertForbidden();
+    }
+
+    public function test_student_cannot_access_the_staff_dashboard(): void
+    {
+        $response = $this->actingAs($this->student())->get(route('dashboard.staff'));
+
+        $response->assertForbidden();
+    }
+
     public function test_direct_navigation_to_booking_page_still_gates_as_backstop(): void
     {
         Carbon::setTestNow(Carbon::today()->setTime(8, 0));

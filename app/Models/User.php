@@ -18,6 +18,7 @@ class User extends Authenticatable
         'password',
         'role',
         'identifier',
+        'is_active',
     ];
 
     protected $hidden = [
@@ -30,6 +31,7 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'is_active' => 'boolean',
         ];
     }
 
@@ -55,7 +57,7 @@ class User extends Authenticatable
         return $this->role === 'doctor';
     }
 
-        public function isAdmin(): bool
+    public function isAdmin(): bool
     {
         return $this->role === 'admin';
     }

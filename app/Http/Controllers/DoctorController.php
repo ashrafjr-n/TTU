@@ -14,8 +14,10 @@ class DoctorController extends Controller
     public function index(Request $request)
     {
         // التاريخ المختار (افتراضيًا اليوم)، مع التحقق إنو تنسيقه صحيح
-        $date = $request->input('date')
-            ? Carbon::parse($request->input('date'))
+        $validated = $request->validate(['date' => 'nullable|date']);
+
+        $date = $validated['date'] ?? null
+            ? Carbon::parse($validated['date'])
             : Carbon::today();
 
         $bookings = Booking::with('user')
