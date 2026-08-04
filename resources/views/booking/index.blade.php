@@ -1,13 +1,13 @@
 @extends('layouts.main')
 
-@section('title', 'حجز موعد')
+@section('title', __('booking.title'))
 
 @section('content')
 
 <x-app-header />
 
 @php
-    $roleLabel = auth()->user()->isStudent() ? 'الطالب' : 'الموظف';
+    $bookingHeading = auth()->user()->isStudent() ? __('booking.heading.student') : __('booking.heading.staff');
 @endphp
 
 <div class="min-h-[calc(100vh-80px)] bg-ttu-cream">
@@ -17,20 +17,20 @@
         <div class="flex justify-end mb-4">
             <a href="{{ route('dashboard') }}"
                class="neu-icon-btn bg-ttu-cream text-ttu-black text-sm font-bold px-5 py-2.5 rounded-xl shrink-0">
-                رجوع للوحة
+                {{ __('common.buttons.back_to_dashboard') }}
             </a>
         </div>
 
         {{-- ============ رأس الصفحة ============ --}}
         <div class="relative rounded-[2.5rem] neu-raised-white p-8 mb-10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
             <div>
-                <span class="inline-block text-xs font-bold tracking-widest text-ttu-red mb-1.5">حجز {{ $roleLabel }}</span>
-                <h2 class="font-display text-2xl sm:text-3xl font-extrabold">احجز موعدك</h2>
+                <span class="inline-block text-xs font-bold tracking-widest text-ttu-red mb-1.5">{{ $bookingHeading }}</span>
+                <h2 class="font-display text-2xl sm:text-3xl font-extrabold">{{ __('booking.book_appointment') }}</h2>
             </div>
 
             <div class="rounded-2xl neu-pressed px-5 py-4 text-center">
-                <p class="text-[11px] text-ttu-gray mb-1">رسوم الدواء</p>
-                <p class="text-lg font-extrabold text-ttu-red">0.20 د.أ لكل دواء</p>
+                <p class="text-[11px] text-ttu-gray mb-1">{{ __('booking.fee_label') }}</p>
+                <p class="text-lg font-extrabold text-ttu-red">{{ __('booking.fee_value') }}</p>
             </div>
         </div>
 
@@ -51,23 +51,23 @@
             {{-- ============ مفتاح الألوان ============ --}}
             <div class="flex flex-wrap items-center gap-4 mb-6 px-2">
                 <span class="flex items-center gap-2 text-xs text-ttu-gray">
-                    <span class="w-3 h-3 rounded-full bg-green-500"></span> متاح
+                    <span class="w-3 h-3 rounded-full bg-green-500"></span> {{ __('booking.legend.available') }}
                 </span>
                 <span class="flex items-center gap-2 text-xs text-ttu-gray">
-                    <span class="w-3 h-3 rounded-full bg-ttu-red"></span> محجوز
+                    <span class="w-3 h-3 rounded-full bg-ttu-red"></span> {{ __('booking.legend.taken') }}
                 </span>
                 <span class="flex items-center gap-2 text-xs text-ttu-gray">
-                    <span class="w-3 h-3 rounded-full bg-ttu-gray/40"></span> انتهى وقته
+                    <span class="w-3 h-3 rounded-full bg-ttu-gray/40"></span> {{ __('booking.legend.past') }}
                 </span>
                 @if (auth()->user()->isStudent())
                     <span class="flex items-center gap-2 text-xs text-ttu-gray">
-                        <span class="w-3 h-3 rounded-full bg-ttu-yellow"></span> وقت إضافي محرر من حصة الموظفين
+                        <span class="w-3 h-3 rounded-full bg-ttu-yellow"></span> {{ __('booking.legend.released') }}
                     </span>
                 @endif
             </div>
 
             {{-- ============ تبويبات الأيام ============ --}}
-            <div class="flex flex-wrap gap-2.5 mb-7" role="tablist" aria-label="اختر اليوم">
+            <div class="flex flex-wrap gap-2.5 mb-7" role="tablist" aria-label="{{ __('booking.choose_day') }}">
                 @foreach ($days as $day)
                     <button type="button"
                             role="tab"
@@ -89,7 +89,7 @@
                 <div id="day-panel-{{ $day['index'] }}" class="day-panel {{ $day['index'] === 0 ? '' : 'hidden' }}">
 
                     {{-- ============ تبويبات الساعات (لهذا اليوم) ============ --}}
-                    <div class="flex flex-wrap gap-2.5 mb-6" role="tablist" aria-label="اختر الساعة">
+                    <div class="flex flex-wrap gap-2.5 mb-6" role="tablist" aria-label="{{ __('booking.choose_hour') }}">
                         @foreach ($day['hours'] as $hourBlock)
                             <button type="button"
                                     role="tab"
@@ -130,7 +130,7 @@
                                                         'bg-ttu-cream text-ttu-yellow hover:!bg-ttu-yellow hover:!text-white' => $slot['released'],
                                                         'bg-ttu-cream text-green-600 hover:!bg-green-600 hover:!text-white' => !$slot['released'],
                                                     ])
-                                                    title="{{ $slot['released'] ? 'وقت إضافي محرر من حصة الموظفين' : 'احجز هذا الوقت' }}">
+                                                    title="{{ $slot['released'] ? __('booking.legend.released') : __('booking.book_this_slot') }}">
                                                 {{ $slot['time_label'] }}
                                             </button>
 
@@ -167,9 +167,9 @@
                 </svg>
             </div>
 
-            <h3 class="font-display text-xl font-extrabold mb-2">تأكيد الحجز</h3>
+            <h3 class="font-display text-xl font-extrabold mb-2">{{ __('booking.confirm_modal.heading') }}</h3>
             <p class="text-sm text-ttu-gray mb-8">
-                هل تريد تأكيد حجز موعدك <span id="bookModalDay" class="font-bold text-ttu-black"></span> الساعة <span id="bookModalTime" class="font-bold text-ttu-black"></span>؟
+                {{ __('booking.confirm_modal.question_before') }} <span id="bookModalDay" class="font-bold text-ttu-black"></span> {{ __('booking.confirm_modal.question_middle') }} <span id="bookModalTime" class="font-bold text-ttu-black"></span>{{ __('booking.confirm_modal.question_end') }}
             </p>
 
             <form id="bookModalForm" method="POST" action="{{ route('booking.store') }}" class="flex gap-3">
@@ -180,11 +180,11 @@
 
                 <button type="button" onclick="closeBookModal()"
                         class="flex-1 neu-icon-btn bg-ttu-cream text-ttu-black text-sm font-bold py-3 rounded-xl">
-                    إلغاء
+                    {{ __('booking.confirm_modal.cancel') }}
                 </button>
                 <button type="submit"
                         class="flex-1 neu-icon-btn bg-green-600 text-white text-sm font-bold py-3 rounded-xl hover:!bg-green-700">
-                    تأكيد الحجز
+                    {{ __('booking.confirm_modal.confirm') }}
                 </button>
             </form>
 

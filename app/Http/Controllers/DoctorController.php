@@ -60,18 +60,18 @@ class DoctorController extends Controller
             ->first();
 
         if (!$attendance) {
-            return back()->with('error', 'يجب تسجيل الحضور أولًا.');
+            return back()->with('error', __('doctor.attendance.check_in_required'));
         }
 
         if ($attendance->check_out_at) {
-            return back()->with('error', 'لقد سجّلت انصرافك اليوم مسبقًا.');
+            return back()->with('error', __('doctor.attendance.already_checked_out'));
         }
 
         $attendance->update(['check_out_at' => now()]);
 
-        ActivityLog::record(Auth::id(), 'doctor_check_out', 'تسجيل انصراف');
+        ActivityLog::record(Auth::id(), 'doctor_check_out', 'activity_log.doctor_check_out');
 
-        return back()->with('success', 'تم تسجيل انصرافك بنجاح.');
+        return back()->with('success', __('doctor.attendance.check_out_success'));
     }
 
     /**
@@ -85,7 +85,7 @@ class DoctorController extends Controller
     public function cancelBooking(Booking $booking)
     {
         if ($booking->status !== 'confirmed') {
-            return back()->with('error', 'هذا الحجز غير قابل للإلغاء.');
+            return back()->with('error', __('doctor.bookings_table.not_cancellable'));
         }
 
         $booking->update(['status' => 'cancelled']);
@@ -93,11 +93,16 @@ class DoctorController extends Controller
         ActivityLog::record(
             Auth::id(),
             'booking_cancelled_by_doctor',
-            "إلغاء حجز المريض {$booking->user->name} بتاريخ {$booking->booking_date->toDateString()} الساعة {$booking->timeLabel()}"
+            'activity_log.booking_cancelled_by_doctor',
+            [
+                'patient' => $booking->user->name,
+                'date' => $booking->booking_date->toDateString(),
+                'time' => $booking->timeLabel(),
+            ]
         );
 
         $booking->user->notify(new BookingCancelledByClinic($booking));
 
-        return back()->with('success', 'تم إلغاء الحجز وإشعار المريض.');
+        return back()->with('success', __('doctor.bookings_table.cancel_success'));
     }
 }

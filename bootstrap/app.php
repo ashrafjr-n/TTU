@@ -16,6 +16,8 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'role' => \App\Http\Middleware\EnsureUserHasRole::class,
         ]);
+
+        $middleware->appendToGroup('web', \App\Http\Middleware\SetLocale::class);
     })
     ->withSchedule(function (Schedule $schedule): void {
         // نهاية دوام العيادة (Booking::CLOSE_HOUR = 16) — تسجيل انصراف تلقائي

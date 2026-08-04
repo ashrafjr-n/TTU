@@ -25,13 +25,14 @@ class BookingCancelledByClinic extends Notification
 
     public function toDatabase(object $notifiable): array
     {
-        $date = $this->booking->booking_date->translatedFormat('d F Y');
-        $time = $this->booking->timeLabel();
-
         return [
             'type' => 'booking_cancelled',
-            'title' => 'تم إلغاء موعدك',
-            'body' => "تم إلغاء موعدك يوم {$date} الساعة {$time} من قبل العيادة.",
+            'title_key' => 'notifications.booking_cancelled.title',
+            'body_key' => 'notifications.booking_cancelled.body',
+            'body_params' => [
+                'date' => $this->booking->booking_date->translatedFormat('d F Y'),
+                'time' => $this->booking->timeLabel(),
+            ],
             // رابط صفحة الحجز ليقدر يحجز موعدًا بديلًا مباشرة
             'url' => route('booking.index', [], false),
         ];

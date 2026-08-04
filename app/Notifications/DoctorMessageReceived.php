@@ -27,7 +27,9 @@ class DoctorMessageReceived extends Notification
     {
         return [
             'type' => 'doctor_message',
-            'title' => 'رسالة من '.$this->message->sender->name,
+            'title_key' => 'notifications.doctor_message.title',
+            'title_params' => ['name' => $this->message->sender->name],
+            // نص الرسالة كتبه المستخدم مباشرة، فلا يُترجَم
             'body' => $this->message->body,
             'url' => null,
             'message_id' => $this->message->id,

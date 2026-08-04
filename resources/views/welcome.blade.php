@@ -1,6 +1,6 @@
 @extends('layouts.main')
 
-@section('title', 'عيادة TTU - الرئيسية')
+@section('title', __('home.title'))
 
 @section('content')
 
@@ -16,23 +16,23 @@
     <div class="absolute inset-0 bg-gradient-to-r from-black/75 via-black/45 to-black/10"></div>
 
     <div class="relative h-full flex items-center justify-end">
-        <div dir="rtl" class="w-full lg:w-[52%] px-6 lg:px-10">
+        <div dir="{{ config('app.supported_locales')[app()->getLocale()]['dir'] }}" class="w-full lg:w-[52%] px-6 lg:px-10">
 
             <h1 class="font-display text-4xl sm:text-5xl lg:text-[3.4rem] font-extrabold leading-[1.25] text-white">
-                رعايتك الصحية بخطوة واحدة.
+                {{ __('home.hero.heading') }}
             </h1>
 
             <p class="mt-5 text-lg text-white/90 leading-relaxed max-w-xl">
-                احجز موعدك بسهولة في العيادة الطبية الجامعية.
+                {{ __('home.hero.subheading_1') }}
             </p>
 
             <p class="mt-2 text-lg text-white/90 leading-relaxed max-w-xl">
-                نظام إلكتروني ذكي لتنظيم المواعيد وتقديم خدمة أفضل للجميع.
+                {{ __('home.hero.subheading_2') }}
             </p>
 
             <div class="mt-9">
                 <a href="#roles" class="btn-hero cursor-pointer">
-                    اختر نوع حسابك
+                    {{ __('home.hero.choose_account') }}
                     <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2.2" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
                     </svg>
@@ -46,8 +46,8 @@
                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6l4 2M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                     <div class="leading-tight">
-                        <p class="text-[10px] text-ttu-gray font-semibold">الدوام</p>
-                        <p class="text-xs font-bold text-ttu-black">8 ص - 4 م</p>
+                        <p class="text-[10px] text-ttu-gray font-semibold">{{ __('home.hero.hours_label') }}</p>
+                        <p class="text-xs font-bold text-ttu-black">{{ __('home.hero.hours_value') }}</p>
                     </div>
                 </div>
 
@@ -56,8 +56,8 @@
                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m4-9.5c0-1.38-1.79-2.5-4-2.5s-4 1.12-4 2.5S9.79 11 12 11s4 1.12 4 2.5S14.21 16 12 16s-4-1.12-4-2.5" />
                     </svg>
                     <div class="leading-tight">
-                        <p class="text-[10px] text-ttu-gray font-semibold">رسوم الدواء</p>
-                        <p class="text-xs font-bold text-ttu-black">0.20 د.أ لكل دواء</p>
+                        <p class="text-[10px] text-ttu-gray font-semibold">{{ __('home.hero.fee_label') }}</p>
+                        <p class="text-xs font-bold text-ttu-black">{{ __('home.hero.fee_value') }}</p>
                     </div>
                 </div>
 
@@ -67,8 +67,8 @@
                         <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-green-500"></span>
                     </span>
                     <div class="leading-tight">
-                        <p class="text-[10px] text-ttu-gray font-semibold">الحالة</p>
-                        <p class="text-xs font-bold text-ttu-black">الحجز متاح الآن</p>
+                        <p class="text-[10px] text-ttu-gray font-semibold">{{ __('home.hero.status_label') }}</p>
+                        <p class="text-xs font-bold text-ttu-black">{{ __('home.hero.status_value') }}</p>
                     </div>
                 </div>
             </div>
@@ -83,9 +83,9 @@
     <div class="max-w-7xl mx-auto px-6">
 
         <div class="text-center max-w-2xl mx-auto mb-14">
-            <span class="inline-block text-xs font-bold tracking-widest text-ttu-red mb-3">من أنت؟</span>
-            <h2 class="font-display text-3xl sm:text-4xl font-extrabold">اختر نوع الحساب للمتابعة</h2>
-            <p class="mt-3 text-ttu-gray">سنوجهك مباشرة إلى الصفحة المناسبة حسب صفتك داخل الجامعة</p>
+            <span class="inline-block text-xs font-bold tracking-widest text-ttu-red mb-3">{{ __('home.roles_section.eyebrow') }}</span>
+            <h2 class="font-display text-3xl sm:text-4xl font-extrabold">{{ __('home.roles_section.heading') }}</h2>
+            <p class="mt-3 text-ttu-gray">{{ __('home.roles_section.subheading') }}</p>
         </div>
 
         @php
@@ -108,14 +108,14 @@
                     <i data-lucide="graduation-cap" class="neu-wiggle w-7 h-7 text-ttu-red group-hover:text-white transition-colors duration-300" stroke-width="1.6"></i>
                 </div>
 
-                <h3 class="relative font-display text-xl font-bold mb-1.5">طالب</h3>
+                <h3 class="relative font-display text-xl font-bold mb-1.5">{{ __('home.roles_section.student.title') }}</h3>
                 <p class="relative text-sm text-ttu-gray leading-relaxed mb-2">
-                    احجز موعدك وتابع حالة طلباتك أولًا بأول.
+                    {{ __('home.roles_section.student.description') }}
                 </p>
-                <p class="relative text-xs text-ttu-red font-semibold mb-6">الدخول عبر الرقم الجامعي</p>
+                <p class="relative text-xs text-ttu-red font-semibold mb-6">{{ __('home.roles_section.student.login_via') }}</p>
 
                 <span class="relative mt-auto pt-5 flex items-center justify-between">
-                    <span class="text-sm font-semibold">ابدأ الآن</span>
+                    <span class="text-sm font-semibold">{{ __('home.roles_section.start_now') }}</span>
                     <span class="w-10 h-10 rounded-full neu-icon bg-ttu-cream group-hover:bg-ttu-red flex items-center justify-center transition-colors duration-300">
                         <svg class="w-4 h-4 text-ttu-red group-hover:text-white transition-colors" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
@@ -138,14 +138,14 @@
                     <i data-lucide="briefcase" class="neu-wiggle w-7 h-7 text-ttu-red group-hover:text-white transition-colors duration-300" stroke-width="1.6"></i>
                 </div>
 
-                <h3 class="relative font-display text-xl font-bold mb-1.5">موظف</h3>
+                <h3 class="relative font-display text-xl font-bold mb-1.5">{{ __('home.roles_section.staff.title') }}</h3>
                 <p class="relative text-sm text-ttu-gray leading-relaxed mb-2">
-                    احجز موعدك ضمن الحصة المخصصة للعاملين بالجامعة.
+                    {{ __('home.roles_section.staff.description') }}
                 </p>
-                <p class="relative text-xs text-ttu-red font-semibold mb-6">الدخول عبر الرقم الوظيفي</p>
+                <p class="relative text-xs text-ttu-red font-semibold mb-6">{{ __('home.roles_section.staff.login_via') }}</p>
 
                 <span class="relative mt-auto pt-5 flex items-center justify-between">
-                    <span class="text-sm font-semibold">ابدأ الآن</span>
+                    <span class="text-sm font-semibold">{{ __('home.roles_section.start_now') }}</span>
                     <span class="w-10 h-10 rounded-full neu-icon bg-ttu-cream group-hover:bg-ttu-red flex items-center justify-center transition-colors duration-300">
                         <svg class="w-4 h-4 text-ttu-red group-hover:text-white transition-colors" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
@@ -168,14 +168,14 @@
                     <i data-lucide="stethoscope" class="neu-wiggle w-7 h-7 text-ttu-red group-hover:text-white transition-colors duration-300" stroke-width="1.6"></i>
                 </div>
 
-                <h3 class="relative font-display text-xl font-bold mb-1.5">دكتور</h3>
+                <h3 class="relative font-display text-xl font-bold mb-1.5">{{ __('home.roles_section.doctor.title') }}</h3>
                 <p class="relative text-sm text-ttu-gray leading-relaxed mb-2">
-                    إدارة جدول العيادة، ومراجعة طلبات الحجز واتخاذ القرار بشأنها.
+                    {{ __('home.roles_section.doctor.description') }}
                 </p>
-                <p class="relative text-xs text-ttu-red font-semibold mb-6">الدخول عبر البريد الجامعي</p>
+                <p class="relative text-xs text-ttu-red font-semibold mb-6">{{ __('home.roles_section.doctor.login_via') }}</p>
 
                 <span class="relative mt-auto pt-5 flex items-center justify-between">
-                    <span class="text-sm font-semibold">تسجيل الدخول</span>
+                    <span class="text-sm font-semibold">{{ __('home.roles_section.login_cta') }}</span>
                     <span class="w-10 h-10 rounded-full neu-icon bg-ttu-cream group-hover:bg-ttu-red flex items-center justify-center transition-colors duration-300">
                         <svg class="w-4 h-4 text-ttu-red group-hover:text-white transition-colors" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
@@ -198,14 +198,14 @@
                     <i data-lucide="shield-check" class="neu-wiggle w-7 h-7 text-ttu-red group-hover:text-white transition-colors duration-300" stroke-width="1.6"></i>
                 </div>
 
-                <h3 class="relative font-display text-xl font-bold mb-1.5">مدير</h3>
+                <h3 class="relative font-display text-xl font-bold mb-1.5">{{ __('home.roles_section.admin.title') }}</h3>
                 <p class="relative text-sm text-ttu-gray leading-relaxed mb-2">
-                    إشراف كامل على النظام وإدارة الحسابات والصلاحيات.
+                    {{ __('home.roles_section.admin.description') }}
                 </p>
-                <p class="relative text-xs text-ttu-red font-semibold mb-6">الدخول عبر البريد الإداري</p>
+                <p class="relative text-xs text-ttu-red font-semibold mb-6">{{ __('home.roles_section.admin.login_via') }}</p>
 
                 <span class="relative mt-auto pt-5 flex items-center justify-between">
-                    <span class="text-sm font-semibold">تسجيل الدخول</span>
+                    <span class="text-sm font-semibold">{{ __('home.roles_section.login_cta') }}</span>
                     <span class="w-10 h-10 rounded-full neu-icon bg-ttu-cream group-hover:bg-ttu-red flex items-center justify-center transition-colors duration-300">
                         <svg class="w-4 h-4 text-ttu-red group-hover:text-white transition-colors" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
@@ -219,8 +219,8 @@
         {{-- ============ كيف تحجز موعدك؟ ============ --}}
         <div class="relative rounded-[2.5rem] neu-raised-white py-14 px-6 lg:px-12 mt-10">
             <div class="text-center max-w-2xl mx-auto mb-12">
-                <span class="inline-block text-xs font-bold tracking-widest text-ttu-red mb-3">آلية العمل</span>
-                <h2 class="font-display text-2xl sm:text-3xl font-extrabold">كيف تحجز موعدك؟</h2>
+                <span class="inline-block text-xs font-bold tracking-widest text-ttu-red mb-3">{{ __('home.how_it_works.eyebrow') }}</span>
+                <h2 class="font-display text-2xl sm:text-3xl font-extrabold">{{ __('home.how_it_works.heading') }}</h2>
             </div>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -230,7 +230,7 @@
                     <div class="w-12 h-12 rounded-full neu-icon bg-ttu-cream flex items-center justify-center mx-auto mb-4">
                         <i data-lucide="user-plus" class="w-5 h-5 text-ttu-red" stroke-width="1.6"></i>
                     </div>
-                    <p class="text-sm font-bold text-ttu-black">أنشئ حسابك</p>
+                    <p class="text-sm font-bold text-ttu-black">{{ __('home.how_it_works.step_1') }}</p>
                 </div>
 
                 <div class="relative rounded-2xl neu-pressed p-6 text-center">
@@ -238,7 +238,7 @@
                     <div class="w-12 h-12 rounded-full neu-icon bg-ttu-cream flex items-center justify-center mx-auto mb-4">
                         <i data-lucide="calendar-search" class="w-5 h-5 text-ttu-red" stroke-width="1.6"></i>
                     </div>
-                    <p class="text-sm font-bold text-ttu-black">اختر وقتًا متاحًا</p>
+                    <p class="text-sm font-bold text-ttu-black">{{ __('home.how_it_works.step_2') }}</p>
                 </div>
 
                 <div class="relative rounded-2xl neu-pressed p-6 text-center">
@@ -246,7 +246,7 @@
                     <div class="w-12 h-12 rounded-full neu-icon bg-ttu-cream flex items-center justify-center mx-auto mb-4">
                         <i data-lucide="check-circle" class="w-5 h-5 text-ttu-red" stroke-width="1.6"></i>
                     </div>
-                    <p class="text-sm font-bold text-ttu-black">أكّد حجزك</p>
+                    <p class="text-sm font-bold text-ttu-black">{{ __('home.how_it_works.step_3') }}</p>
                 </div>
 
                 <div class="relative rounded-2xl neu-pressed p-6 text-center">
@@ -254,7 +254,7 @@
                     <div class="w-12 h-12 rounded-full neu-icon bg-ttu-cream flex items-center justify-center mx-auto mb-4">
                         <i data-lucide="footprints" class="w-5 h-5 text-ttu-red" stroke-width="1.6"></i>
                     </div>
-                    <p class="text-sm font-bold text-ttu-black">احضر بالوقت المحدد</p>
+                    <p class="text-sm font-bold text-ttu-black">{{ __('home.how_it_works.step_4') }}</p>
                 </div>
 
             </div>
@@ -265,35 +265,33 @@
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-20 items-center">
 
                 <div>
-                    <span class="inline-block text-xs font-bold tracking-widest text-ttu-red mb-3">من نحن</span>
-                    <h2 class="font-display text-2xl sm:text-3xl font-extrabold mb-4">عن عيادة TTU</h2>
+                    <span class="inline-block text-xs font-bold tracking-widest text-ttu-red mb-3">{{ __('home.about.eyebrow') }}</span>
+                    <h2 class="font-display text-2xl sm:text-3xl font-extrabold mb-4">{{ __('home.about.heading') }}</h2>
                     <p class="text-base text-ttu-gray leading-relaxed mb-4">
-                        نظام إلكتروني ذكي لحجز مواعيد العيادة الطبية الجامعية، صُمم لتسهيل الوصول
-                        إلى الرعاية الصحية على طلاب وموظفي الجامعة، بخطوات بسيطة وسريعة.
+                        {{ __('home.about.paragraph_1') }}
                     </p>
                     <p class="text-base text-ttu-gray leading-relaxed">
-                        انطلق هذا المشروع من مشكلة يومية بسيطة: <span class="text-ttu-red font-semibold">الانتظار الطويل</span>
-                        أمام عيادة الجامعة، ليأتي كمشروع تخرج يبني منصة تنظّم عملية الحجز بالكامل
-                        وتمنح الطبيب أداة سهلة لإدارة جدوله اليومي.
+                        {{ __('home.about.paragraph_2_before') }} <span class="text-ttu-red font-semibold">{{ __('home.about.paragraph_2_highlight') }}</span>
+                        {{ __('home.about.paragraph_2_after') }}
                     </p>
                 </div>
 
                 <div class="grid grid-cols-2 gap-5">
                     <div class="rounded-2xl neu-pressed px-5 py-6 text-center">
                         <p class="font-display text-2xl sm:text-3xl font-extrabold text-ttu-red mb-1">100%</p>
-                        <p class="text-xs text-ttu-gray">إلكتروني بالكامل</p>
+                        <p class="text-xs text-ttu-gray">{{ __('home.about.stat_electronic') }}</p>
                     </div>
                     <div class="rounded-2xl neu-pressed px-5 py-6 text-center">
                         <p class="font-display text-2xl sm:text-3xl font-extrabold text-ttu-red mb-1">8</p>
-                        <p class="text-xs text-ttu-gray">ساعات دوام يوميًا</p>
+                        <p class="text-xs text-ttu-gray">{{ __('home.about.stat_hours') }}</p>
                     </div>
                     <div class="rounded-2xl neu-pressed px-5 py-6 text-center">
                         <p class="font-display text-2xl sm:text-3xl font-extrabold text-ttu-red mb-1">3</p>
-                        <p class="text-xs text-ttu-gray">أنواع حسابات</p>
+                        <p class="text-xs text-ttu-gray">{{ __('home.about.stat_account_types') }}</p>
                     </div>
                     <div class="rounded-2xl neu-pressed px-5 py-6 text-center">
                         <p class="font-display text-2xl sm:text-3xl font-extrabold text-ttu-red mb-1">0.20</p>
-                        <p class="text-xs text-ttu-gray">د.أ لكل دواء</p>
+                        <p class="text-xs text-ttu-gray">{{ __('home.about.stat_fee') }}</p>
                     </div>
                 </div>
 
@@ -306,13 +304,13 @@
 {{-- ============ فوتر بسيط ============ --}}
 <footer class="border-t border-black/10 bg-ttu-cream">
     <div class="max-w-7xl mx-auto px-6 py-8 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-ttu-gray">
-        <span>© 2026 عيادة TTU. جميع الحقوق محفوظة.</span>
-        <span>مشروع تخرج — جامعة TTU</span>
+        <span>{{ __('common.footer.copyright') }}</span>
+        <span>{{ __('common.footer.project') }}</span>
     </div>
 </footer>
 
 {{-- زر العودة للأعلى --}}
-<button id="scrollTopBtn" type="button" aria-label="العودة للأعلى"
+<button id="scrollTopBtn" type="button" aria-label="{{ __('home.scroll_top') }}"
         class="btn-hero cursor-pointer fixed bottom-6 left-6 z-50 !w-12 !h-12 !p-0 !rounded-full justify-center opacity-0 pointer-events-none translate-y-4 transition-all duration-300">
     <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke-width="2.2" stroke="currentColor">
         <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 15.75l7.5-7.5 7.5 7.5" />

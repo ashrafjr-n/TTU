@@ -16,7 +16,7 @@
              'scale-95 opacity-0' => !$autoOpen,
          ])>
 
-        <button type="button" onclick="closeActiveBookingModal()" title="إغلاق"
+        <button type="button" onclick="closeActiveBookingModal()" title="{{ __('booking.active_modal.close') }}"
                 class="absolute top-5 left-5 w-8 h-8 rounded-full neu-icon-btn bg-ttu-cream text-ttu-gray flex items-center justify-center hover:!bg-ttu-red hover:!text-white">
             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2.2" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -29,23 +29,23 @@
             </svg>
         </div>
 
-        <h3 class="font-display text-xl font-extrabold mb-2">لديك حجز حاليًا</h3>
-        <p class="text-sm text-ttu-gray mb-1">لا يمكن حجز موعد جديد قبل إلغاء موعدك الحالي:</p>
+        <h3 class="font-display text-xl font-extrabold mb-2">{{ __('booking.active_modal.heading') }}</h3>
+        <p class="text-sm text-ttu-gray mb-1">{{ __('booking.active_modal.intro') }}</p>
         <p class="text-lg font-bold text-ttu-black mb-8">
-            {{ $activeBooking['date_label'] }} — الساعة {{ $activeBooking['time_label'] }}
+            {{ $activeBooking['date_label'] }} — {{ __('booking.active_modal.hour_prefix') }} {{ $activeBooking['time_label'] }}
         </p>
 
         <div class="flex gap-3">
             <button type="button" onclick="closeActiveBookingModal()"
                     class="flex-1 neu-icon-btn bg-ttu-cream text-ttu-black text-sm font-bold py-3 rounded-xl">
-                إغلاق
+                {{ __('booking.active_modal.close') }}
             </button>
 
             <form method="POST" action="{{ route('booking.destroy', $activeBooking['id']) }}" class="flex-1">
                 @csrf
                 @method('DELETE')
                 <button type="submit" class="w-full neu-icon-btn bg-ttu-red text-white text-sm font-bold py-3 rounded-xl hover:!bg-ttu-red-dark">
-                    إلغاء هذا الحجز
+                    {{ __('booking.active_modal.cancel_booking') }}
                 </button>
             </form>
         </div>

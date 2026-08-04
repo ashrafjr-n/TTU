@@ -32,7 +32,7 @@ class AdminController extends Controller
                 ->count(),
         ];
 
-        $dayLabels = ['الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
+        $dayLabels = __('common.days');
 
         // الأسبوع الحالي: أحد إلى سبت (بغض النظر عن لغة النظام)، متسق مع
         // تسمية الأيام المستخدمة في صفحة جدول عمل الأطباء
@@ -62,7 +62,7 @@ class AdminController extends Controller
             ->pluck('c', 'role');
 
         $roleChart = [
-            'labels' => ['طلاب', 'موظفون'],
+            'labels' => [__('admin_dashboard.students_series'), __('admin_dashboard.staff_series')],
             'data' => [(int) ($roleCounts['student'] ?? 0), (int) ($roleCounts['staff'] ?? 0)],
         ];
 
@@ -87,7 +87,7 @@ class AdminController extends Controller
             $rate = $capacityPerHour > 0 ? round($booked / $capacityPerHour * 100, 1) : 0;
 
             $hourlyChart['hours'][] = $h;
-            $hourlyChart['labels'][] = sprintf('%d %s', $h > 12 ? $h - 12 : $h, $h < 12 ? 'ص' : 'م');
+            $hourlyChart['labels'][] = sprintf('%d %s', $h > 12 ? $h - 12 : $h, $h < 12 ? __('common.time.am_short') : __('common.time.pm_short'));
             $hourlyChart['rates'][] = $rate;
         }
 
@@ -143,20 +143,21 @@ class AdminController extends Controller
     public function toggleUserStatus(User $user)
     {
         if ($user->isAdmin()) {
-            return back()->with('error', 'لا يمكن تعطيل حساب المدير.');
+            return back()->with('error', __('admin_dashboard.errors.cannot_disable_admin'));
         }
 
         $user->update(['is_active' => !$user->is_active]);
 
-        $status = $user->is_active ? 'تفعيل' : 'تعطيل';
-
         ActivityLog::record(
             Auth::id(),
             $user->is_active ? 'user_activated' : 'user_deactivated',
-            "{$status} حساب \"{$user->name}\""
+            $user->is_active ? 'activity_log.user_activated' : 'activity_log.user_deactivated',
+            ['name' => $user->name]
         );
 
-        return back()->with('success', "تم {$status} حساب {$user->name}.");
+        return back()->with('success', $user->is_active
+            ? __('admin_dashboard.flash.user_activated', ['name' => $user->name])
+            : __('admin_dashboard.flash.user_deactivated', ['name' => $user->name]));
     }
 
     /**
@@ -194,9 +195,12 @@ class AdminController extends Controller
             'working_days' => $this->normalizeWorkingDays($validated['working_days'] ?? []),
         ]);
 
-        ActivityLog::record(Auth::id(), 'doctor_created', "إنشاء حساب دكتور: {$validated['name']} ({$validated['email']})");
+        ActivityLog::record(Auth::id(), 'doctor_created', 'activity_log.doctor_created', [
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+        ]);
 
-        return redirect()->route('admin.users')->with('success', 'تم إضافة حساب الدكتور بنجاح.');
+        return redirect()->route('admin.users')->with('success', __('admin_dashboard.flash.doctor_created'));
     }
 
     /**
@@ -239,9 +243,9 @@ class AdminController extends Controller
             ['working_days' => $this->normalizeWorkingDays($validated['working_days'] ?? [])]
         );
 
-        ActivityLog::record(Auth::id(), 'doctor_updated', "تحديث حساب دكتور: \"{$doctor->name}\"");
+        ActivityLog::record(Auth::id(), 'doctor_updated', 'activity_log.doctor_updated', ['name' => $doctor->name]);
 
-        return redirect()->route('admin.users')->with('success', "تم تحديث حساب \"{$doctor->name}\".");
+        return redirect()->route('admin.users')->with('success', __('admin_dashboard.flash.doctor_updated', ['name' => $doctor->name]));
     }
 
     /**
@@ -285,10 +289,12 @@ class AdminController extends Controller
             'is_valid' => true,
         ]);
 
-        $typeLabel = $validated['type'] === 'student' ? 'طالب' : 'موظف';
-        ActivityLog::record(Auth::id(), 'university_record_added', "إضافة رقم {$validated['identifier']} ({$typeLabel})");
+        ActivityLog::record(Auth::id(), 'university_record_added', 'activity_log.university_record_added', [
+            'identifier' => $validated['identifier'],
+            'type' => __('common.roles.'.$validated['type']),
+        ]);
 
-        return back()->with('success', 'تمت إضافة الرقم بنجاح.');
+        return back()->with('success', __('admin_dashboard.flash.record_added'));
     }
 
     /**
@@ -299,9 +305,9 @@ class AdminController extends Controller
         $identifier = $record->identifier;
         $record->delete();
 
-        ActivityLog::record(Auth::id(), 'university_record_removed', "حذف رقم {$identifier}");
+        ActivityLog::record(Auth::id(), 'university_record_removed', 'activity_log.university_record_removed', ['identifier' => $identifier]);
 
-        return back()->with('success', 'تم حذف السجل بنجاح.');
+        return back()->with('success', __('admin_dashboard.flash.record_removed'));
     }
 
     /**
@@ -328,9 +334,9 @@ class AdminController extends Controller
 
         Medication::create($validated);
 
-        ActivityLog::record(Auth::id(), 'medication_added', "إضافة دواء: {$validated['name']}");
+        ActivityLog::record(Auth::id(), 'medication_added', 'activity_log.medication_added', ['name' => $validated['name']]);
 
-        return back()->with('success', 'تمت إضافة الدواء بنجاح.');
+        return back()->with('success', __('admin_dashboard.flash.medication_added'));
     }
 
     /**
@@ -347,9 +353,9 @@ class AdminController extends Controller
 
         $medication->update($validated);
 
-        ActivityLog::record(Auth::id(), 'medication_edited', "تعديل بيانات دواء: {$medication->name}");
+        ActivityLog::record(Auth::id(), 'medication_edited', 'activity_log.medication_edited', ['name' => $medication->name]);
 
-        return back()->with('success', 'تم تحديث بيانات الدواء بنجاح.');
+        return back()->with('success', __('admin_dashboard.flash.medication_edited'));
     }
 
     /**
@@ -363,9 +369,15 @@ class AdminController extends Controller
 
         $medication->increment('stock_quantity', $validated['amount']);
 
-        ActivityLog::record(Auth::id(), 'medication_restocked', "إضافة {$validated['amount']} إلى مخزون \"{$medication->name}\"");
+        ActivityLog::record(Auth::id(), 'medication_restocked', 'activity_log.medication_restocked', [
+            'amount' => $validated['amount'],
+            'name' => $medication->name,
+        ]);
 
-        return back()->with('success', "تمت إضافة {$validated['amount']} إلى مخزون \"{$medication->name}\".");
+        return back()->with('success', __('admin_dashboard.flash.medication_restocked', [
+            'amount' => $validated['amount'],
+            'name' => $medication->name,
+        ]));
     }
 
     /**
@@ -378,8 +390,9 @@ class AdminController extends Controller
     {
         $medication->update(['is_active' => !$medication->is_active]);
 
-        $status = $medication->is_active ? 'تفعيل' : 'تعطيل';
-        return back()->with('success', "تم {$status} \"{$medication->name}\".");
+        return back()->with('success', $medication->is_active
+            ? __('admin_dashboard.flash.medication_activated', ['name' => $medication->name])
+            : __('admin_dashboard.flash.medication_deactivated', ['name' => $medication->name]));
     }
 
     /**

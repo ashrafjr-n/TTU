@@ -23,14 +23,14 @@
          x-transition:leave-start="opacity-100 scale-100"
          x-transition:leave-end="opacity-0 scale-95">
 
-        <button type="button" x-on:click="show = false" title="إغلاق"
+        <button type="button" x-on:click="show = false" title="{{ __('doctor.report_modal.close') }}"
                 class="absolute top-6 left-6 w-9 h-9 rounded-full neu-icon-btn bg-ttu-cream text-ttu-gray flex items-center justify-center hover:!bg-ttu-red hover:!text-white">
             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2.2" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
             </svg>
         </button>
 
-        <h3 class="font-display text-xl font-extrabold mb-6" x-text="isEdit ? 'تعديل التقرير' : 'إرفاق تقرير'"></h3>
+        <h3 class="font-display text-xl font-extrabold mb-6" x-text="isEdit ? labels.editTitle : labels.createTitle"></h3>
 
         {{-- تنبيه أخطاء عام --}}
         <template x-if="Object.keys(errors).length">
@@ -44,19 +44,19 @@
         {{-- بيانات المريض (قراءة فقط) --}}
         <div class="grid grid-cols-2 gap-3 mb-6">
             <div class="rounded-xl neu-pressed px-4 py-3">
-                <p class="text-[11px] text-ttu-gray mb-1">اسم المريض</p>
+                <p class="text-[11px] text-ttu-gray mb-1">{{ __('doctor.report_modal.patient_name') }}</p>
                 <p class="text-sm font-bold text-ttu-black" x-text="patientName"></p>
             </div>
             <div class="rounded-xl neu-pressed px-4 py-3">
-                <p class="text-[11px] text-ttu-gray mb-1">الرقم الجامعي/الوظيفي</p>
+                <p class="text-[11px] text-ttu-gray mb-1">{{ __('doctor.report_modal.patient_identifier') }}</p>
                 <p class="text-sm font-bold text-ttu-black" x-text="patientIdentifier"></p>
             </div>
             <div class="rounded-xl neu-pressed px-4 py-3">
-                <p class="text-[11px] text-ttu-gray mb-1">تاريخ الموعد</p>
+                <p class="text-[11px] text-ttu-gray mb-1">{{ __('doctor.report_modal.appointment_date') }}</p>
                 <p class="text-sm font-bold text-ttu-black" x-text="dateLabel"></p>
             </div>
             <div class="rounded-xl neu-pressed px-4 py-3">
-                <p class="text-[11px] text-ttu-gray mb-1">وقت الموعد</p>
+                <p class="text-[11px] text-ttu-gray mb-1">{{ __('doctor.report_modal.appointment_time') }}</p>
                 <p class="text-sm font-bold text-ttu-black" x-text="timeLabel"></p>
             </div>
         </div>
@@ -68,27 +68,27 @@
 
             <div class="space-y-4 mb-6">
                 <div>
-                    <label class="block text-xs font-bold text-ttu-gray mb-1.5">الحالة</label>
+                    <label class="block text-xs font-bold text-ttu-gray mb-1.5">{{ __('doctor.report_modal.condition') }}</label>
                     <textarea name="condition" x-model="condition" rows="2" required
                               class="w-full rounded-xl neu-pressed bg-ttu-cream border-0 px-4 py-3 text-sm focus:ring-2 focus:ring-ttu-red/30 outline-none"></textarea>
                 </div>
                 <div>
-                    <label class="block text-xs font-bold text-ttu-gray mb-1.5">الفحص</label>
+                    <label class="block text-xs font-bold text-ttu-gray mb-1.5">{{ __('doctor.report_modal.examination') }}</label>
                     <textarea name="examination" x-model="examination" rows="2" required
                               class="w-full rounded-xl neu-pressed bg-ttu-cream border-0 px-4 py-3 text-sm focus:ring-2 focus:ring-ttu-red/30 outline-none"></textarea>
                 </div>
                 <div>
-                    <label class="block text-xs font-bold text-ttu-gray mb-1.5">التشخيص (اختياري)</label>
+                    <label class="block text-xs font-bold text-ttu-gray mb-1.5">{{ __('doctor.report_modal.diagnosis') }}</label>
                     <textarea name="diagnosis" x-model="diagnosis" rows="2"
                               class="w-full rounded-xl neu-pressed bg-ttu-cream border-0 px-4 py-3 text-sm focus:ring-2 focus:ring-ttu-red/30 outline-none"></textarea>
                 </div>
                 <div>
-                    <label class="block text-xs font-bold text-ttu-gray mb-1.5">خطة العلاج (اختياري)</label>
+                    <label class="block text-xs font-bold text-ttu-gray mb-1.5">{{ __('doctor.report_modal.treatment_plan') }}</label>
                     <textarea name="treatment_plan" x-model="treatmentPlan" rows="2"
                               class="w-full rounded-xl neu-pressed bg-ttu-cream border-0 px-4 py-3 text-sm focus:ring-2 focus:ring-ttu-red/30 outline-none"></textarea>
                 </div>
                 <div>
-                    <label class="block text-xs font-bold text-ttu-gray mb-1.5">ملاحظات (اختياري)</label>
+                    <label class="block text-xs font-bold text-ttu-gray mb-1.5">{{ __('doctor.report_modal.notes') }}</label>
                     <textarea name="notes" x-model="notes" rows="2"
                               class="w-full rounded-xl neu-pressed bg-ttu-cream border-0 px-4 py-3 text-sm focus:ring-2 focus:ring-ttu-red/30 outline-none"></textarea>
                 </div>
@@ -97,14 +97,14 @@
             {{-- الأدوية --}}
             <div class="mb-6">
                 <div class="flex items-center justify-between mb-3">
-                    <label class="block text-xs font-bold text-ttu-gray">الأدوية الموصوفة</label>
+                    <label class="block text-xs font-bold text-ttu-gray">{{ __('doctor.report_modal.medications') }}</label>
                     <button type="button" x-on:click="addRow()"
                             class="neu-icon-btn bg-ttu-cream text-ttu-black text-xs font-bold px-3 py-1.5 rounded-lg">
-                        + إضافة دواء
+                        {{ __('doctor.report_modal.add_medication') }}
                     </button>
                 </div>
 
-                <p x-show="medRows.length === 0" class="text-xs text-ttu-gray text-center py-4">لا توجد أدوية مضافة</p>
+                <p x-show="medRows.length === 0" class="text-xs text-ttu-gray text-center py-4">{{ __('doctor.report_modal.no_medications_added') }}</p>
 
                 <div class="space-y-3">
                     <template x-for="(row, index) in medRows" :key="row.uid">
@@ -113,7 +113,7 @@
                                 <input type="text" x-model="row.search"
                                        x-on:focus="row.open = true"
                                        x-on:input="row.open = true; row.medicationId = null"
-                                       placeholder="ابحث عن دواء..."
+                                       placeholder="{{ __('doctor.report_modal.search_placeholder') }}"
                                        autocomplete="off"
                                        class="w-full rounded-lg border-0 bg-white px-3 py-2 text-sm focus:ring-2 focus:ring-ttu-red/30 outline-none">
                                 <input type="hidden" x-bind:name="'medications[' + index + '][medication_id]'" x-bind:value="row.medicationId">
@@ -124,10 +124,10 @@
                                         <button type="button" x-on:click="selectMed(row, med)"
                                                 class="w-full text-right px-3 py-2 rounded-lg hover:bg-ttu-cream text-sm flex items-center justify-between gap-2">
                                             <span x-text="med.name"></span>
-                                            <span class="text-[11px] text-ttu-gray shrink-0" x-text="'متوفر: ' + med.stock + (med.unit ? ' ' + med.unit : '')"></span>
+                                            <span class="text-[11px] text-ttu-gray shrink-0" x-text="labels.availablePrefix + med.stock + (med.unit ? ' ' + med.unit : '')"></span>
                                         </button>
                                     </template>
-                                    <p x-show="filteredCatalog(row).length === 0" class="text-xs text-ttu-gray text-center py-2">لا نتائج</p>
+                                    <p x-show="filteredCatalog(row).length === 0" class="text-xs text-ttu-gray text-center py-2">{{ __('doctor.report_modal.no_results') }}</p>
                                 </div>
                             </div>
 
@@ -149,11 +149,11 @@
             <div class="flex gap-3">
                 <button type="button" x-on:click="show = false"
                         class="flex-1 neu-icon-btn bg-ttu-cream text-ttu-black text-sm font-bold py-3 rounded-xl">
-                    إلغاء
+                    {{ __('doctor.report_modal.cancel') }}
                 </button>
                 <button type="submit"
                         class="flex-1 neu-icon-btn bg-ttu-red text-white text-sm font-bold py-3 rounded-xl hover:!bg-ttu-red-dark">
-                    <span x-text="isEdit ? 'حفظ التعديلات' : 'حفظ التقرير'"></span>
+                    <span x-text="isEdit ? labels.saveEdit : labels.saveCreate"></span>
                 </button>
             </div>
         </form>
@@ -175,6 +175,13 @@
             show: false,
             actionTemplate: '{{ route('doctor.bookings.report.store', ['booking' => '__ID__']) }}',
             medicationCatalog: @json($medicationCatalogJson),
+            labels: {
+                editTitle: @json(__('doctor.report_modal.edit_title')),
+                createTitle: @json(__('doctor.report_modal.create_title')),
+                saveEdit: @json(__('doctor.report_modal.save_edit')),
+                saveCreate: @json(__('doctor.report_modal.save_create')),
+                availablePrefix: @json(__('doctor.report_modal.available_prefix')),
+            },
 
             bookingId: null,
             isEdit: false,

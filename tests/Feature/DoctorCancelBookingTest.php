@@ -88,11 +88,11 @@ class DoctorCancelBookingTest extends TestCase
         $data = $patient->fresh()->notifications()->first()->data;
 
         $this->assertSame('booking_cancelled', $data['type']);
-        $this->assertSame('تم إلغاء موعدك', $data['title']);
-        $this->assertStringContainsString('تم إلغاء موعدك يوم', $data['body']);
-        $this->assertStringContainsString($booking->booking_date->translatedFormat('d F Y'), $data['body']);
-        $this->assertStringContainsString('9:30 صباحًا', $data['body']);
-        $this->assertStringContainsString('من قبل العيادة', $data['body']);
+        $this->assertSame('notifications.booking_cancelled.title', $data['title_key']);
+        $this->assertSame('notifications.booking_cancelled.body', $data['body_key']);
+        $this->assertSame($booking->booking_date->translatedFormat('d F Y'), $data['body_params']['date']);
+        $this->assertSame('9:30 '.__('common.time.am'), $data['body_params']['time']);
+        $this->assertStringContainsString('من قبل العيادة', __('notifications.booking_cancelled.body', $data['body_params']));
     }
 
     public function test_the_notification_is_visible_in_the_patients_notification_panel(): void
@@ -129,9 +129,10 @@ class DoctorCancelBookingTest extends TestCase
         ]);
 
         $log = \App\Models\ActivityLog::where('action', 'booking_cancelled_by_doctor')->first();
-        $this->assertStringContainsString($patient->name, $log->description);
-        $this->assertStringContainsString($booking->booking_date->toDateString(), $log->description);
-        $this->assertStringContainsString('9:30 صباحًا', $log->description);
+        $rendered = $log->renderedDescription();
+        $this->assertStringContainsString($patient->name, $rendered);
+        $this->assertStringContainsString($booking->booking_date->toDateString(), $rendered);
+        $this->assertStringContainsString('9:30 صباحًا', $rendered);
     }
 
     public function test_an_already_cancelled_booking_cannot_be_cancelled_again(): void

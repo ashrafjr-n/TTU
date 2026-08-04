@@ -149,7 +149,7 @@ class Booking extends Model
     public function timeLabel(): string
     {
         $hour = $this->booking_hour;
-        $period = $hour < 12 ? 'صباحًا' : 'مساءً';
+        $period = $hour < 12 ? __('common.time.am') : __('common.time.pm');
         $displayHour = $hour <= 12 ? $hour : $hour - 12;
 
         return sprintf('%d:%02d %s', $displayHour, $this->booking_minute, $period);

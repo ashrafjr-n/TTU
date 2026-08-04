@@ -1,13 +1,13 @@
 @extends('layouts.main')
 
-@section('title', 'حضور الأطباء')
+@section('title', __('admin_attendance.title'))
 
 @section('content')
 
 <x-app-header />
 
 @php
-    $dayLabels = [0 => 'الأحد', 1 => 'الاثنين', 2 => 'الثلاثاء', 3 => 'الأربعاء', 4 => 'الخميس', 5 => 'الجمعة', 6 => 'السبت'];
+    $dayLabels = __('common.days');
     $isToday = $selectedDate->isToday();
 @endphp
 
@@ -16,7 +16,7 @@
 
         @include('partials.admin-header')
 
-        <h2 class="font-display text-2xl sm:text-3xl font-extrabold mb-8">حضور الأطباء</h2>
+        <h2 class="font-display text-2xl sm:text-3xl font-extrabold mb-8">{{ __('admin_attendance.heading') }}</h2>
 
         @if (session('success'))
             <div class="rounded-2xl neu-pressed text-green-700 text-sm px-5 py-3.5 mb-6">{{ session('success') }}</div>
@@ -36,10 +36,10 @@
 
         {{-- ============ المناوبون غدًا ============ --}}
         <div class="rounded-[2rem] neu-raised-white p-6 mb-6">
-            <h3 class="font-bold text-sm mb-4">المناوبون غدًا ({{ $tomorrow->translatedFormat('d F Y') }} — {{ $dayLabels[$tomorrow->dayOfWeek] }})</h3>
+            <h3 class="font-bold text-sm mb-4">{{ __('admin_attendance.on_duty_tomorrow', ['date' => $tomorrow->translatedFormat('d F Y'), 'day' => $dayLabels[$tomorrow->dayOfWeek]]) }}</h3>
 
             @if ($onDutyTomorrow->isEmpty())
-                <p class="text-sm text-ttu-gray">لا يوجد أطباء مجدولون غدًا</p>
+                <p class="text-sm text-ttu-gray">{{ __('admin_attendance.no_doctors_tomorrow') }}</p>
             @else
                 <div class="flex flex-wrap gap-3">
                     @foreach ($onDutyTomorrow as $doctor)
@@ -54,7 +54,7 @@
 
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
                 <h3 class="font-display text-lg font-bold">
-                    {{ $isToday ? 'قائمة اليوم' : 'سجل يوم' }} — {{ $selectedDate->translatedFormat('d F Y') }}
+                    {{ $isToday ? __('admin_attendance.today_list') : __('admin_attendance.day_log') }} — {{ $selectedDate->translatedFormat('d F Y') }}
                     <span class="text-sm font-normal text-ttu-gray">({{ $dayLabels[$selectedDate->dayOfWeek] }})</span>
                 </h3>
 
@@ -62,11 +62,11 @@
                     <input type="date" name="date" value="{{ $selectedDate->format('Y-m-d') }}"
                            class="rounded-xl neu-pressed bg-ttu-cream border-0 px-4 py-2 text-sm focus:ring-2 focus:ring-ttu-red/30 outline-none">
                     <button type="submit" class="neu-icon-btn bg-ttu-cream text-ttu-black text-sm font-bold px-5 py-2 rounded-xl">
-                        عرض
+                        {{ __('admin_attendance.view_button') }}
                     </button>
                     @unless ($isToday)
                         <a href="{{ route('admin.attendance') }}" class="neu-icon-btn bg-ttu-cream text-ttu-black text-sm font-bold px-5 py-2 rounded-xl whitespace-nowrap">
-                            اليوم
+                            {{ __('admin_attendance.today_button') }}
                         </a>
                     @endunless
                 </form>
@@ -91,35 +91,35 @@
 
                         <div class="flex flex-wrap items-center gap-3">
                             <span class="text-xs font-bold px-3 py-1.5 rounded-full {{ $entry['scheduled'] ? 'bg-blue-50 text-blue-600' : 'bg-gray-100 text-gray-500' }}">
-                                {{ $entry['scheduled'] ? 'مجدول' : 'غير مجدول' }}
+                                {{ $entry['scheduled'] ? __('admin_attendance.scheduled') : __('admin_attendance.not_scheduled') }}
                             </span>
 
                             @if ($isToday && $entry['on_duty_now'])
                                 <span class="text-xs font-bold px-3 py-1.5 rounded-full bg-green-50 text-green-600 flex items-center gap-1.5">
-                                    <span class="w-2 h-2 rounded-full bg-green-500"></span> على رأس العمل الآن
+                                    <span class="w-2 h-2 rounded-full bg-green-500"></span> {{ __('admin_attendance.on_duty_now') }}
                                 </span>
                             @endif
 
                             @if ($attendance)
                                 <div class="text-center rounded-xl neu-raised-white px-4 py-2 min-w-[110px]">
-                                    <p class="text-[10px] text-ttu-gray">الحضور</p>
+                                    <p class="text-[10px] text-ttu-gray">{{ __('admin_attendance.check_in_label') }}</p>
                                     <p class="text-sm font-bold text-ttu-black">{{ $attendance->check_in_at->format('H:i') }}</p>
                                 </div>
                                 <div class="text-center rounded-xl neu-raised-white px-4 py-2 min-w-[110px]">
-                                    <p class="text-[10px] text-ttu-gray">الانصراف</p>
+                                    <p class="text-[10px] text-ttu-gray">{{ __('admin_attendance.check_out_label') }}</p>
                                     <p class="text-sm font-bold text-ttu-black">
                                         {{ $attendance->check_out_at ? $attendance->check_out_at->format('H:i') : '—' }}
                                     </p>
                                 </div>
                                 @if ($attendance->is_auto_checkout)
                                     <span class="text-[11px] font-bold text-ttu-red bg-red-50 rounded-full px-2.5 py-1.5 whitespace-nowrap">
-                                        انصراف تلقائي
+                                        {{ __('admin_attendance.auto_checkout_badge') }}
                                     </span>
                                 @endif
                             @elseif ($entry['scheduled'])
-                                <span class="text-xs font-bold px-3 py-1.5 rounded-full bg-red-50 text-red-600">لم يحضر</span>
+                                <span class="text-xs font-bold px-3 py-1.5 rounded-full bg-red-50 text-red-600">{{ __('admin_attendance.did_not_attend') }}</span>
                             @else
-                                <span class="text-xs text-ttu-gray">لا يوجد سجل</span>
+                                <span class="text-xs text-ttu-gray">{{ __('admin_attendance.no_record') }}</span>
                             @endif
                         </div>
                     </div>
@@ -130,9 +130,9 @@
         {{-- ============ جدول عمل الأطباء (عرض فقط) ============ --}}
         <div class="rounded-[2.5rem] neu-raised-white p-6 sm:p-8">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
-                <h3 class="font-display text-lg font-bold">جدول عمل الأطباء الأسبوعي</h3>
+                <h3 class="font-display text-lg font-bold">{{ __('admin_attendance.weekly_schedule.heading') }}</h3>
                 <p class="text-xs text-ttu-gray">
-                    أيام العمل تُعيَّن من صفحة تعديل حساب الدكتور
+                    {{ __('admin_attendance.weekly_schedule.note') }}
                 </p>
             </div>
 
@@ -147,7 +147,7 @@
 
                         <div class="flex flex-wrap gap-2 flex-1">
                             @if (empty($workingDays))
-                                <span class="text-xs text-ttu-gray py-2">لم تُعيَّن أيام عمل</span>
+                                <span class="text-xs text-ttu-gray py-2">{{ __('admin_attendance.weekly_schedule.no_days_set') }}</span>
                             @else
                                 @foreach ($dayLabels as $dayNum => $label)
                                     @if (in_array($dayNum, $workingDays, true))
@@ -159,7 +159,7 @@
 
                         <a href="{{ route('admin.doctors.edit', $doctor) }}"
                            class="neu-icon-btn bg-ttu-cream text-ttu-black text-sm font-bold px-5 py-2 rounded-xl shrink-0">
-                            تعديل
+                            {{ __('admin_attendance.weekly_schedule.edit') }}
                         </a>
                     </div>
                 @endforeach

@@ -31,7 +31,7 @@ class RegisteredUserController extends Controller
 
         if (!in_array($role, self::REGISTRABLE_ROLES, true)) {
             return redirect(route('home').'#roles')
-                ->with('error', 'الرجاء اختيار نوع حساب صالح للتسجيل من الصفحة الرئيسية.');
+                ->with('error', __('auth_forms.register.errors.invalid_role'));
         }
 
         return view('auth.register', ['role' => $role]);
@@ -48,13 +48,13 @@ class RegisteredUserController extends Controller
 
         if (!in_array($role, self::REGISTRABLE_ROLES, true)) {
             return redirect(route('home').'#roles')
-                ->with('error', 'حدث خطأ في تحديد نوع الحساب، الرجاء المحاولة من جديد.');
+                ->with('error', __('auth_forms.register.errors.role_error'));
         }
 
         $request->merge(['email' => strtolower(trim((string) $request->input('email')))]);
 
         $digitsRule = $role === 'student' ? 'digits:8' : 'digits:4';
-        $identifierLabel = $role === 'student' ? 'الرقم الجامعي' : 'الرقم الوظيفي';
+        $identifierLabel = __('auth_forms.register.identifier_label.'.$role);
 
         $validated = $request->validate([
             'name' => 'required|string|max:255',
@@ -63,13 +63,13 @@ class RegisteredUserController extends Controller
             'email' => 'required|string|lowercase|email|max:255|unique:'.User::class,
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ], [
-            'identifier.required' => "الرجاء إدخال {$identifierLabel}.",
+            'identifier.required' => __('auth_forms.register.errors.identifier_required', ['label' => $identifierLabel]),
             'identifier.digits' => $role === 'student'
-                ? 'الرقم الجامعي يجب أن يتكون من 8 أرقام بالضبط.'
-                : 'الرقم الوظيفي يجب أن يتكون من 4 أرقام بالضبط.',
-            'identifier.unique' => "هذا {$identifierLabel} مستخدم بالفعل من قبل حساب آخر.",
-            'email.unique' => 'هذا البريد الإلكتروني مستخدم بالفعل من قبل حساب آخر.',
-            'password.confirmed' => 'كلمتا المرور غير متطابقتين.',
+                ? __('auth_forms.register.errors.student_id_digits')
+                : __('auth_forms.register.errors.staff_id_digits'),
+            'identifier.unique' => __('auth_forms.register.errors.identifier_taken', ['label' => $identifierLabel]),
+            'email.unique' => __('auth_forms.register.errors.email_taken'),
+            'password.confirmed' => __('auth_forms.register.errors.password_confirmed'),
         ]);
 
         // التحقق من الرقم عبر قاعدة بيانات الجامعة الوهمية
@@ -80,7 +80,7 @@ class RegisteredUserController extends Controller
 
         if (!$record) {
             return back()
-                ->withErrors(['identifier' => 'الرقم المدخل غير موجود أو غير صحيح في سجلات الجامعة.'])
+                ->withErrors(['identifier' => __('auth_forms.register.errors.identifier_not_found')])
                 ->withInput();
         }
 

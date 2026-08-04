@@ -28,8 +28,8 @@ class LoginRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'login.required' => 'الرجاء إدخال البريد الإلكتروني أو الرقم الجامعي/الوظيفي.',
-            'password.required' => 'الرجاء إدخال كلمة المرور.',
+            'login.required' => __('auth_forms.login.errors.login_required'),
+            'password.required' => __('auth_forms.login.errors.password_required'),
         ];
     }
 
@@ -55,7 +55,7 @@ class LoginRequest extends FormRequest
             RateLimiter::hit($this->throttleKey());
 
             throw ValidationException::withMessages([
-                'login' => 'بيانات الدخول غير صحيحة.',
+                'login' => __('auth_forms.login.errors.invalid_credentials'),
             ]);
         }
 
@@ -64,7 +64,7 @@ class LoginRequest extends FormRequest
             Auth::logout();
 
             throw ValidationException::withMessages([
-                'login' => 'تم تعطيل هذا الحساب. الرجاء التواصل مع إدارة العيادة.',
+                'login' => __('auth_forms.login.errors.account_disabled'),
             ]);
         }
 
@@ -82,7 +82,7 @@ class LoginRequest extends FormRequest
         $seconds = RateLimiter::availableIn($this->throttleKey());
 
         throw ValidationException::withMessages([
-            'login' => "عدد المحاولات كبير جدًا. حاول مرة أخرى خلال {$seconds} ثانية.",
+            'login' => __('auth_forms.login.errors.too_many_attempts', ['seconds' => $seconds]),
         ]);
     }
 

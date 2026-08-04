@@ -1,6 +1,6 @@
 @extends('layouts.main')
 
-@section('title', 'سجل نشاط الإدارة')
+@section('title', __('admin_activity_log.page_title'))
 
 @section('content')
 
@@ -11,11 +11,11 @@
 
         @include('partials.admin-header')
 
-        <h2 class="font-display text-2xl sm:text-3xl font-extrabold mb-8">سجل نشاط الإدارة</h2>
+        <h2 class="font-display text-2xl sm:text-3xl font-extrabold mb-8">{{ __('admin_activity_log.heading') }}</h2>
 
         @include('partials.admin-nav')
 
-        <p class="text-sm text-ttu-gray mb-6">كل الإجراءات المسجّلة تحت أي حساب مدير — الأحدث أولًا</p>
+        <p class="text-sm text-ttu-gray mb-6">{{ __('admin_activity_log.subheading') }}</p>
 
         @include('admin.partials.activity-log-list', ['logs' => $logs, 'showActor' => true])
 

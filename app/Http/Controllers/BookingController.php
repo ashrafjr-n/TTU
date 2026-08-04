@@ -77,9 +77,9 @@ class BookingController extends Controller
     private function dayLabel(int $index, Carbon $date): string
     {
         $prefix = match ($index) {
-            0 => 'اليوم',
-            1 => 'غدًا',
-            default => 'بعد الغد',
+            0 => __('booking.day.today'),
+            1 => __('booking.day.tomorrow'),
+            default => __('booking.day.day_after'),
         };
 
         return $prefix.' — '.$date->translatedFormat('j F');
@@ -192,7 +192,7 @@ class BookingController extends Controller
 
     private function formatHour(int $hour, int $minute = 0): string
     {
-        $period = $hour < 12 ? 'صباحًا' : 'مساءً';
+        $period = $hour < 12 ? __('common.time.am') : __('common.time.pm');
         $displayHour = $hour <= 12 ? $hour : $hour - 12;
 
         return sprintf('%d:%02d %s', $displayHour, $minute, $period);
@@ -224,24 +224,24 @@ class BookingController extends Controller
             $slotEnd = $slotStart->copy()->addMinutes(Booking::SLOT_MINUTES);
 
             if ($user->isStaff() && !$isStaffMinute) {
-                return back()->with('error', 'هذا الوقت مخصص للطلاب فقط.');
+                return back()->with('error', __('booking.errors.students_only'));
             }
 
             if ($user->isStudent() && $isStaffMinute) {
                 // مسموح فقط لو الخانة تحررت فعليًا (بدأ وقتها ولم تُحجز من موظف)
                 if (now()->lt($slotStart)) {
-                    return back()->with('error', 'هذا الوقت مخصص للموظفين فقط.');
+                    return back()->with('error', __('booking.errors.staff_only'));
                 }
 
                 // حد أعلى: لا حجز لخانة محررة بعد ساعة إغلاق العيادة (16:00) —
                 // بدون هذا الحد يقدر طالب يحجز خانة "محررة" في ساعة متأخرة من
                 // الليل طالما بدأ وقتها الأصلي اليوم فعليًا.
                 if (now()->gte($date->copy()->setTime(Booking::CLOSE_HOUR, 0))) {
-                    return back()->with('error', 'انتهى وقت حجز الأوقات الإضافية المحررة لهذا اليوم.');
+                    return back()->with('error', __('booking.errors.released_slot_closed'));
                 }
             } elseif (now()->gte($slotEnd)) {
                 // خانات الطالب/الموظف العادية: لا حجز لوقت انتهى فعليًا
-                return back()->with('error', 'انتهى وقت هذا الموعد.');
+                return back()->with('error', __('booking.errors.slot_expired'));
             }
 
             // قفل صف المستخدم نفسه أولًا (موجود دائمًا، بعكس صفوف الحجوزات) لضمان
@@ -254,7 +254,7 @@ class BookingController extends Controller
             // قاعدة: حجز فعّال واحد فقط بالمستخدم بأي وقت (أي يوم ضمن نافذة
             // الحجز) — يجب إلغاء الحجز الحالي أولًا قبل حجز موعد جديد.
             if ($this->findActiveBooking($user, lock: true)) {
-                return back()->with('error', 'لديك حجز فعّال بالفعل. يجب إلغاؤه أولًا قبل حجز موعد جديد.');
+                return back()->with('error', __('booking.errors.already_have_active_booking'));
             }
 
             $existing = Booking::where('booking_date', $date)
@@ -265,7 +265,7 @@ class BookingController extends Controller
                 ->exists();
 
             if ($existing) {
-                return back()->with('error', 'عذرًا، هذا الوقت تم حجزه للتو. حاول وقتًا آخر.');
+                return back()->with('error', __('booking.errors.just_taken'));
             }
 
             try {
@@ -280,16 +280,17 @@ class BookingController extends Controller
             } catch (\Illuminate\Database\QueryException $e) {
                 // شبكة أمان أخيرة على مستوى قاعدة البيانات (active_slot_key فريد)
                 // في حال تسابق تجاوز الفحص أعلاه
-                return back()->with('error', 'عذرًا، هذا الوقت تم حجزه للتو. حاول وقتًا آخر.');
+                return back()->with('error', __('booking.errors.just_taken'));
             }
 
             ActivityLog::record(
                 $user->id,
                 'booking_created',
-                "حجز موعد بتاريخ {$date->toDateString()} الساعة {$this->formatHour($hour, $minute)}"
+                'activity_log.booking_created',
+                ['date' => $date->toDateString(), 'time' => $this->formatHour($hour, $minute)]
             );
 
-            return redirect()->route('dashboard.'.$user->role)->with('success', 'تم حجز موعدك بنجاح!');
+            return redirect()->route('dashboard.'.$user->role)->with('success', __('booking.flash.booked_success'));
         });
     }
 
@@ -300,11 +301,11 @@ class BookingController extends Controller
     {
         // حماية: لا يقدر أي مستخدم يلغي حجز شخص تاني عن طريق تغيير الرقم بالرابط يدويًا
         if ($booking->user_id !== Auth::id()) {
-            abort(403, 'ليس لديك صلاحية إلغاء هذا الحجز.');
+            abort(403, __('booking.errors.not_authorized_to_cancel'));
         }
 
         if ($booking->status !== 'confirmed') {
-            return redirect()->route('booking.index')->with('error', 'هذا الحجز غير قابل للإلغاء.');
+            return redirect()->route('booking.index')->with('error', __('booking.errors.not_cancellable'));
         }
 
         $booking->update(['status' => 'cancelled']);
@@ -312,9 +313,10 @@ class BookingController extends Controller
         ActivityLog::record(
             $booking->user_id,
             'booking_cancelled',
-            "إلغاء حجز بتاريخ {$booking->booking_date->toDateString()} الساعة {$this->formatHour($booking->booking_hour, $booking->booking_minute)}"
+            'activity_log.booking_cancelled',
+            ['date' => $booking->booking_date->toDateString(), 'time' => $this->formatHour($booking->booking_hour, $booking->booking_minute)]
         );
 
-        return redirect()->route('booking.index')->with('success', 'تم إلغاء حجزك بنجاح.');
+        return redirect()->route('booking.index')->with('success', __('booking.flash.cancelled_success'));
     }
 }

@@ -22,14 +22,15 @@ class VisitReportCompleted extends Notification
     public function toDatabase(object $notifiable): array
     {
         $condition = $this->report->condition ?: $this->report->diagnosis;
-
         $medications = $this->report->medications->pluck('name')->implode('، ');
-        $medications = $medications !== '' ? $medications : 'لا توجد أدوية موصوفة';
 
         return [
             'type' => 'visit_report',
-            'title' => 'تقرير زيارتك جاهز',
-            'body' => "تقرير زيارتك جاهز — الحالة: {$condition}. الأدوية: {$medications}.",
+            'title_key' => 'notifications.visit_report.title',
+            'body_key' => $medications !== ''
+                ? 'notifications.visit_report.body'
+                : 'notifications.visit_report.body_no_meds',
+            'body_params' => ['condition' => $condition, 'medications' => $medications],
             'url' => route('medications.mine', [], false),
         ];
     }

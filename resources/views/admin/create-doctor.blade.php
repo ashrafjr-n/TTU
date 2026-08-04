@@ -1,6 +1,6 @@
 @extends('layouts.main')
 
-@section('title', 'إضافة دكتور')
+@section('title', __('admin_doctor_form.create.page_title'))
 
 @section('content')
 
@@ -11,12 +11,12 @@
 
         @include('partials.admin-header')
 
-        <h2 class="font-display text-2xl sm:text-3xl font-extrabold mb-8">إضافة حساب دكتور جديد</h2>
+        <h2 class="font-display text-2xl sm:text-3xl font-extrabold mb-8">{{ __('admin_doctor_form.create.heading') }}</h2>
 
         @include('partials.admin-nav')
 
         @php
-            $dayLabels = [0 => 'الأحد', 1 => 'الاثنين', 2 => 'الثلاثاء', 3 => 'الأربعاء', 4 => 'الخميس', 5 => 'الجمعة', 6 => 'السبت'];
+            $dayLabels = __('common.days');
             $selectedDays = collect(old('working_days', []))->map(fn ($d) => (int) $d)->all();
         @endphp
 
@@ -34,33 +34,33 @@
                 @csrf
 
                 <div>
-                    <label class="block text-sm font-medium text-ttu-black mb-1.5">الاسم الكامل</label>
+                    <label class="block text-sm font-medium text-ttu-black mb-1.5">{{ __('admin_doctor_form.name_label') }}</label>
                     <input type="text" name="name" value="{{ old('name') }}" required
                            class="w-full px-4 py-2.5 rounded-xl neu-pressed bg-ttu-cream border-0 focus:ring-2 focus:ring-ttu-red/30 outline-none">
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium text-ttu-black mb-1.5">البريد الإلكتروني</label>
+                    <label class="block text-sm font-medium text-ttu-black mb-1.5">{{ __('admin_doctor_form.email_label') }}</label>
                     <input type="email" name="email" value="{{ old('email') }}" required
                            placeholder="doctor-4@ttu.edu.jo"
                            class="w-full px-4 py-2.5 rounded-xl neu-pressed bg-ttu-cream border-0 focus:ring-2 focus:ring-ttu-red/30 outline-none">
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium text-ttu-black mb-1.5">كلمة المرور</label>
+                    <label class="block text-sm font-medium text-ttu-black mb-1.5">{{ __('admin_doctor_form.password_label') }}</label>
                     <input type="password" name="password" required
                            class="w-full px-4 py-2.5 rounded-xl neu-pressed bg-ttu-cream border-0 focus:ring-2 focus:ring-ttu-red/30 outline-none">
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium text-ttu-black mb-1.5">تأكيد كلمة المرور</label>
+                    <label class="block text-sm font-medium text-ttu-black mb-1.5">{{ __('admin_doctor_form.password_confirmation_label') }}</label>
                     <input type="password" name="password_confirmation" required
                            class="w-full px-4 py-2.5 rounded-xl neu-pressed bg-ttu-cream border-0 focus:ring-2 focus:ring-ttu-red/30 outline-none">
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium text-ttu-black mb-1.5">أيام العمل الأسبوعية</label>
-                    <p class="text-xs text-ttu-gray mb-2.5">تحدد الأيام التي يُتوقع فيها حضور الدكتور</p>
+                    <label class="block text-sm font-medium text-ttu-black mb-1.5">{{ __('admin_doctor_form.working_days_label') }}</label>
+                    <p class="text-xs text-ttu-gray mb-2.5">{{ __('admin_doctor_form.working_days_hint') }}</p>
                     <div class="flex flex-wrap gap-2">
                         @foreach ($dayLabels as $dayNum => $label)
                             <label class="flex items-center gap-1.5 text-xs font-bold rounded-lg neu-pressed bg-ttu-cream px-3 py-2 cursor-pointer">
@@ -73,7 +73,7 @@
                     </div>
                 </div>
 
-                <button type="submit" class="w-full btn-hero justify-center">إضافة الدكتور</button>
+                <button type="submit" class="w-full btn-hero justify-center">{{ __('admin_doctor_form.create.submit') }}</button>
             </form>
 
         </div>

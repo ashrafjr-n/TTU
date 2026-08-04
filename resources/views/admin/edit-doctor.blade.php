@@ -1,13 +1,13 @@
 @extends('layouts.main')
 
-@section('title', 'تعديل حساب دكتور')
+@section('title', __('admin_doctor_form.edit.page_title'))
 
 @section('content')
 
 <x-app-header />
 
 @php
-    $dayLabels = [0 => 'الأحد', 1 => 'الاثنين', 2 => 'الثلاثاء', 3 => 'الأربعاء', 4 => 'الخميس', 5 => 'الجمعة', 6 => 'السبت'];
+    $dayLabels = __('common.days');
     $currentDays = $doctor->doctorSchedule->working_days ?? [];
     $selectedDays = collect(old('working_days', $currentDays))->map(fn ($d) => (int) $d)->all();
 @endphp
@@ -17,7 +17,7 @@
 
         @include('partials.admin-header')
 
-        <h2 class="font-display text-2xl sm:text-3xl font-extrabold mb-8">تعديل حساب: {{ $doctor->name }}</h2>
+        <h2 class="font-display text-2xl sm:text-3xl font-extrabold mb-8">{{ __('admin_doctor_form.edit.heading', ['name' => $doctor->name]) }}</h2>
 
         @include('partials.admin-nav')
 
@@ -36,20 +36,20 @@
                 @method('PUT')
 
                 <div>
-                    <label class="block text-sm font-medium text-ttu-black mb-1.5">الاسم الكامل</label>
+                    <label class="block text-sm font-medium text-ttu-black mb-1.5">{{ __('admin_doctor_form.name_label') }}</label>
                     <input type="text" name="name" value="{{ old('name', $doctor->name) }}" required
                            class="w-full px-4 py-2.5 rounded-xl neu-pressed bg-ttu-cream border-0 focus:ring-2 focus:ring-ttu-red/30 outline-none">
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium text-ttu-black mb-1.5">البريد الإلكتروني</label>
+                    <label class="block text-sm font-medium text-ttu-black mb-1.5">{{ __('admin_doctor_form.email_label') }}</label>
                     <input type="email" name="email" value="{{ old('email', $doctor->email) }}" required
                            class="w-full px-4 py-2.5 rounded-xl neu-pressed bg-ttu-cream border-0 focus:ring-2 focus:ring-ttu-red/30 outline-none">
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium text-ttu-black mb-1.5">أيام العمل الأسبوعية</label>
-                    <p class="text-xs text-ttu-gray mb-2.5">تحدد الأيام التي يُتوقع فيها حضور الدكتور</p>
+                    <label class="block text-sm font-medium text-ttu-black mb-1.5">{{ __('admin_doctor_form.working_days_label') }}</label>
+                    <p class="text-xs text-ttu-gray mb-2.5">{{ __('admin_doctor_form.working_days_hint') }}</p>
                     <div class="flex flex-wrap gap-2">
                         @foreach ($dayLabels as $dayNum => $label)
                             <label class="flex items-center gap-1.5 text-xs font-bold rounded-lg neu-pressed bg-ttu-cream px-3 py-2 cursor-pointer">
@@ -65,9 +65,9 @@
                 <div class="flex gap-3 pt-2">
                     <a href="{{ route('admin.users') }}"
                        class="flex-1 neu-icon-btn bg-ttu-cream text-ttu-black text-sm font-bold py-3 rounded-xl text-center">
-                        إلغاء
+                        {{ __('admin_doctor_form.edit.cancel') }}
                     </a>
-                    <button type="submit" class="flex-1 btn-hero justify-center !py-3">حفظ التعديلات</button>
+                    <button type="submit" class="flex-1 btn-hero justify-center !py-3">{{ __('admin_doctor_form.edit.submit') }}</button>
                 </div>
             </form>
 

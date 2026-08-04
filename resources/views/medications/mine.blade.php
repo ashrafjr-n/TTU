@@ -1,6 +1,6 @@
 @extends('layouts.main')
 
-@section('title', 'أدويتي')
+@section('title', __('medications.title'))
 
 @section('content')
 
@@ -12,14 +12,14 @@
 
         <div class="flex items-center justify-between gap-4 mb-10">
             <div>
-                <span class="inline-block text-xs font-bold tracking-widest text-ttu-red mb-1.5">سجل طبي</span>
-                <h2 class="font-display text-2xl sm:text-3xl font-extrabold">أدويتي</h2>
-                <p class="mt-1 text-sm text-ttu-gray">تقارير الزيارات والأدوية التي وصفها الطبيب</p>
+                <span class="inline-block text-xs font-bold tracking-widest text-ttu-red mb-1.5">{{ __('medications.eyebrow') }}</span>
+                <h2 class="font-display text-2xl sm:text-3xl font-extrabold">{{ __('medications.heading') }}</h2>
+                <p class="mt-1 text-sm text-ttu-gray">{{ __('medications.subheading') }}</p>
             </div>
 
             <a href="{{ route('dashboard') }}"
                class="neu-icon-btn bg-ttu-cream text-ttu-black text-sm font-bold px-5 py-2.5 rounded-xl shrink-0">
-                رجوع للوحة
+                {{ __('common.buttons.back_to_dashboard') }}
             </a>
         </div>
 
@@ -31,12 +31,12 @@
                         <line x1="12" y1="9" x2="12" y2="15" />
                     </svg>
                 </div>
-                <h3 class="font-display text-lg font-bold mb-2">لا توجد تقارير بعد</h3>
+                <h3 class="font-display text-lg font-bold mb-2">{{ __('medications.empty.heading') }}</h3>
                 <p class="text-sm text-ttu-gray max-w-sm mx-auto mb-8">
-                    بمجرد ما يكمّل الطبيب تقرير أول زيارة لك، رح تظهر هنا كل التقارير والأدوية الموصوفة.
+                    {{ __('medications.empty.body') }}
                 </p>
                 <a href="{{ route('booking.index') }}" class="btn-hero cursor-pointer">
-                    احجز موعدك الآن
+                    {{ __('medications.empty.cta') }}
                     <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2.2" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
                     </svg>
@@ -59,37 +59,37 @@
                                         {{ $report->booking->booking_date->translatedFormat('d F Y') }}
                                     </p>
                                     <p class="text-xs text-ttu-gray mt-0.5">
-                                        الساعة {{ sprintf('%d:%02d', $report->booking->booking_hour, $report->booking->booking_minute) }}
+                                        {{ __('medications.report.hour_prefix') }} {{ sprintf('%d:%02d', $report->booking->booking_hour, $report->booking->booking_minute) }}
                                     </p>
                                 </div>
                             </div>
-                            <span class="text-xs font-bold text-green-600 bg-green-50 rounded-full px-3 py-1.5">تقرير مكتمل</span>
+                            <span class="text-xs font-bold text-green-600 bg-green-50 rounded-full px-3 py-1.5">{{ __('medications.report.completed_badge') }}</span>
                         </div>
 
                         <div class="grid sm:grid-cols-2 gap-4 mb-6">
                             <div class="rounded-xl neu-pressed px-4 py-3">
-                                <p class="text-[11px] text-ttu-gray mb-1">الحالة</p>
+                                <p class="text-[11px] text-ttu-gray mb-1">{{ __('medications.report.condition') }}</p>
                                 <p class="text-sm text-ttu-black leading-relaxed">{{ $report->condition }}</p>
                             </div>
                             <div class="rounded-xl neu-pressed px-4 py-3">
-                                <p class="text-[11px] text-ttu-gray mb-1">الفحص</p>
+                                <p class="text-[11px] text-ttu-gray mb-1">{{ __('medications.report.examination') }}</p>
                                 <p class="text-sm text-ttu-black leading-relaxed">{{ $report->examination }}</p>
                             </div>
                             @if ($report->diagnosis)
                                 <div class="rounded-xl neu-pressed px-4 py-3">
-                                    <p class="text-[11px] text-ttu-gray mb-1">التشخيص</p>
+                                    <p class="text-[11px] text-ttu-gray mb-1">{{ __('medications.report.diagnosis') }}</p>
                                     <p class="text-sm text-ttu-black leading-relaxed">{{ $report->diagnosis }}</p>
                                 </div>
                             @endif
                             @if ($report->treatment_plan)
                                 <div class="rounded-xl neu-pressed px-4 py-3">
-                                    <p class="text-[11px] text-ttu-gray mb-1">خطة العلاج</p>
+                                    <p class="text-[11px] text-ttu-gray mb-1">{{ __('medications.report.treatment_plan') }}</p>
                                     <p class="text-sm text-ttu-black leading-relaxed">{{ $report->treatment_plan }}</p>
                                 </div>
                             @endif
                             @if ($report->notes)
                                 <div class="rounded-xl neu-pressed px-4 py-3 sm:col-span-2">
-                                    <p class="text-[11px] text-ttu-gray mb-1">ملاحظات</p>
+                                    <p class="text-[11px] text-ttu-gray mb-1">{{ __('medications.report.notes') }}</p>
                                     <p class="text-sm text-ttu-black leading-relaxed">{{ $report->notes }}</p>
                                 </div>
                             @endif
@@ -97,26 +97,28 @@
 
                         <div>
                             <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
-                                <p class="text-xs font-bold text-ttu-gray">الأدوية الموصوفة</p>
+                                <p class="text-xs font-bold text-ttu-gray">{{ __('medications.report.medications') }}</p>
 
                                 @if ($report->medications->isNotEmpty())
                                     <span class="text-xs font-bold text-ttu-red bg-red-50 rounded-full px-3 py-1.5">
-                                        الرسوم: {{ number_format(\App\Models\Medication::PRICE_PER_ITEM, 2) }} د.أ ×
-                                        {{ $report->medications->count() }} =
-                                        {{ number_format($report->medicationsFee(), 2) }} د.أ
+                                        {{ __('medications.report.fee_line', [
+                                            'price' => number_format(\App\Models\Medication::PRICE_PER_ITEM, 2),
+                                            'count' => $report->medications->count(),
+                                            'total' => number_format($report->medicationsFee(), 2),
+                                        ]) }}
                                     </span>
                                 @endif
                             </div>
 
                             @if ($report->medications->isEmpty())
-                                <p class="text-xs text-ttu-gray">لم توصف أدوية لهذه الزيارة</p>
+                                <p class="text-xs text-ttu-gray">{{ __('medications.report.none_prescribed') }}</p>
                             @else
                                 <div class="space-y-2">
                                     @foreach ($report->medications as $medication)
                                         <div class="flex items-center justify-between rounded-xl neu-pressed px-4 py-3">
                                             <span class="text-sm font-bold text-ttu-black">{{ $medication->name }}</span>
                                             <span class="text-xs font-bold text-ttu-red">
-                                                الكمية: {{ $medication->pivot->quantity }}{{ $medication->unit ? ' '.$medication->unit : '' }}
+                                                {{ __('medications.report.quantity_prefix') }} {{ $medication->pivot->quantity }}{{ $medication->unit ? ' '.$medication->unit : '' }}
                                             </span>
                                         </div>
                                     @endforeach

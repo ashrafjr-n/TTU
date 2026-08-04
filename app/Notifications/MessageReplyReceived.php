@@ -27,7 +27,9 @@ class MessageReplyReceived extends Notification
     {
         return [
             'type' => 'message_reply',
-            'title' => 'رد من '.$this->reply->sender->name,
+            'title_key' => 'notifications.message_reply.title',
+            'title_params' => ['name' => $this->reply->sender->name],
+            // نص الرد كتبه الدكتور مباشرة، فلا يُترجَم
             'body' => $this->reply->body,
             'url' => null,
             'message_id' => $this->reply->id,

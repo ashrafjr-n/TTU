@@ -1,6 +1,6 @@
 @extends('layouts.main')
 
-@section('title', 'سجلات الجامعة')
+@section('title', __('admin_records.title'))
 
 @section('content')
 
@@ -11,7 +11,7 @@
 
         @include('partials.admin-header')
 
-        <h2 class="font-display text-2xl sm:text-3xl font-extrabold mb-8">سجلات الجامعة</h2>
+        <h2 class="font-display text-2xl sm:text-3xl font-extrabold mb-8">{{ __('admin_records.heading') }}</h2>
 
         @if (session('success'))
             <div class="rounded-2xl neu-pressed text-green-700 text-sm px-5 py-3.5 mb-6">{{ session('success') }}</div>
@@ -28,16 +28,16 @@
 
         {{-- فورم إضافة رقم جديد --}}
         <div class="rounded-[2rem] neu-raised-white p-6 mb-6">
-            <h3 class="font-bold text-sm mb-4">إضافة رقم جديد</h3>
+            <h3 class="font-bold text-sm mb-4">{{ __('admin_records.add_new') }}</h3>
             <form method="POST" action="{{ route('admin.records.store') }}" class="flex flex-wrap gap-3">
                 @csrf
-                <input type="text" name="identifier" placeholder="الرقم الجامعي أو الوظيفي" required
+                <input type="text" name="identifier" placeholder="{{ __('admin_records.identifier_placeholder') }}" required
                        class="flex-1 min-w-[200px] rounded-xl neu-pressed bg-ttu-cream border-0 px-4 py-2.5 text-sm outline-none">
                 <select name="type" required class="rounded-xl neu-pressed bg-ttu-cream border-0 px-4 py-2.5 text-sm outline-none">
-                    <option value="student">طالب</option>
-                    <option value="staff">موظف</option>
+                    <option value="student">{{ __('common.roles.student') }}</option>
+                    <option value="staff">{{ __('common.roles.staff') }}</option>
                 </select>
-                <button type="submit" class="btn-hero !py-2.5 text-sm">إضافة</button>
+                <button type="submit" class="btn-hero !py-2.5 text-sm">{{ __('admin_records.add_button') }}</button>
             </form>
         </div>
 
@@ -48,10 +48,10 @@
                     <div class="flex items-center justify-between gap-4 rounded-2xl neu-pressed px-5 py-4">
                         <div>
                             <p class="text-sm font-bold text-ttu-black">{{ $record->identifier }}</p>
-                            <p class="text-xs text-ttu-gray mt-0.5">{{ $record->type == 'student' ? 'طالب' : 'موظف' }}</p>
+                            <p class="text-xs text-ttu-gray mt-0.5">{{ __('common.roles.'.$record->type) }}</p>
                         </div>
                         <form method="POST" action="{{ route('admin.records.destroy', $record) }}"
-                              onsubmit="return confirm('متأكد من حذف هذا الرقم؟');">
+                              onsubmit="return confirm(@json(__('admin_records.confirm_delete')));">
                             @csrf
                             @method('DELETE')
                             <button type="submit" class="neu-icon-btn w-9 h-9 rounded-full bg-ttu-cream text-ttu-red flex items-center justify-center hover:!bg-ttu-red hover:!text-white">
@@ -62,7 +62,7 @@
                         </form>
                     </div>
                 @empty
-                    <p class="text-center text-sm text-ttu-gray py-10">لا يوجد سجلات</p>
+                    <p class="text-center text-sm text-ttu-gray py-10">{{ __('admin_records.empty') }}</p>
                 @endforelse
             </div>
 

@@ -21,7 +21,7 @@ class VisitReportController extends Controller
     public function store(Request $request, Booking $booking)
     {
         if ($booking->status !== 'confirmed') {
-            return back()->with('error', 'لا يمكن إرفاق تقرير لحجز غير مؤكد.');
+            return back()->with('error', __('doctor.report_modal.not_confirmed'));
         }
 
         $validated = $request->validate([
@@ -67,7 +67,10 @@ class VisitReportController extends Controller
 
                     if ($diff > 0 && $medications[$medId]->stock_quantity < $diff) {
                         throw ValidationException::withMessages([
-                            'medications' => "الكمية المطلوبة من \"{$medications[$medId]->name}\" غير متوفرة بالمخزون (المتوفر: {$medications[$medId]->stock_quantity}).",
+                            'medications' => __('doctor.report_modal.insufficient_stock', [
+                                'name' => $medications[$medId]->name,
+                                'stock' => $medications[$medId]->stock_quantity,
+                            ]),
                         ]);
                     }
                 }
@@ -106,12 +109,13 @@ class VisitReportController extends Controller
         ActivityLog::record(
             Auth::id(),
             $wasEdit ? 'visit_report_edited' : 'visit_report_created',
-            ($wasEdit ? 'تعديل تقرير زيارة للمريض ' : 'إنشاء تقرير زيارة للمريض ').$booking->user->name
+            $wasEdit ? 'activity_log.visit_report_edited' : 'activity_log.visit_report_created',
+            ['patient' => $booking->user->name]
         );
 
         $report = VisitReport::where('booking_id', $booking->id)->with('medications')->first();
         $booking->user->notify(new VisitReportCompleted($report));
 
-        return back()->with('success', 'تم حفظ تقرير الزيارة بنجاح.');
+        return back()->with('success', __('doctor.report_modal.save_success'));
     }
 }

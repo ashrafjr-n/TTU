@@ -19,7 +19,7 @@
 
                 {{-- الإشعارات --}}
                 <div class="relative">
-                    <button type="button" id="notif-toggle" title="الإشعارات" aria-label="الإشعارات"
+                    <button type="button" id="notif-toggle" title="{{ __('common.header.notifications') }}" aria-label="{{ __('common.header.notifications') }}"
                             class="neu-icon-btn relative w-10 h-10 flex items-center justify-center rounded-full bg-ttu-cream">
                         <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-ttu-black" fill="none" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" />
@@ -35,10 +35,10 @@
                         <div id="notif-panel"
                              class="hidden absolute top-full start-0 mt-3 w-80 max-w-[90vw] rounded-2xl neu-raised-white p-3 z-50">
                             <div class="flex items-center justify-between px-1 pb-2 mb-2 border-b border-black/10">
-                                <span class="text-sm font-bold text-ttu-black">الإشعارات</span>
+                                <span class="text-sm font-bold text-ttu-black">{{ __('common.header.notifications') }}</span>
                                 @if ($unreadCount > 0)
                                     <button type="button" id="notif-mark-all" class="text-xs font-bold text-ttu-red hover:underline">
-                                        تحديد الكل كمقروء
+                                        {{ __('common.header.mark_all_read') }}
                                     </button>
                                 @endif
                             </div>
@@ -50,16 +50,16 @@
                                          data-url="{{ $n->data['url'] ?? '' }}"
                                          data-read="{{ $n->read_at ? '1' : '0' }}">
                                         <div class="flex items-start justify-between gap-2">
-                                            <p class="text-xs font-bold text-ttu-black">{{ $n->data['title'] ?? '' }}</p>
+                                            <p class="text-xs font-bold text-ttu-black">{{ isset($n->data['title_key']) ? __($n->data['title_key'], $n->data['title_params'] ?? []) : ($n->data['title'] ?? '') }}</p>
                                             @if (!$n->read_at)
                                                 <span class="notif-dot w-2 h-2 rounded-full bg-ttu-red mt-1 shrink-0"></span>
                                             @endif
                                         </div>
-                                        <p class="text-xs text-ttu-gray mt-1 leading-relaxed">{{ $n->data['body'] ?? '' }}</p>
+                                        <p class="text-xs text-ttu-gray mt-1 leading-relaxed">{{ isset($n->data['body_key']) ? __($n->data['body_key'], $n->data['body_params'] ?? []) : ($n->data['body'] ?? '') }}</p>
                                         <p class="text-[10px] text-ttu-gray/70 mt-1.5">{{ $n->created_at->diffForHumans() }}</p>
                                     </div>
                                 @empty
-                                    <p class="text-xs text-ttu-gray text-center py-6">لا توجد إشعارات</p>
+                                    <p class="text-xs text-ttu-gray text-center py-6">{{ __('common.header.no_notifications') }}</p>
                                 @endforelse
                             </div>
                         </div>
@@ -68,7 +68,7 @@
 
                 {{-- اللغة + البانل --}}
                 <div class="relative">
-                    <button type="button" id="auth-lang-toggle" title="تبديل اللغة" aria-label="تبديل اللغة"
+                    <button type="button" id="auth-lang-toggle" title="{{ __('common.header.toggle_language') }}" aria-label="{{ __('common.header.toggle_language') }}"
                             class="neu-icon-btn w-10 h-10 flex items-center justify-center rounded-full bg-ttu-cream">
                         <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-ttu-black" fill="none" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9 9 0 100-18 9 9 0 000 18z" />
@@ -78,22 +78,27 @@
 
                     <div id="auth-lang-panel"
                          class="hidden absolute top-full start-0 mt-3 w-48 rounded-2xl neu-raised-white p-2">
-                        <button type="button" class="neu-icon-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition text-sm font-semibold">
-                            <span class="text-lg leading-none">🇯🇴</span>
-                            <span class="flex-1 text-right">العربية</span>
-                            <svg class="w-4 h-4 text-ttu-red" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-                            </svg>
-                        </button>
-                        <button type="button" class="neu-icon-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl mt-2 transition text-sm font-semibold text-ttu-gray">
-                            <span class="text-lg leading-none">🇬🇧</span>
-                            <span class="flex-1 text-right">English</span>
-                        </button>
+                        @foreach (config('app.supported_locales') as $code => $locale)
+                            <a href="{{ route('locale.switch', $code) }}"
+                               @class([
+                                   'neu-icon-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition text-sm font-semibold',
+                                   'mt-2' => !$loop->first,
+                                   'text-ttu-gray' => app()->getLocale() !== $code,
+                               ])>
+                                <span class="text-lg leading-none">{{ $locale['flag'] }}</span>
+                                <span class="flex-1 text-start">{{ $locale['name'] }}</span>
+                                @if (app()->getLocale() === $code)
+                                    <svg class="w-4 h-4 text-ttu-red" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                                    </svg>
+                                @endif
+                            </a>
+                        @endforeach
                     </div>
                 </div>
 
                 {{-- الوضع الليلي --}}
-                <button type="button" title="الوضع الليلي" aria-label="الوضع الليلي"
+                <button type="button" title="{{ __('common.header.dark_mode') }}" aria-label="{{ __('common.header.dark_mode') }}"
                         class="neu-icon-btn w-10 h-10 flex items-center justify-center rounded-full bg-ttu-cream">
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-ttu-black" fill="none" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M21 12.8A9 9 0 1111.2 3a7 7 0 009.8 9.8z" />
@@ -103,10 +108,10 @@
             </div>
 
             <nav class="hidden md:flex items-center gap-8 text-sm font-semibold">
-                <a href="{{ route('home') }}" class="nav-link-dark">الرئيسية</a>
+                <a href="{{ route('home') }}" class="nav-link-dark">{{ __('common.nav.home') }}</a>
                 @auth
                     @if (auth()->user()->isStudent() || auth()->user()->isStaff())
-                        <a href="{{ route('contact') }}" class="nav-link-dark">تواصل</a>
+                        <a href="{{ route('contact') }}" class="nav-link-dark">{{ __('common.nav.contact') }}</a>
                     @endif
                 @endauth
             </nav>
@@ -115,7 +120,7 @@
 
         {{-- اللوجو --}}
         <a href="{{ route('home') }}" class="flex items-center shrink-0">
-            <img src="{{ asset('images/TTU-Clinic.png') }}" alt="عيادة TTU" class="h-14 w-auto">
+            <img src="{{ asset('images/TTU-Clinic.png') }}" alt="{{ __('common.app_title') }}" class="h-14 w-auto">
         </a>
 
     </div>

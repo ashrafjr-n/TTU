@@ -7,8 +7,8 @@
         </svg>
     </div>
     <div>
-        <span class="inline-block text-xs font-bold tracking-widest text-ttu-red mb-1.5">لوحة الإدارة</span>
-        <h2 class="font-display text-2xl sm:text-3xl font-extrabold">مرحبًا، {{ auth()->user()->name }} 👋</h2>
+        <span class="inline-block text-xs font-bold tracking-widest text-ttu-red mb-1.5">{{ __('admin_common.badge') }}</span>
+        <h2 class="font-display text-2xl sm:text-3xl font-extrabold">{{ __('dashboard.greeting', ['name' => auth()->user()->name]) }} 👋</h2>
         <p class="mt-1 text-sm text-ttu-gray">{{ auth()->user()->email }}</p>
     </div>
 </div>
@@ -26,8 +26,8 @@
                     <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75" />
                 </svg>
             </div>
-            <h3 class="relative font-display text-base font-bold mb-1.5">تسجيل الخروج</h3>
-            <p class="relative text-xs text-ttu-gray leading-relaxed">الخروج من حسابك بأمان</p>
+            <h3 class="relative font-display text-base font-bold mb-1.5">{{ __('common.buttons.logout') }}</h3>
+            <p class="relative text-xs text-ttu-gray leading-relaxed">{{ __('common.buttons.logout_desc') }}</p>
         </button>
     </form>
 

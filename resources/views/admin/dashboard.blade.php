@@ -1,6 +1,6 @@
 @extends('layouts.main')
 
-@section('title', 'لوحة المدير')
+@section('title', __('admin_dashboard.title'))
 
 @section('content')
 
@@ -24,36 +24,36 @@
         <div class="grid grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
             <div class="rounded-[2rem] neu-raised-white p-6 text-center">
                 <p class="text-3xl font-display font-extrabold text-ttu-red">{{ $stats['total_students'] }}</p>
-                <p class="text-xs text-ttu-gray mt-2">طالب مسجل</p>
+                <p class="text-xs text-ttu-gray mt-2">{{ __('admin_dashboard.stats.students') }}</p>
             </div>
             <div class="rounded-[2rem] neu-raised-white p-6 text-center">
                 <p class="text-3xl font-display font-extrabold text-ttu-red">{{ $stats['total_staff'] }}</p>
-                <p class="text-xs text-ttu-gray mt-2">موظف مسجل</p>
+                <p class="text-xs text-ttu-gray mt-2">{{ __('admin_dashboard.stats.staff') }}</p>
             </div>
             <div class="rounded-[2rem] neu-raised-white p-6 text-center">
                 <p class="text-3xl font-display font-extrabold text-ttu-red">{{ $stats['total_doctors'] }}</p>
-                <p class="text-xs text-ttu-gray mt-2">دكتور</p>
+                <p class="text-xs text-ttu-gray mt-2">{{ __('admin_dashboard.stats.doctors') }}</p>
             </div>
             <div class="rounded-[2rem] neu-raised-white p-6 text-center">
                 <p class="text-3xl font-display font-extrabold text-ttu-red">{{ $stats['today_bookings'] }}</p>
-                <p class="text-xs text-ttu-gray mt-2">حجز اليوم</p>
+                <p class="text-xs text-ttu-gray mt-2">{{ __('admin_dashboard.stats.today_bookings') }}</p>
             </div>
         </div>
 
         {{-- ============ الإحصائيات والتحليلات ============ --}}
-        <h3 class="font-display text-lg font-bold mb-6">الإحصائيات والتحليلات</h3>
+        <h3 class="font-display text-lg font-bold mb-6">{{ __('admin_dashboard.analytics_heading') }}</h3>
 
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
 
             {{-- الحجوزات هذا الأسبوع --}}
             <div class="rounded-[2rem] neu-raised-white p-6">
                 <div class="flex items-center justify-between mb-1">
-                    <h4 class="font-bold text-sm text-ttu-black">حجوزات الأسبوع</h4>
+                    <h4 class="font-bold text-sm text-ttu-black">{{ __('admin_dashboard.week_chart.heading') }}</h4>
                     <span class="text-xs font-bold px-3 py-1.5 rounded-full neu-pressed text-ttu-red">
-                        المجموع: {{ $weekBookingsTotal }}
+                        {{ __('admin_dashboard.week_chart.total', ['total' => $weekBookingsTotal]) }}
                     </span>
                 </div>
-                <p class="text-xs text-ttu-gray mb-4">التوزيع اليومي (الأحد–السبت)</p>
+                <p class="text-xs text-ttu-gray mb-4">{{ __('admin_dashboard.week_chart.subheading') }}</p>
                 <div class="h-64">
                     <canvas id="weekChartCanvas"></canvas>
                 </div>
@@ -61,8 +61,8 @@
 
             {{-- طلاب مقابل موظفين --}}
             <div class="rounded-[2rem] neu-raised-white p-6">
-                <h4 class="font-bold text-sm text-ttu-black mb-1">طلاب مقابل موظفين</h4>
-                <p class="text-xs text-ttu-gray mb-4">حجوزات هذا الأسبوع حسب الفئة</p>
+                <h4 class="font-bold text-sm text-ttu-black mb-1">{{ __('admin_dashboard.role_chart.heading') }}</h4>
+                <p class="text-xs text-ttu-gray mb-4">{{ __('admin_dashboard.role_chart.subheading') }}</p>
                 <div class="h-64">
                     <canvas id="roleChartCanvas"></canvas>
                 </div>
@@ -74,15 +74,15 @@
             <div class="flex flex-col lg:flex-row lg:items-start gap-8">
 
                 <div class="flex-1">
-                    <h4 class="font-bold text-sm text-ttu-black mb-1">نسبة الإشغال حسب الساعة</h4>
-                    <p class="text-xs text-ttu-gray mb-4">نسبة الخانات المحجوزة من إجمالي الخانات المتاحة لكل ساعة (على كامل السجل التاريخي)</p>
+                    <h4 class="font-bold text-sm text-ttu-black mb-1">{{ __('admin_dashboard.hourly_chart.heading') }}</h4>
+                    <p class="text-xs text-ttu-gray mb-4">{{ __('admin_dashboard.hourly_chart.description') }}</p>
                     <div class="h-72">
                         <canvas id="hourlyChartCanvas"></canvas>
                     </div>
                 </div>
 
                 <div class="lg:w-64 shrink-0">
-                    <h4 class="font-bold text-sm text-ttu-black mb-4">الأكثر ازدحامًا</h4>
+                    <h4 class="font-bold text-sm text-ttu-black mb-4">{{ __('admin_dashboard.busiest.heading') }}</h4>
                     <div class="space-y-3">
                         @forelse ($busiestHours as $i => $entry)
                             <div class="flex items-center justify-between gap-3 rounded-2xl neu-pressed px-4 py-3">
@@ -95,7 +95,7 @@
                                 <span class="text-sm font-bold text-ttu-red">{{ $entry['rate'] }}%</span>
                             </div>
                         @empty
-                            <p class="text-sm text-ttu-gray">لا توجد بيانات كافية بعد</p>
+                            <p class="text-sm text-ttu-gray">{{ __('admin_dashboard.busiest.empty') }}</p>
                         @endforelse
                     </div>
                 </div>
@@ -123,6 +123,7 @@
         const roleChart = @json($roleChart);
         const hourlyChart = @json($hourlyChart);
         const busiestHours = @json($busiestHours->pluck('hour'));
+        const occupancySuffix = @json(__('admin_dashboard.hourly_chart.occupancy_suffix'));
 
         new Chart(document.getElementById('weekChartCanvas'), {
             type: 'bar',
@@ -191,7 +192,7 @@
                         backgroundColor: '#0A0A0A',
                         padding: 10,
                         cornerRadius: 10,
-                        callbacks: { label: (ctx) => ctx.parsed.y + '% إشغال' },
+                        callbacks: { label: (ctx) => ctx.parsed.y + occupancySuffix },
                     },
                 },
                 scales: {

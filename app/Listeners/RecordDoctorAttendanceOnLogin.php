@@ -65,6 +65,6 @@ class RecordDoctorAttendanceOnLogin
             return;
         }
 
-        ActivityLog::record($user->id, 'doctor_check_in', 'تسجيل حضور تلقائي عند الدخول');
+        ActivityLog::record($user->id, 'doctor_check_in', 'activity_log.doctor_check_in');
     }
 }

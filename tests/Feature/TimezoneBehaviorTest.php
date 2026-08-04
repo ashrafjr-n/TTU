@@ -141,7 +141,10 @@ class TimezoneBehaviorTest extends TestCase
         $this->artisan('notifications:send-reminders')->assertExitCode(0);
 
         Notification::assertSentTo($student, AppointmentReminder::class, function ($notification) use ($booking) {
-            return $notification->toDatabase($booking->user)['body'] === "تذكير: عندك موعد الساعة {$booking->timeLabel()}";
+            $data = $notification->toDatabase($booking->user);
+
+            return $data['body_key'] === 'notifications.reminder.body'
+                && $data['body_params']['time'] === $booking->timeLabel();
         });
         Notification::assertSentToTimes($student, AppointmentReminder::class, 1);
 

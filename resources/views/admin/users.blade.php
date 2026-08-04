@@ -1,6 +1,6 @@
 @extends('layouts.main')
 
-@section('title', 'المستخدمون')
+@section('title', __('admin_users.title'))
 
 @section('content')
 
@@ -11,7 +11,7 @@
 
         @include('partials.admin-header')
 
-        <h2 class="font-display text-2xl sm:text-3xl font-extrabold mb-8">إدارة المستخدمين</h2>
+        <h2 class="font-display text-2xl sm:text-3xl font-extrabold mb-8">{{ __('admin_users.heading') }}</h2>
 
         @if (session('success'))
             <div class="rounded-2xl neu-pressed text-green-700 text-sm px-5 py-3.5 mb-6">{{ session('success') }}</div>
@@ -24,16 +24,16 @@
 
         {{-- فلترة وبحث --}}
         <form method="GET" action="{{ route('admin.users') }}" class="flex flex-wrap gap-3 mb-6">
-            <input type="text" name="search" value="{{ request('search') }}" placeholder="ابحث بالاسم أو البريد أو الرقم..."
+            <input type="text" name="search" value="{{ request('search') }}" placeholder="{{ __('admin_users.search_placeholder') }}"
                    class="flex-1 min-w-[220px] rounded-xl neu-pressed bg-ttu-cream border-0 px-4 py-2.5 text-sm focus:ring-2 focus:ring-ttu-red/30 outline-none">
             <select name="role" onchange="this.form.submit()"
                     class="rounded-xl neu-pressed bg-ttu-cream border-0 px-4 py-2.5 text-sm outline-none">
-                <option value="">كل الأدوار</option>
-                <option value="student" {{ request('role') == 'student' ? 'selected' : '' }}>طالب</option>
-                <option value="staff" {{ request('role') == 'staff' ? 'selected' : '' }}>موظف</option>
-                <option value="doctor" {{ request('role') == 'doctor' ? 'selected' : '' }}>دكتور</option>
+                <option value="">{{ __('admin_users.all_roles') }}</option>
+                <option value="student" {{ request('role') == 'student' ? 'selected' : '' }}>{{ __('common.roles.student') }}</option>
+                <option value="staff" {{ request('role') == 'staff' ? 'selected' : '' }}>{{ __('common.roles.staff') }}</option>
+                <option value="doctor" {{ request('role') == 'doctor' ? 'selected' : '' }}>{{ __('common.roles.doctor') }}</option>
             </select>
-            <button type="submit" class="neu-icon-btn bg-ttu-cream text-ttu-black text-sm font-bold px-6 rounded-xl">بحث</button>
+            <button type="submit" class="neu-icon-btn bg-ttu-cream text-ttu-black text-sm font-bold px-6 rounded-xl">{{ __('admin_users.search_button') }}</button>
         </form>
 
         {{-- قائمة المستخدمين --}}
@@ -54,35 +54,35 @@
                         <div class="flex items-center gap-3">
                             <span class="text-xs font-bold px-3 py-1.5 rounded-full neu-pressed
                                 {{ $u->role == 'student' ? 'text-blue-600' : ($u->role == 'staff' ? 'text-green-600' : 'text-purple-600') }}">
-                                {{ $u->role == 'student' ? 'طالب' : ($u->role == 'staff' ? 'موظف' : 'دكتور') }}
+                                {{ __('common.roles.'.$u->role) }}
                             </span>
 
                             <span class="text-xs font-bold px-3 py-1.5 rounded-full {{ $u->is_active ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-500' }}">
-                                {{ $u->is_active ? 'مفعّل' : 'معطّل' }}
+                                {{ $u->is_active ? __('admin_users.status.active') : __('admin_users.status.inactive') }}
                             </span>
 
                             <a href="{{ route('admin.users.activity', $u) }}"
                                class="neu-icon-btn bg-ttu-cream text-ttu-black text-sm font-bold px-4 py-2 rounded-xl">
-                                سجل النشاط
+                                {{ __('admin_users.activity_log_link') }}
                             </a>
 
                             @if ($u->isDoctor())
                                 <a href="{{ route('admin.doctors.edit', $u) }}"
                                    class="neu-icon-btn bg-ttu-cream text-ttu-black text-sm font-bold px-4 py-2 rounded-xl">
-                                    تعديل
+                                    {{ __('admin_users.edit') }}
                                 </a>
                             @endif
 
                             <form method="POST" action="{{ route('admin.users.toggle', $u) }}">
                                 @csrf
                                 <button type="submit" class="neu-icon-btn text-sm font-bold px-4 py-2 rounded-xl {{ $u->is_active ? 'bg-ttu-cream text-ttu-red hover:!bg-ttu-red hover:!text-white' : 'bg-ttu-cream text-green-600 hover:!bg-green-600 hover:!text-white' }}">
-                                    {{ $u->is_active ? 'تعطيل' : 'تفعيل' }}
+                                    {{ $u->is_active ? __('admin_users.toggle.deactivate') : __('admin_users.toggle.activate') }}
                                 </button>
                             </form>
                         </div>
                     </div>
                 @empty
-                    <p class="text-center text-sm text-ttu-gray py-10">لا يوجد مستخدمون مطابقون</p>
+                    <p class="text-center text-sm text-ttu-gray py-10">{{ __('admin_users.empty') }}</p>
                 @endforelse
             </div>
 

@@ -11,7 +11,7 @@ class EnsureUserHasRole
     public function handle(Request $request, Closure $next, string ...$roles): Response
     {
         if (!$request->user() || !in_array($request->user()->role, $roles)) {
-            abort(403, 'ليس لديك صلاحية الوصول لهذه الصفحة.');
+            abort(403, __('common.errors.forbidden'));
         }
 
         return $next($request);

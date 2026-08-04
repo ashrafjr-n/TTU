@@ -1,6 +1,6 @@
 @extends('layouts.main')
 
-@section('title', 'حول - عيادة TTU')
+@section('title', __('about.title'))
 
 @section('content')
 
@@ -15,16 +15,15 @@
 
         <div class="relative max-w-2xl mx-auto">
             <img src="{{ asset('images/TTU-logo.png') }}"
-                 alt="شعار جامعة TTU"
+                 alt="{{ __('about.logo_alt') }}"
                  class="w-24 h-24 sm:w-28 sm:h-28 mx-auto mb-6 object-contain rounded-3xl neu-icon bg-white p-3">
 
-            <span class="inline-block text-xs font-bold tracking-widest text-ttu-red mb-3">من نحن</span>
+            <span class="inline-block text-xs font-bold tracking-widest text-ttu-red mb-3">{{ __('about.hero.eyebrow') }}</span>
             <h1 class="font-display text-3xl sm:text-4xl lg:text-[2.75rem] font-extrabold leading-[1.3] mb-4">
-                عن عيادة TTU
+                {{ __('about.hero.heading') }}
             </h1>
             <p class="text-lg text-ttu-gray leading-relaxed max-w-xl mx-auto">
-                نظام إلكتروني ذكي لحجز مواعيد العيادة الطبية الجامعية، صُمم لتسهيل الوصول
-                إلى الرعاية الصحية على طلاب وموظفي الجامعة، بخطوات بسيطة وسريعة.
+                {{ __('home.about.paragraph_1') }}
             </p>
         </div>
     </section>
@@ -36,35 +35,33 @@
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-20 items-center">
 
                 <div>
-                    <span class="inline-block text-xs font-bold tracking-widest text-ttu-red mb-3">مشروع تخرج</span>
-                    <h2 class="font-display text-2xl sm:text-3xl font-extrabold mb-4">فكرة المشروع</h2>
+                    <span class="inline-block text-xs font-bold tracking-widest text-ttu-red mb-3">{{ __('about.project.eyebrow') }}</span>
+                    <h2 class="font-display text-2xl sm:text-3xl font-extrabold mb-4">{{ __('about.project.heading') }}</h2>
                     <p class="text-base sm:text-lg text-ttu-gray leading-relaxed mb-4">
-                        انطلق هذا المشروع من مشكلة يومية بسيطة: <span class="text-ttu-red font-semibold">الانتظار الطويل</span>
-                        أمام عيادة الجامعة وصعوبة معرفة الأوقات المتاحة مسبقًا.
+                        {{ __('about.project.paragraph_1_before') }} <span class="text-ttu-red font-semibold">{{ __('about.project.paragraph_1_highlight') }}</span>
+                        {{ __('about.project.paragraph_1_after') }}
                     </p>
                     <p class="text-base sm:text-lg text-ttu-gray leading-relaxed">
-                        جاء النظام كمشروع تخرج بهدف بناء منصة إلكترونية تنظّم عملية الحجز بالكامل،
-                        وتوزّع الأوقات بعدالة بين الطلاب والموظفين، وتمنح الطبيب أداة سهلة
-                        لإدارة جدوله اليومي.
+                        {{ __('about.project.paragraph_2') }}
                     </p>
                 </div>
 
                 <div class="grid grid-cols-2 gap-5">
                     <div class="rounded-2xl neu-pressed px-5 py-6 text-center">
                         <p class="font-display text-2xl sm:text-3xl font-extrabold text-ttu-red mb-1">100%</p>
-                        <p class="text-xs text-ttu-gray">إلكتروني بالكامل</p>
+                        <p class="text-xs text-ttu-gray">{{ __('about.project.stat_electronic') }}</p>
                     </div>
                     <div class="rounded-2xl neu-pressed px-5 py-6 text-center">
                         <p class="font-display text-2xl sm:text-3xl font-extrabold text-ttu-red mb-1">8</p>
-                        <p class="text-xs text-ttu-gray">ساعات دوام يوميًا</p>
+                        <p class="text-xs text-ttu-gray">{{ __('about.project.stat_hours') }}</p>
                     </div>
                     <div class="rounded-2xl neu-pressed px-5 py-6 text-center">
                         <p class="font-display text-2xl sm:text-3xl font-extrabold text-ttu-red mb-1">3</p>
-                        <p class="text-xs text-ttu-gray">أنواع حسابات</p>
+                        <p class="text-xs text-ttu-gray">{{ __('about.project.stat_account_types') }}</p>
                     </div>
                     <div class="rounded-2xl neu-pressed px-5 py-6 text-center">
                         <p class="font-display text-2xl sm:text-3xl font-extrabold text-ttu-red mb-1">0.20</p>
-                        <p class="text-xs text-ttu-gray">د.أ لكل دواء</p>
+                        <p class="text-xs text-ttu-gray">{{ __('about.project.stat_fee') }}</p>
                     </div>
                 </div>
 
@@ -74,8 +71,8 @@
         {{-- ============ عن العيادة ============ --}}
         <div class="relative rounded-[2.5rem] neu-raised py-14 px-6 lg:px-12">
             <div class="text-center max-w-2xl mx-auto mb-12">
-                <span class="inline-block text-xs font-bold tracking-widest text-ttu-red mb-3">العيادة</span>
-                <h2 class="font-display text-2xl sm:text-3xl font-extrabold">خدماتنا داخل الحرم الجامعي</h2>
+                <span class="inline-block text-xs font-bold tracking-widest text-ttu-red mb-3">{{ __('about.services.eyebrow') }}</span>
+                <h2 class="font-display text-2xl sm:text-3xl font-extrabold">{{ __('about.services.heading') }}</h2>
             </div>
 
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
@@ -84,24 +81,24 @@
                     <div class="w-14 h-14 rounded-2xl neu-icon bg-ttu-cream flex items-center justify-center mx-auto mb-4">
                         <i data-lucide="clock" class="w-6 h-6 text-ttu-red" stroke-width="1.6"></i>
                     </div>
-                    <h3 class="font-display font-bold text-base mb-1.5">دوام يومي</h3>
-                    <p class="text-sm text-ttu-gray">من الساعة 8 صباحًا حتى 4 عصرًا</p>
+                    <h3 class="font-display font-bold text-base mb-1.5">{{ __('about.services.hours_title') }}</h3>
+                    <p class="text-sm text-ttu-gray">{{ __('about.services.hours_desc') }}</p>
                 </div>
 
                 <div class="rounded-2xl neu-raised-white p-6 text-center">
                     <div class="w-14 h-14 rounded-2xl neu-icon bg-ttu-cream flex items-center justify-center mx-auto mb-4">
                         <i data-lucide="stethoscope" class="w-6 h-6 text-ttu-red" stroke-width="1.6"></i>
                     </div>
-                    <h3 class="font-display font-bold text-base mb-1.5">كشف طبي عام</h3>
-                    <p class="text-sm text-ttu-gray">لكافة طلاب وموظفي الجامعة</p>
+                    <h3 class="font-display font-bold text-base mb-1.5">{{ __('about.services.checkup_title') }}</h3>
+                    <p class="text-sm text-ttu-gray">{{ __('about.services.checkup_desc') }}</p>
                 </div>
 
                 <div class="rounded-2xl neu-raised-white p-6 text-center">
                     <div class="w-14 h-14 rounded-2xl neu-icon bg-ttu-cream flex items-center justify-center mx-auto mb-4">
                         <i data-lucide="map-pin" class="w-6 h-6 text-ttu-red" stroke-width="1.6"></i>
                     </div>
-                    <h3 class="font-display font-bold text-base mb-1.5">داخل الحرم الجامعي</h3>
-                    <p class="text-sm text-ttu-gray">قريبة من مبنى الطلاب الرئيسي</p>
+                    <h3 class="font-display font-bold text-base mb-1.5">{{ __('about.services.location_title') }}</h3>
+                    <p class="text-sm text-ttu-gray">{{ __('about.services.location_desc') }}</p>
                 </div>
 
             </div>
@@ -109,12 +106,12 @@
 
         {{-- ============ دعوة لإجراء ============ --}}
         <div class="relative rounded-[2.5rem] neu-raised py-14 px-6 lg:px-12 text-center">
-            <h2 class="font-display text-2xl sm:text-3xl font-extrabold mb-3">جاهز تحجز موعدك؟</h2>
+            <h2 class="font-display text-2xl sm:text-3xl font-extrabold mb-3">{{ __('about.cta.heading') }}</h2>
             <p class="text-ttu-gray mb-8 max-w-md mx-auto">
-                ما تضيع وقتك بالانتظار، احجز موعدك إلكترونيًا خلال ثوانٍ
+                {{ __('about.cta.subheading') }}
             </p>
             <a href="{{ route('home') }}" class="btn-hero cursor-pointer">
-                ابدأ الآن
+                {{ __('about.cta.button') }}
                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2.2" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M11.25 4.5L3.75 12l7.5 7.5M20.25 12H4.5" />
                 </svg>
@@ -128,8 +125,8 @@
 {{-- ============ فوتر بسيط ============ --}}
 <footer class="border-t border-black/10 bg-ttu-cream">
     <div class="max-w-7xl mx-auto px-6 py-8 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-ttu-gray">
-        <span>© 2026 عيادة TTU. جميع الحقوق محفوظة.</span>
-        <span>مشروع تخرج — جامعة TTU</span>
+        <span>{{ __('common.footer.copyright') }}</span>
+        <span>{{ __('common.footer.project') }}</span>
     </div>
 </footer>
 

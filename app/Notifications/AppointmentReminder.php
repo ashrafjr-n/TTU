@@ -23,8 +23,9 @@ class AppointmentReminder extends Notification
     {
         return [
             'type' => 'reminder',
-            'title' => 'تذكير بموعدك',
-            'body' => "تذكير: عندك موعد الساعة {$this->booking->timeLabel()}",
+            'title_key' => 'notifications.reminder.title',
+            'body_key' => 'notifications.reminder.body',
+            'body_params' => ['time' => $this->booking->timeLabel()],
             'url' => null,
         ];
     }

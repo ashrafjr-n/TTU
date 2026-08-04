@@ -29,8 +29,8 @@ class ContactController extends Controller
             'doctor_id' => 'required|integer|exists:users,id',
             'message' => 'required|string|max:2000',
         ], [
-            'doctor_id.required' => 'الرجاء اختيار الطبيب.',
-            'message.required' => 'الرجاء كتابة رسالتك.',
+            'doctor_id.required' => __('contact.errors.doctor_required'),
+            'message.required' => __('contact.errors.message_required'),
         ]);
 
         $doctor = User::where('role', 'doctor')->findOrFail($validated['doctor_id']);
@@ -43,6 +43,6 @@ class ContactController extends Controller
 
         $doctor->notify(new DoctorMessageReceived($message));
 
-        return back()->with('success', 'تم إرسال رسالتك للدكتور بنجاح.');
+        return back()->with('success', __('contact.flash.sent_success'));
     }
 }

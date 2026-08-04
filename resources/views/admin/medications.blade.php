@@ -1,6 +1,6 @@
 @extends('layouts.main')
 
-@section('title', 'إدارة الأدوية')
+@section('title', __('admin_medications.title'))
 
 @section('content')
 
@@ -11,7 +11,7 @@
 
         @include('partials.admin-header')
 
-        <h2 class="font-display text-2xl sm:text-3xl font-extrabold mb-8">إدارة الأدوية</h2>
+        <h2 class="font-display text-2xl sm:text-3xl font-extrabold mb-8">{{ __('admin_medications.heading') }}</h2>
 
         @if (session('success'))
             <div class="rounded-2xl neu-pressed text-green-700 text-sm px-5 py-3.5 mb-6">{{ session('success') }}</div>
@@ -28,18 +28,18 @@
 
         {{-- فورم إضافة دواء جديد --}}
         <div class="rounded-[2rem] neu-raised-white p-6 mb-6">
-            <h3 class="font-bold text-sm mb-4">إضافة دواء جديد</h3>
+            <h3 class="font-bold text-sm mb-4">{{ __('admin_medications.add_new') }}</h3>
             <form method="POST" action="{{ route('admin.medications.store') }}" class="flex flex-wrap gap-3">
                 @csrf
-                <input type="text" name="name" value="{{ old('name') }}" placeholder="اسم الدواء" required
+                <input type="text" name="name" value="{{ old('name') }}" placeholder="{{ __('admin_medications.name_placeholder') }}" required
                        class="flex-1 min-w-[200px] rounded-xl neu-pressed bg-ttu-cream border-0 px-4 py-2.5 text-sm focus:ring-2 focus:ring-ttu-red/30 outline-none">
-                <input type="number" name="stock_quantity" value="{{ old('stock_quantity') }}" min="0" placeholder="الكمية الابتدائية" required
+                <input type="number" name="stock_quantity" value="{{ old('stock_quantity') }}" min="0" placeholder="{{ __('admin_medications.initial_stock_placeholder') }}" required
                        class="w-44 rounded-xl neu-pressed bg-ttu-cream border-0 px-4 py-2.5 text-sm focus:ring-2 focus:ring-ttu-red/30 outline-none">
-                <input type="text" name="unit" value="{{ old('unit') }}" placeholder="الوحدة (شريط، علبة...)"
+                <input type="text" name="unit" value="{{ old('unit') }}" placeholder="{{ __('admin_medications.unit_placeholder') }}"
                        class="w-44 rounded-xl neu-pressed bg-ttu-cream border-0 px-4 py-2.5 text-sm focus:ring-2 focus:ring-ttu-red/30 outline-none">
-                <input type="number" name="low_stock_threshold" value="{{ old('low_stock_threshold', 10) }}" min="0" placeholder="حد التنبيه" required
+                <input type="number" name="low_stock_threshold" value="{{ old('low_stock_threshold', 10) }}" min="0" placeholder="{{ __('admin_medications.threshold_placeholder') }}" required
                        class="w-36 rounded-xl neu-pressed bg-ttu-cream border-0 px-4 py-2.5 text-sm focus:ring-2 focus:ring-ttu-red/30 outline-none">
-                <button type="submit" class="btn-hero !py-2.5 text-sm">إضافة</button>
+                <button type="submit" class="btn-hero !py-2.5 text-sm">{{ __('admin_medications.add_button') }}</button>
             </form>
         </div>
 
@@ -56,44 +56,44 @@
                             <div>
                                 <p class="text-sm font-bold text-ttu-black">{{ $m->name }}</p>
                                 <p class="text-xs text-ttu-gray mt-0.5">
-                                    الوحدة: {{ $m->unit ?: '—' }} · حد التنبيه: {{ $m->low_stock_threshold }}
+                                    {{ __('admin_medications.unit_label') }}: {{ $m->unit ?: '—' }} · {{ __('admin_medications.threshold_label') }}: {{ $m->low_stock_threshold }}
                                 </p>
                             </div>
                         </div>
 
                         <div class="flex flex-wrap items-center gap-3">
                             <div class="text-center rounded-xl neu-pressed px-4 py-2 min-w-[90px]">
-                                <p class="text-[10px] text-ttu-gray">الكمية الحالية</p>
+                                <p class="text-[10px] text-ttu-gray">{{ __('admin_medications.current_stock') }}</p>
                                 <p class="text-sm font-bold {{ $m->isLowStock() ? 'text-red-600' : 'text-ttu-black' }}">{{ $m->stock_quantity }}</p>
                             </div>
 
                             @if ($m->isLowStock())
-                                <span class="text-xs font-bold px-3 py-1.5 rounded-full bg-red-100 text-red-600">⚠ مخزون منخفض</span>
+                                <span class="text-xs font-bold px-3 py-1.5 rounded-full bg-red-100 text-red-600">{{ __('admin_medications.low_stock') }}</span>
                             @endif
 
                             @unless ($m->is_active)
-                                <span class="text-xs font-bold px-3 py-1.5 rounded-full bg-gray-100 text-gray-500">غير نشط</span>
+                                <span class="text-xs font-bold px-3 py-1.5 rounded-full bg-gray-100 text-gray-500">{{ __('admin_medications.inactive') }}</span>
                             @endunless
 
                             {{-- إضافة كمية --}}
                             <form method="POST" action="{{ route('admin.medications.restock', $m) }}" class="flex items-center gap-1.5">
                                 @csrf
-                                <input type="number" name="amount" min="1" required placeholder="الكمية"
+                                <input type="number" name="amount" min="1" required placeholder="{{ __('admin_medications.restock_placeholder') }}"
                                        class="w-20 rounded-lg neu-pressed bg-ttu-cream border-0 px-2 py-2 text-sm text-center outline-none">
                                 <button type="submit" class="neu-icon-btn bg-ttu-cream text-ttu-black text-xs font-bold px-3 py-2 rounded-lg whitespace-nowrap">
-                                    + إضافة كمية
+                                    {{ __('admin_medications.restock_button') }}
                                 </button>
                             </form>
 
                             <button type="button" onclick="document.getElementById('edit-med-{{ $m->id }}').classList.toggle('hidden')"
                                     class="neu-icon-btn bg-ttu-cream text-ttu-black text-xs font-bold px-3 py-2 rounded-lg">
-                                تعديل
+                                {{ __('admin_medications.edit') }}
                             </button>
 
                             <form method="POST" action="{{ route('admin.medications.toggle', $m) }}">
                                 @csrf
                                 <button type="submit" class="neu-icon-btn text-xs font-bold px-3 py-2 rounded-lg {{ $m->is_active ? 'bg-ttu-cream text-ttu-red hover:!bg-ttu-red hover:!text-white' : 'bg-ttu-cream text-green-600 hover:!bg-green-600 hover:!text-white' }}">
-                                    {{ $m->is_active ? 'تعطيل' : 'تفعيل' }}
+                                    {{ $m->is_active ? __('admin_medications.toggle.deactivate') : __('admin_medications.toggle.activate') }}
                                 </button>
                             </form>
                         </div>
@@ -106,25 +106,25 @@
                             @method('PUT')
                             <input type="hidden" name="medication_id" value="{{ $m->id }}">
                             <div class="flex-1 min-w-[160px]">
-                                <label class="block text-xs font-bold text-ttu-gray mb-1">الاسم</label>
+                                <label class="block text-xs font-bold text-ttu-gray mb-1">{{ __('admin_medications.edit_form.name_label') }}</label>
                                 <input type="text" name="name" value="{{ old('name', $m->name) }}" required
                                        class="w-full rounded-lg border-0 bg-white px-3 py-2 text-sm focus:ring-2 focus:ring-ttu-red/30 outline-none">
                             </div>
                             <div class="w-32">
-                                <label class="block text-xs font-bold text-ttu-gray mb-1">الوحدة</label>
+                                <label class="block text-xs font-bold text-ttu-gray mb-1">{{ __('admin_medications.edit_form.unit_label') }}</label>
                                 <input type="text" name="unit" value="{{ old('unit', $m->unit) }}"
                                        class="w-full rounded-lg border-0 bg-white px-3 py-2 text-sm focus:ring-2 focus:ring-ttu-red/30 outline-none">
                             </div>
                             <div class="w-32">
-                                <label class="block text-xs font-bold text-ttu-gray mb-1">حد التنبيه</label>
+                                <label class="block text-xs font-bold text-ttu-gray mb-1">{{ __('admin_medications.edit_form.threshold_label') }}</label>
                                 <input type="number" name="low_stock_threshold" min="0" value="{{ old('low_stock_threshold', $m->low_stock_threshold) }}" required
                                        class="w-full rounded-lg border-0 bg-white px-3 py-2 text-sm focus:ring-2 focus:ring-ttu-red/30 outline-none">
                             </div>
-                            <button type="submit" class="btn-hero !py-2.5 !px-5 text-sm">حفظ</button>
+                            <button type="submit" class="btn-hero !py-2.5 !px-5 text-sm">{{ __('admin_medications.edit_form.save') }}</button>
                         </form>
                     </div>
                 @empty
-                    <p class="text-center text-sm text-ttu-gray py-10">لا يوجد أدوية في الكتالوج</p>
+                    <p class="text-center text-sm text-ttu-gray py-10">{{ __('admin_medications.empty') }}</p>
                 @endforelse
             </div>
 
