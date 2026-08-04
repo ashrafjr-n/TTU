@@ -260,6 +260,46 @@
             </div>
         </div>
 
+        {{-- ============ حول العيادة ============ --}}
+        <div id="about" class="relative rounded-[2.5rem] neu-raised-white py-14 px-6 lg:px-12 mt-10">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-20 items-center">
+
+                <div>
+                    <span class="inline-block text-xs font-bold tracking-widest text-ttu-red mb-3">من نحن</span>
+                    <h2 class="font-display text-2xl sm:text-3xl font-extrabold mb-4">عن عيادة TTU</h2>
+                    <p class="text-base text-ttu-gray leading-relaxed mb-4">
+                        نظام إلكتروني ذكي لحجز مواعيد العيادة الطبية الجامعية، صُمم لتسهيل الوصول
+                        إلى الرعاية الصحية على طلاب وموظفي الجامعة، بخطوات بسيطة وسريعة.
+                    </p>
+                    <p class="text-base text-ttu-gray leading-relaxed">
+                        انطلق هذا المشروع من مشكلة يومية بسيطة: <span class="text-ttu-red font-semibold">الانتظار الطويل</span>
+                        أمام عيادة الجامعة، ليأتي كمشروع تخرج يبني منصة تنظّم عملية الحجز بالكامل
+                        وتمنح الطبيب أداة سهلة لإدارة جدوله اليومي.
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-2 gap-5">
+                    <div class="rounded-2xl neu-pressed px-5 py-6 text-center">
+                        <p class="font-display text-2xl sm:text-3xl font-extrabold text-ttu-red mb-1">100%</p>
+                        <p class="text-xs text-ttu-gray">إلكتروني بالكامل</p>
+                    </div>
+                    <div class="rounded-2xl neu-pressed px-5 py-6 text-center">
+                        <p class="font-display text-2xl sm:text-3xl font-extrabold text-ttu-red mb-1">8</p>
+                        <p class="text-xs text-ttu-gray">ساعات دوام يوميًا</p>
+                    </div>
+                    <div class="rounded-2xl neu-pressed px-5 py-6 text-center">
+                        <p class="font-display text-2xl sm:text-3xl font-extrabold text-ttu-red mb-1">3</p>
+                        <p class="text-xs text-ttu-gray">أنواع حسابات</p>
+                    </div>
+                    <div class="rounded-2xl neu-pressed px-5 py-6 text-center">
+                        <p class="font-display text-2xl sm:text-3xl font-extrabold text-ttu-red mb-1">0.20</p>
+                        <p class="text-xs text-ttu-gray">د.أ لكل دواء</p>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
     </div>
 </section>
 

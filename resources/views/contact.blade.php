@@ -74,9 +74,6 @@
             <div class="text-center max-w-xl mx-auto mb-10">
                 <span class="inline-block text-xs font-bold tracking-widest text-ttu-red mb-3">راسلنا</span>
                 <h2 class="font-display text-2xl sm:text-3xl font-extrabold">أرسل رسالتك</h2>
-                <p class="mt-3 text-ttu-gray">
-                    رسالتك تصل مباشرة لإدارة العيادة — هذه محاكاة داخل النظام، لا يوجد إرسال بريد فعلي حاليًا.
-                </p>
             </div>
 
             @if (session('success'))
