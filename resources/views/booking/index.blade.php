@@ -14,6 +14,13 @@
 
     <div class="max-w-4xl mx-auto px-6 py-16 lg:py-20">
 
+        <div class="flex justify-end mb-4">
+            <a href="{{ route('dashboard') }}"
+               class="neu-icon-btn bg-ttu-cream text-ttu-black text-sm font-bold px-5 py-2.5 rounded-xl shrink-0">
+                رجوع للوحة
+            </a>
+        </div>
+
         {{-- ============ رأس الصفحة ============ --}}
         <div class="relative rounded-[2.5rem] neu-raised-white p-8 mb-10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
             <div>
@@ -21,16 +28,9 @@
                 <h2 class="font-display text-2xl sm:text-3xl font-extrabold">احجز موعدك</h2>
             </div>
 
-            <div class="flex items-center gap-4">
-                <div class="rounded-2xl neu-pressed px-5 py-4 text-center">
-                    <p class="text-[11px] text-ttu-gray mb-1">رسوم الدواء</p>
-                    <p class="text-lg font-extrabold text-ttu-red">0.20 د.أ لكل دواء</p>
-                </div>
-
-                <a href="{{ route('dashboard') }}"
-                   class="neu-icon-btn bg-ttu-cream text-ttu-black text-sm font-bold px-5 py-2.5 rounded-xl shrink-0">
-                    رجوع للوحة
-                </a>
+            <div class="rounded-2xl neu-pressed px-5 py-4 text-center">
+                <p class="text-[11px] text-ttu-gray mb-1">رسوم الدواء</p>
+                <p class="text-lg font-extrabold text-ttu-red">0.20 د.أ لكل دواء</p>
             </div>
         </div>
 

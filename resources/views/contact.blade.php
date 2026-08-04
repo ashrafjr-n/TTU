@@ -8,6 +8,13 @@
 
 <div class="min-h-screen bg-ttu-cream">
 
+    <div class="max-w-6xl mx-auto px-6 pt-8 flex justify-end">
+        <a href="{{ route('dashboard') }}"
+           class="neu-icon-btn bg-ttu-cream text-ttu-black text-sm font-bold px-5 py-2.5 rounded-xl shrink-0">
+            رجوع للوحة
+        </a>
+    </div>
+
     {{-- ============ الهيرو ============ --}}
     <section class="relative pt-32 lg:pt-40 pb-16 px-6 text-center overflow-hidden">
 
