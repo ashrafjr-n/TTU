@@ -87,7 +87,7 @@
             @endif
 
             {{-- تواصل معنا --}}
-            <a href="#"
+            <a href="{{ route('contact') }}"
                class="group relative flex flex-col overflow-hidden p-7 rounded-[2rem] neu-raised-white neu-card-hover">
                 <div class="relative w-14 h-14 rounded-2xl neu-icon bg-ttu-cream flex items-center justify-center mb-5 group-hover:bg-ttu-red transition-colors duration-300">
                     <svg class="neu-wiggle w-6 h-6 text-ttu-red group-hover:text-white transition-colors duration-300" fill="none" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor">
@@ -95,7 +95,7 @@
                     </svg>
                 </div>
                 <h3 class="relative font-display text-base font-bold mb-1.5">تواصل معنا</h3>
-                <p class="relative text-xs text-ttu-gray leading-relaxed">تواصل مع العيادة</p>
+                <p class="relative text-xs text-ttu-gray leading-relaxed">راسل الدكتور مباشرة</p>
             </a>
 
             {{-- أدويتي --}}

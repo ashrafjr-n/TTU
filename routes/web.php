@@ -9,6 +9,7 @@ use App\Http\Controllers\AdminController;
 use App\Http\Controllers\VisitReportController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ContactController;
+use App\Http\Controllers\MessageController;
 
 Route::middleware(['auth', 'role:doctor'])->group(function () {
     Route::get('/dashboard/doctor', [DoctorController::class, 'index'])->name('dashboard.doctor');
@@ -17,6 +18,7 @@ Route::middleware(['auth', 'role:doctor'])->group(function () {
     // الحضور يُسجَّل تلقائيًا عند الدخول (RecordDoctorAttendanceOnLogin) —
     // الانصراف فقط يحتاج إجراءً يدويًا
     Route::post('/doctor/attendance/check-out', [DoctorController::class, 'checkOut'])->name('doctor.attendance.checkout');
+    Route::post('/messages/{message}/reply', [MessageController::class, 'reply'])->name('messages.reply');
 });
 
 // الصفحة الرئيسية - اختيار الدور
@@ -25,8 +27,6 @@ Route::get('/', function () {
 })->name('home');
 
 Route::view('/about', 'about')->name('about');
-Route::view('/contact', 'contact')->name('contact');
-Route::post('/contact', [ContactController::class, 'store'])->name('contact.store');
 
 // توجيه ذكي بعد تسجيل الدخول حسب الدور
 Route::middleware('auth')->get('/dashboard', function () {
@@ -56,6 +56,8 @@ Route::middleware(['auth', 'role:student,staff'])->group(function () {
     Route::post('/booking', [BookingController::class, 'store'])->name('booking.store');
     Route::delete('/booking/{booking}', [BookingController::class, 'destroy'])->name('booking.destroy');
     Route::get('/my-medications', [DashboardController::class, 'medications'])->name('medications.mine');
+    Route::get('/contact', [ContactController::class, 'create'])->name('contact');
+    Route::post('/contact', [ContactController::class, 'store'])->name('contact.store');
 });
 
 

@@ -23,7 +23,7 @@
                 نسعد بتواصلك معنا
             </h1>
             <p class="text-lg text-ttu-gray leading-relaxed max-w-xl mx-auto">
-                لأي استفسار أو ملاحظة حول عيادة TTU، تقدر تتواصل معنا عبر البيانات أدناه، أو ترسل رسالتك مباشرة من الفورم.
+                لأي استفسار أو ملاحظة، تقدر تراسل الدكتور مباشرة من الفورم وراح يوصلك الرد على نفس جرس الإشعارات.
             </p>
         </div>
     </section>
@@ -95,8 +95,19 @@
 
                 <div>
                     <label class="block text-sm font-medium text-ttu-black mb-1.5">الاسم</label>
-                    <input type="text" name="name" value="{{ old('name', auth()->user()->name ?? '') }}" required
-                           class="w-full px-4 py-2.5 rounded-xl neu-pressed bg-ttu-cream border-0 focus:ring-2 focus:ring-ttu-red/30 outline-none">
+                    <input type="text" value="{{ auth()->user()->name }}" disabled
+                           class="w-full px-4 py-2.5 rounded-xl neu-pressed bg-ttu-cream border-0 text-ttu-gray outline-none cursor-not-allowed">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-ttu-black mb-1.5">الدكتور</label>
+                    <select name="doctor_id" required
+                            class="w-full px-4 py-2.5 rounded-xl neu-pressed bg-ttu-cream border-0 focus:ring-2 focus:ring-ttu-red/30 outline-none">
+                        <option value="" disabled {{ old('doctor_id') ? '' : 'selected' }}>اختر الدكتور</option>
+                        @foreach ($doctors as $doctor)
+                            <option value="{{ $doctor->id }}" @selected(old('doctor_id') == $doctor->id)>{{ $doctor->name }}</option>
+                        @endforeach
+                    </select>
                 </div>
 
                 <div>

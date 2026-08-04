@@ -104,7 +104,11 @@
 
             <nav class="hidden md:flex items-center gap-8 text-sm font-semibold">
                 <a href="{{ route('home') }}" class="nav-link-dark">الرئيسية</a>
-                <a href="{{ route('contact') }}" class="nav-link-dark">تواصل</a>
+                @auth
+                    @if (auth()->user()->isStudent() || auth()->user()->isStaff())
+                        <a href="{{ route('contact') }}" class="nav-link-dark">تواصل</a>
+                    @endif
+                @endauth
             </nav>
 
         </div>

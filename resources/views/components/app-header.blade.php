@@ -69,6 +69,18 @@
                                     </div>
                                     <p class="text-xs text-ttu-gray mt-1 leading-relaxed">{{ $n->data['body'] ?? '' }}</p>
                                     <p class="text-[10px] text-ttu-gray/70 mt-1.5">{{ $n->created_at->diffForHumans() }}</p>
+
+                                    @if (($n->data['type'] ?? null) === 'doctor_message' && auth()->user()->isDoctor())
+                                        <div class="notif-reply-box mt-2 flex items-center gap-2" onclick="event.stopPropagation()">
+                                            <input type="text" placeholder="اكتب ردك..."
+                                                   class="notif-reply-input flex-1 min-w-0 rounded-lg neu-pressed bg-ttu-cream border-0 px-3 py-1.5 text-xs focus:ring-2 focus:ring-ttu-red/30 outline-none">
+                                            <button type="button" onclick="notifSendReply(this, {{ $n->data['message_id'] }})"
+                                                    class="shrink-0 rounded-lg bg-ttu-red text-white text-xs font-bold px-3 py-1.5">
+                                                رد
+                                            </button>
+                                        </div>
+                                        <p class="notif-reply-status hidden text-[10px] text-green-600 mt-1.5">تم إرسال الرد ✓</p>
+                                    @endif
                                 </div>
                             @empty
                                 <p class="text-xs text-ttu-gray text-center py-6">لا توجد إشعارات</p>
@@ -120,7 +132,11 @@
                    class="{{ $navLinkClass }} {{ $transparent && request()->routeIs('home') ? 'nav-link-active' : '' }}">
                     الرئيسية
                 </a>
-                <a href="{{ route('contact') }}" class="{{ $navLinkClass }}">تواصل</a>
+                @auth
+                    @if (auth()->user()->isStudent() || auth()->user()->isStaff())
+                        <a href="{{ route('contact') }}" class="{{ $navLinkClass }}">تواصل</a>
+                    @endif
+                @endauth
             </nav>
 
         </div>
@@ -141,9 +157,36 @@
 <script>
     const notifMarkReadTemplate = "{{ route('notifications.read', ['notification' => '__ID__']) }}";
     const notifMarkAllUrl = "{{ route('notifications.read-all') }}";
+    const notifReplyTemplate = "{{ route('messages.reply', ['message' => '__ID__']) }}";
 
     function notifCsrfToken() {
         return document.querySelector('meta[name="csrf-token"]').content;
+    }
+
+    function notifSendReply(button, messageId) {
+        const box = button.closest('.notif-reply-box');
+        const input = box.querySelector('.notif-reply-input');
+        const body = input.value.trim();
+        if (!body) return;
+
+        button.disabled = true;
+
+        fetch(notifReplyTemplate.replace('__ID__', messageId), {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': notifCsrfToken(),
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ body }),
+        })
+            .then((res) => res.json())
+            .then(() => {
+                box.classList.add('hidden');
+                const status = box.nextElementSibling;
+                if (status) status.classList.remove('hidden');
+            })
+            .catch(() => { button.disabled = false; });
     }
 
     function notifUpdateBadge(count) {

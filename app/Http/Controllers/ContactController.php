@@ -2,33 +2,47 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Message;
 use App\Models\User;
-use App\Notifications\ContactFormSubmitted;
+use App\Notifications\DoctorMessageReceived;
+use Illuminate\Contracts\View\View;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Notification;
 
 class ContactController extends Controller
 {
     /**
-     * استقبال فورم "تواصل معنا" — الصفحة عامة (لا تشترط تسجيل دخول)،
-     * فالاسم حقل حر دائمًا بدل الاعتماد على حساب مسجَّل. لا يوجد إرسال بريد
-     * فعلي؛ الرسالة تصل كإشعار داخلي لكل حسابات المدير.
+     * فورم "تواصل" — طالب أو موظف يختار أحد الأطباء ويرسله رسالة. الاسم
+     * دائمًا اسم الحساب المسجَّل دخوله (الحقل معطّل بالفورم)، فلا داعي
+     * لقبوله من الطلب.
      */
-    public function store(Request $request)
+    public function create(): View
+    {
+        return view('contact', [
+            'doctors' => User::where('role', 'doctor')->orderBy('name')->get(),
+        ]);
+    }
+
+    public function store(Request $request): RedirectResponse
     {
         $validated = $request->validate([
-            'name' => 'required|string|max:255',
+            'doctor_id' => 'required|integer|exists:users,id',
             'message' => 'required|string|max:2000',
         ], [
-            'name.required' => 'الرجاء إدخال اسمك.',
+            'doctor_id.required' => 'الرجاء اختيار الطبيب.',
             'message.required' => 'الرجاء كتابة رسالتك.',
         ]);
 
-        Notification::send(
-            User::where('role', 'admin')->get(),
-            new ContactFormSubmitted($validated['name'], $validated['message'])
-        );
+        $doctor = User::where('role', 'doctor')->findOrFail($validated['doctor_id']);
 
-        return back()->with('success', 'تم إرسال رسالتك بنجاح، سنتواصل معك قريبًا.');
+        $message = Message::create([
+            'sender_id' => $request->user()->id,
+            'recipient_id' => $doctor->id,
+            'body' => $validated['message'],
+        ]);
+
+        $doctor->notify(new DoctorMessageReceived($message));
+
+        return back()->with('success', 'تم إرسال رسالتك للدكتور بنجاح.');
     }
 }

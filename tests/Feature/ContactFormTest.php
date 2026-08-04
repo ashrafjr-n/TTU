@@ -2,110 +2,139 @@
 
 namespace Tests\Feature;
 
+use App\Models\Message;
 use App\Models\User;
-use App\Notifications\ContactFormSubmitted;
+use App\Notifications\DoctorMessageReceived;
+use App\Notifications\MessageReplyReceived;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Notification;
 use Tests\TestCase;
 
 /**
- * فورم "تواصل معنا": الصفحة عامة (بدون تسجيل دخول)، والإرسال يُنشئ إشعارًا
- * لكل حسابات المدير — محاكاة داخلية بلا بريد فعلي.
+ * فورم "تواصل": مقصور على الطالب/الموظف المسجّل دخوله، يختار أحد الأطباء
+ * من قائمة ويرسله رسالة تظهر كإشعار عند الدكتور (مع اسم المرسل والنص)،
+ * ويقدر الدكتور يرد عليها من نفس لوحة الإشعارات فيوصل الرد للمُرسِل الأصلي.
  */
 class ContactFormTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_the_contact_page_is_publicly_accessible(): void
+    private function student(): User
+    {
+        return User::factory()->create(['role' => 'student', 'identifier' => fake()->unique()->numerify('########')]);
+    }
+
+    private function staff(): User
+    {
+        return User::factory()->create(['role' => 'staff', 'identifier' => fake()->unique()->numerify('########')]);
+    }
+
+    private function doctor(): User
+    {
+        return User::factory()->create(['role' => 'doctor', 'identifier' => fake()->unique()->numerify('########')]);
+    }
+
+    public function test_a_guest_is_redirected_to_login(): void
     {
         $response = $this->get(route('contact'));
 
-        $response->assertOk();
-        $response->assertSee('تواصل معنا');
-        $response->assertSee('XXX-XXXXXXX');
-        $response->assertSee('clinic@xxx.edu.jo');
-        $response->assertSee('8 صباحًا حتى 4 عصرًا');
+        $response->assertRedirect(route('login'));
     }
 
-    public function test_a_guest_can_submit_the_contact_form(): void
+    public function test_a_doctor_cannot_access_the_contact_page(): void
+    {
+        $response = $this->actingAs($this->doctor())->get(route('contact'));
+
+        $response->assertForbidden();
+    }
+
+    public function test_an_admin_cannot_access_the_contact_page(): void
+    {
+        $admin = User::factory()->create(['role' => 'admin', 'identifier' => fake()->unique()->numerify('########')]);
+
+        $response = $this->actingAs($admin)->get(route('contact'));
+
+        $response->assertForbidden();
+    }
+
+    public function test_a_student_can_view_the_contact_page_with_the_doctor_list(): void
+    {
+        $doctor = $this->doctor();
+        $student = $this->student();
+
+        $response = $this->actingAs($student)->get(route('contact'));
+
+        $response->assertOk();
+        $response->assertSee($doctor->name);
+    }
+
+    public function test_a_student_can_send_a_message_to_a_doctor(): void
     {
         Notification::fake();
 
-        $admin = User::factory()->create(['role' => 'admin', 'identifier' => 'admin-contact']);
+        $doctor = $this->doctor();
+        $student = $this->student();
 
-        $response = $this->post(route('contact.store'), [
-            'name' => 'زائر مهتم',
+        $response = $this->actingAs($student)->post(route('contact.store'), [
+            'doctor_id' => $doctor->id,
             'message' => 'عندي استفسار عن مواعيد العيادة.',
         ]);
 
         $response->assertSessionHas('success');
         $response->assertSessionDoesntHaveErrors();
 
-        Notification::assertSentTo($admin, ContactFormSubmitted::class);
-    }
-
-    public function test_the_notification_carries_the_senders_name_and_message(): void
-    {
-        Notification::fake();
-        $admin = User::factory()->create(['role' => 'admin', 'identifier' => 'admin-contact-2']);
-
-        $this->post(route('contact.store'), [
-            'name' => 'أحمد',
-            'message' => 'شكرًا على الخدمة الممتازة.',
+        $this->assertDatabaseHas('messages', [
+            'sender_id' => $student->id,
+            'recipient_id' => $doctor->id,
+            'body' => 'عندي استفسار عن مواعيد العيادة.',
         ]);
 
-        Notification::assertSentTo($admin, function (ContactFormSubmitted $notification) use ($admin) {
-            $data = $notification->toDatabase($admin);
-
-            return $data['type'] === 'contact_message'
-                && str_contains($data['body'], 'أحمد')
-                && str_contains($data['body'], 'شكرًا على الخدمة الممتازة.');
-        });
+        Notification::assertSentTo($doctor, DoctorMessageReceived::class);
     }
 
-    public function test_all_admin_accounts_receive_the_notification(): void
+    public function test_a_staff_member_can_send_a_message_to_a_doctor(): void
     {
         Notification::fake();
-        $admin1 = User::factory()->create(['role' => 'admin', 'identifier' => 'admin-a']);
-        $admin2 = User::factory()->create(['role' => 'admin', 'identifier' => 'admin-b']);
-        $student = User::factory()->create(['role' => 'student', 'identifier' => '20219999']);
 
-        $this->post(route('contact.store'), [
-            'name' => 'موظف',
+        $doctor = $this->doctor();
+        $staff = $this->staff();
+
+        $this->actingAs($staff)->post(route('contact.store'), [
+            'doctor_id' => $doctor->id,
+            'message' => 'سؤال بخصوص الدوام.',
+        ])->assertSessionHas('success');
+
+        Notification::assertSentTo($doctor, DoctorMessageReceived::class);
+    }
+
+    public function test_the_name_field_cannot_be_overridden_by_the_request(): void
+    {
+        Notification::fake();
+
+        $doctor = $this->doctor();
+        $student = $this->student();
+
+        $this->actingAs($student)->post(route('contact.store'), [
+            'doctor_id' => $doctor->id,
             'message' => 'رسالة تجريبية.',
+            'name' => 'اسم مزيف',
         ]);
 
-        Notification::assertSentTo($admin1, ContactFormSubmitted::class);
-        Notification::assertSentTo($admin2, ContactFormSubmitted::class);
-        Notification::assertNotSentTo($student, ContactFormSubmitted::class);
+        $message = Message::first();
+        $this->assertSame($student->id, $message->sender_id);
+        $this->assertSame($student->name, $message->sender->name);
     }
 
-    public function test_the_message_actually_appears_in_the_admins_notification_panel(): void
-    {
-        $admin = User::factory()->create(['role' => 'admin', 'identifier' => 'admin-contact-3']);
-
-        $this->post(route('contact.store'), [
-            'name' => 'سارة',
-            'message' => 'هل يوجد موعد فاضي اليوم؟',
-        ]);
-
-        $response = $this->actingAs($admin)->get(route('admin.dashboard'));
-
-        $response->assertOk();
-        $response->assertSee('رسالة تواصل جديدة');
-        $response->assertSee('سارة');
-    }
-
-    public function test_name_is_required(): void
+    public function test_doctor_id_is_required(): void
     {
         Notification::fake();
 
-        $response = $this->post(route('contact.store'), [
-            'name' => '',
-            'message' => 'رسالة بدون اسم.',
+        $response = $this->actingAs($this->student())->post(route('contact.store'), [
+            'doctor_id' => '',
+            'message' => 'رسالة بدون دكتور.',
         ]);
 
-        $response->assertSessionHasErrors('name');
+        $response->assertSessionHasErrors('doctor_id');
         Notification::assertNothingSent();
     }
 
@@ -113,8 +142,8 @@ class ContactFormTest extends TestCase
     {
         Notification::fake();
 
-        $response = $this->post(route('contact.store'), [
-            'name' => 'مستخدم',
+        $response = $this->actingAs($this->student())->post(route('contact.store'), [
+            'doctor_id' => $this->doctor()->id,
             'message' => '',
         ]);
 
@@ -122,18 +151,94 @@ class ContactFormTest extends TestCase
         Notification::assertNothingSent();
     }
 
-    public function test_a_logged_in_user_can_also_submit_the_form(): void
+    public function test_the_message_notification_shows_sender_name_and_body_to_the_doctor(): void
     {
-        Notification::fake();
-        $admin = User::factory()->create(['role' => 'admin', 'identifier' => 'admin-contact-4']);
-        $student = User::factory()->create(['role' => 'student', 'identifier' => '20218888']);
+        $doctor = $this->doctor();
+        $student = $this->student();
 
-        $response = $this->actingAs($student)->post(route('contact.store'), [
-            'name' => $student->name,
-            'message' => 'سؤال من طالب مسجّل دخول.',
+        $this->actingAs($student)->post(route('contact.store'), [
+            'doctor_id' => $doctor->id,
+            'message' => 'هل يوجد موعد فاضي اليوم؟',
         ]);
 
-        $response->assertSessionHas('success');
-        Notification::assertSentTo($admin, ContactFormSubmitted::class);
+        $response = $this->actingAs($doctor)->get(route('dashboard.doctor'));
+
+        $response->assertOk();
+        $response->assertSee($student->name);
+        $response->assertSee('هل يوجد موعد فاضي اليوم؟');
+    }
+
+    public function test_the_doctor_can_reply_and_the_sender_gets_notified(): void
+    {
+        $doctor = $this->doctor();
+        $student = $this->student();
+
+        $this->actingAs($student)->post(route('contact.store'), [
+            'doctor_id' => $doctor->id,
+            'message' => 'هل يوجد موعد فاضي اليوم؟',
+        ]);
+
+        $message = Message::first();
+
+        Notification::fake();
+
+        $response = $this->actingAs($doctor)->postJson(route('messages.reply', $message), [
+            'body' => 'نعم، تفضل الساعة 10.',
+        ]);
+
+        $response->assertOk();
+        $response->assertJson(['success' => true]);
+
+        $this->assertDatabaseHas('messages', [
+            'sender_id' => $doctor->id,
+            'recipient_id' => $student->id,
+            'body' => 'نعم، تفضل الساعة 10.',
+            'parent_message_id' => $message->id,
+        ]);
+
+        Notification::assertSentTo($student, MessageReplyReceived::class);
+    }
+
+    public function test_the_reply_appears_in_the_original_senders_notifications(): void
+    {
+        $doctor = $this->doctor();
+        $student = $this->student();
+
+        $this->actingAs($student)->post(route('contact.store'), [
+            'doctor_id' => $doctor->id,
+            'message' => 'هل يوجد موعد فاضي اليوم؟',
+        ]);
+
+        $message = Message::first();
+
+        $this->actingAs($doctor)->postJson(route('messages.reply', $message), [
+            'body' => 'نعم، تفضل الساعة 10.',
+        ]);
+
+        $response = $this->actingAs($student)->get(route('dashboard.student'));
+
+        $response->assertOk();
+        $response->assertSee($doctor->name);
+        $response->assertSee('نعم، تفضل الساعة 10.');
+    }
+
+    public function test_a_doctor_cannot_reply_to_a_message_addressed_to_someone_else(): void
+    {
+        $doctor = $this->doctor();
+        $otherDoctor = $this->doctor();
+        $student = $this->student();
+
+        $this->actingAs($student)->post(route('contact.store'), [
+            'doctor_id' => $doctor->id,
+            'message' => 'رسالة للدكتور الأول.',
+        ]);
+
+        $message = Message::first();
+
+        $response = $this->actingAs($otherDoctor)->postJson(route('messages.reply', $message), [
+            'body' => 'محاولة رد من دكتور آخر.',
+        ]);
+
+        $response->assertForbidden();
     }
 }

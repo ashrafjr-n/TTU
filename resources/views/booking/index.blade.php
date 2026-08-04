@@ -8,7 +8,6 @@
 
 @php
     $roleLabel = auth()->user()->isStudent() ? 'الطالب' : 'الموظف';
-    $dashboardRoute = auth()->user()->isStudent() ? route('dashboard.student') : route('dashboard.staff');
 @endphp
 
 <div class="min-h-[calc(100vh-80px)] bg-ttu-cream">
@@ -18,19 +17,20 @@
         {{-- ============ رأس الصفحة ============ --}}
         <div class="relative rounded-[2.5rem] neu-raised-white p-8 mb-10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
             <div>
-                <a href="{{ $dashboardRoute }}" class="text-sm text-ttu-gray hover:text-ttu-red transition-colors mb-3 inline-flex items-center gap-1">
-                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
-                    </svg>
-                    رجوع للرئيسية
-                </a>
                 <span class="inline-block text-xs font-bold tracking-widest text-ttu-red mb-1.5">حجز {{ $roleLabel }}</span>
                 <h2 class="font-display text-2xl sm:text-3xl font-extrabold">احجز موعدك</h2>
             </div>
 
-            <div class="rounded-2xl neu-pressed px-5 py-4 text-center">
-                <p class="text-[11px] text-ttu-gray mb-1">رسوم الدواء</p>
-                <p class="text-lg font-extrabold text-ttu-red">0.20 د.أ لكل دواء</p>
+            <div class="flex items-center gap-4">
+                <div class="rounded-2xl neu-pressed px-5 py-4 text-center">
+                    <p class="text-[11px] text-ttu-gray mb-1">رسوم الدواء</p>
+                    <p class="text-lg font-extrabold text-ttu-red">0.20 د.أ لكل دواء</p>
+                </div>
+
+                <a href="{{ route('dashboard') }}"
+                   class="neu-icon-btn bg-ttu-cream text-ttu-black text-sm font-bold px-5 py-2.5 rounded-xl shrink-0">
+                    رجوع للوحة
+                </a>
             </div>
         </div>
 
