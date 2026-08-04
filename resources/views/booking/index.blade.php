@@ -66,66 +66,91 @@
                 @endif
             </div>
 
-            {{-- ============ تبويبات الساعات ============ --}}
-            <div class="flex flex-wrap gap-2.5 mb-6" role="tablist" aria-label="اختر الساعة">
-                @foreach ($hours as $hourBlock)
+            {{-- ============ تبويبات الأيام ============ --}}
+            <div class="flex flex-wrap gap-2.5 mb-7" role="tablist" aria-label="اختر اليوم">
+                @foreach ($days as $day)
                     <button type="button"
                             role="tab"
-                            id="hour-tab-{{ $hourBlock['hour'] }}"
-                            data-hour="{{ $hourBlock['hour'] }}"
-                            aria-selected="{{ $hourBlock['hour'] === $defaultHour ? 'true' : 'false' }}"
-                            onclick="selectHour({{ $hourBlock['hour'] }})"
+                            id="day-tab-{{ $day['index'] }}"
+                            data-day="{{ $day['index'] }}"
+                            aria-selected="{{ $day['index'] === 0 ? 'true' : 'false' }}"
+                            onclick="selectDay({{ $day['index'] }})"
                             @class([
-                                'hour-tab rounded-xl px-4 py-2.5 text-xs font-bold whitespace-nowrap transition-colors',
-                                'neu-pressed text-ttu-red' => $hourBlock['hour'] === $defaultHour,
-                                'neu-icon-btn bg-ttu-cream text-ttu-black' => $hourBlock['hour'] !== $defaultHour,
+                                'day-tab rounded-2xl px-5 py-3 text-sm font-bold whitespace-nowrap transition-colors',
+                                'neu-pressed text-ttu-red' => $day['index'] === 0,
+                                'neu-icon-btn bg-ttu-cream text-ttu-black' => $day['index'] !== 0,
                             ])>
-                        {{ $hourBlock['label'] }}
+                        {{ $day['label'] }}
                     </button>
                 @endforeach
             </div>
 
-            {{-- ============ خانات الأوقات (كل ساعة مقسّمة لـ5 دقائق) ============ --}}
-            <div class="space-y-4">
-                @foreach ($hours as $hourBlock)
-                    <div id="hour-panel-{{ $hourBlock['hour'] }}"
-                         class="hour-panel rounded-[2rem] neu-raised-white p-6 sm:p-7 {{ $hourBlock['hour'] === $defaultHour ? '' : 'hidden' }}">
+            @foreach ($days as $day)
+                <div id="day-panel-{{ $day['index'] }}" class="day-panel {{ $day['index'] === 0 ? '' : 'hidden' }}">
 
-                        <div class="flex flex-wrap gap-2.5">
-                            @foreach ($hourBlock['slots'] as $slot)
-                                @php
-                                    $state = $slot['is_taken']
-                                        ? 'taken'
-                                        : ($slot['is_past'] ? 'past' : 'available');
-                                @endphp
-
-                                @if ($state === 'available')
-                                    <button type="button"
-                                            onclick="openBookModal({{ $slot['hour'] }}, {{ $slot['minute'] }}, '{{ $slot['time_label'] }}')"
-                                            @class([
-                                                'neu-icon-btn rounded-xl px-3.5 py-2.5 text-xs font-bold transition-colors',
-                                                'bg-ttu-cream text-ttu-yellow hover:!bg-ttu-yellow hover:!text-white' => $slot['released'],
-                                                'bg-ttu-cream text-green-600 hover:!bg-green-600 hover:!text-white' => !$slot['released'],
-                                            ])
-                                            title="{{ $slot['released'] ? 'وقت إضافي محرر من حصة الموظفين' : 'احجز هذا الوقت' }}">
-                                        {{ $slot['time_label'] }}
-                                    </button>
-
-                                @elseif ($state === 'taken')
-                                    <span class="neu-pressed rounded-xl px-3.5 py-2.5 text-xs font-bold text-ttu-red/70">
-                                        {{ $slot['time_label'] }}
-                                    </span>
-
-                                @else
-                                    <span class="neu-pressed rounded-xl px-3.5 py-2.5 text-xs font-bold text-ttu-gray/50">
-                                        {{ $slot['time_label'] }}
-                                    </span>
-                                @endif
-                            @endforeach
-                        </div>
+                    {{-- ============ تبويبات الساعات (لهذا اليوم) ============ --}}
+                    <div class="flex flex-wrap gap-2.5 mb-6" role="tablist" aria-label="اختر الساعة">
+                        @foreach ($day['hours'] as $hourBlock)
+                            <button type="button"
+                                    role="tab"
+                                    id="hour-tab-{{ $day['index'] }}-{{ $hourBlock['hour'] }}"
+                                    data-day="{{ $day['index'] }}"
+                                    data-hour="{{ $hourBlock['hour'] }}"
+                                    aria-selected="{{ $hourBlock['hour'] === $day['default_hour'] ? 'true' : 'false' }}"
+                                    onclick="selectHour({{ $day['index'] }}, {{ $hourBlock['hour'] }})"
+                                    @class([
+                                        'hour-tab rounded-xl px-4 py-2.5 text-xs font-bold whitespace-nowrap transition-colors',
+                                        'neu-pressed text-ttu-red' => $hourBlock['hour'] === $day['default_hour'],
+                                        'neu-icon-btn bg-ttu-cream text-ttu-black' => $hourBlock['hour'] !== $day['default_hour'],
+                                    ])>
+                                {{ $hourBlock['label'] }}
+                            </button>
+                        @endforeach
                     </div>
-                @endforeach
-            </div>
+
+                    {{-- ============ خانات الأوقات (كل ساعة مقسّمة لـ5 دقائق) ============ --}}
+                    <div class="space-y-4">
+                        @foreach ($day['hours'] as $hourBlock)
+                            <div id="hour-panel-{{ $day['index'] }}-{{ $hourBlock['hour'] }}"
+                                 class="hour-panel rounded-[2rem] neu-raised-white p-6 sm:p-7 {{ $hourBlock['hour'] === $day['default_hour'] ? '' : 'hidden' }}">
+
+                                <div class="flex flex-wrap gap-2.5">
+                                    @foreach ($hourBlock['slots'] as $slot)
+                                        @php
+                                            $state = $slot['is_taken']
+                                                ? 'taken'
+                                                : ($slot['is_past'] ? 'past' : 'available');
+                                        @endphp
+
+                                        @if ($state === 'available')
+                                            <button type="button"
+                                                    onclick="openBookModal('{{ $day['date'] }}', {{ $slot['hour'] }}, {{ $slot['minute'] }}, '{{ $slot['time_label'] }}', '{{ $day['label'] }}')"
+                                                    @class([
+                                                        'neu-icon-btn rounded-xl px-3.5 py-2.5 text-xs font-bold transition-colors',
+                                                        'bg-ttu-cream text-ttu-yellow hover:!bg-ttu-yellow hover:!text-white' => $slot['released'],
+                                                        'bg-ttu-cream text-green-600 hover:!bg-green-600 hover:!text-white' => !$slot['released'],
+                                                    ])
+                                                    title="{{ $slot['released'] ? 'وقت إضافي محرر من حصة الموظفين' : 'احجز هذا الوقت' }}">
+                                                {{ $slot['time_label'] }}
+                                            </button>
+
+                                        @elseif ($state === 'taken')
+                                            <span class="neu-pressed rounded-xl px-3.5 py-2.5 text-xs font-bold text-ttu-red/70">
+                                                {{ $slot['time_label'] }}
+                                            </span>
+
+                                        @else
+                                            <span class="neu-pressed rounded-xl px-3.5 py-2.5 text-xs font-bold text-ttu-gray/50">
+                                                {{ $slot['time_label'] }}
+                                            </span>
+                                        @endif
+                                    @endforeach
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
+            @endforeach
         @endif
 
     </div>
@@ -144,11 +169,12 @@
 
             <h3 class="font-display text-xl font-extrabold mb-2">تأكيد الحجز</h3>
             <p class="text-sm text-ttu-gray mb-8">
-                هل تريد تأكيد حجز موعدك الساعة <span id="bookModalTime" class="font-bold text-ttu-black"></span>؟
+                هل تريد تأكيد حجز موعدك <span id="bookModalDay" class="font-bold text-ttu-black"></span> الساعة <span id="bookModalTime" class="font-bold text-ttu-black"></span>؟
             </p>
 
             <form id="bookModalForm" method="POST" action="{{ route('booking.store') }}" class="flex gap-3">
                 @csrf
+                <input type="hidden" name="date" id="bookModalDate" value="">
                 <input type="hidden" name="hour" id="bookModalHour" value="">
                 <input type="hidden" name="minute" id="bookModalMinute" value="">
 
@@ -166,8 +192,24 @@
     </div>
 
     <script>
-        function selectHour(hour) {
-            document.querySelectorAll('.hour-tab').forEach(function (tab) {
+        function selectDay(dayIndex) {
+            document.querySelectorAll('.day-tab').forEach(function (tab) {
+                const isActive = Number(tab.dataset.day) === dayIndex;
+                tab.setAttribute('aria-selected', isActive ? 'true' : 'false');
+                tab.classList.toggle('neu-pressed', isActive);
+                tab.classList.toggle('text-ttu-red', isActive);
+                tab.classList.toggle('neu-icon-btn', !isActive);
+                tab.classList.toggle('bg-ttu-cream', !isActive);
+                tab.classList.toggle('text-ttu-black', !isActive);
+            });
+
+            document.querySelectorAll('.day-panel').forEach(function (panel) {
+                panel.classList.toggle('hidden', panel.id !== 'day-panel-' + dayIndex);
+            });
+        }
+
+        function selectHour(dayIndex, hour) {
+            document.querySelectorAll('.hour-tab[data-day="' + dayIndex + '"]').forEach(function (tab) {
                 const isActive = Number(tab.dataset.hour) === hour;
                 tab.setAttribute('aria-selected', isActive ? 'true' : 'false');
                 tab.classList.toggle('neu-pressed', isActive);
@@ -177,15 +219,19 @@
                 tab.classList.toggle('text-ttu-black', !isActive);
             });
 
+            const panelPrefix = 'hour-panel-' + dayIndex + '-';
             document.querySelectorAll('.hour-panel').forEach(function (panel) {
-                panel.classList.toggle('hidden', panel.id !== 'hour-panel-' + hour);
+                if (panel.id.indexOf(panelPrefix) !== 0) return;
+                panel.classList.toggle('hidden', panel.id !== panelPrefix + hour);
             });
         }
 
-        function openBookModal(hour, minute, timeLabel) {
+        function openBookModal(date, hour, minute, timeLabel, dayLabel) {
+            document.getElementById('bookModalDate').value = date;
             document.getElementById('bookModalHour').value = hour;
             document.getElementById('bookModalMinute').value = minute;
             document.getElementById('bookModalTime').textContent = timeLabel;
+            document.getElementById('bookModalDay').textContent = dayLabel;
 
             const overlay = document.getElementById('bookModalOverlay');
             const card = document.getElementById('bookModalCard');

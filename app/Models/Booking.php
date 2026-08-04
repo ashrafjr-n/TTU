@@ -14,6 +14,9 @@ class Booking extends Model
     const OPEN_HOUR = 8;
     const CLOSE_HOUR = 16;
 
+    /** عدد الأيام المعروضة/القابلة للحجز في صفحة الحجز: اليوم + يومين قادمين */
+    const BOOKING_WINDOW_DAYS = 3;
+
     /** دقائق حصة الطلاب ضمن كل ساعة (9 خانات) */
     const STUDENT_MINUTES = [0, 5, 10, 15, 20, 25, 30, 35, 40];
 
@@ -98,8 +101,10 @@ class Booking extends Model
      * بنافذة الخانة الأصلية الضيقة (5 دقائق) — لكن هذه الخانة أساسًا لا
      * "تتحرر" للطلاب إلا بعد أن يبدأ وقتها الأصلي فعليًا (وغالبًا ينتهي خلال
      * دقائق من الحجز نفسه)، فتصبح isUpcoming() خاطئة على الفور تقريبًا رغم
-     * أن الحجز جديد فعلًا. لذلك تبقى هذه الحجوزات "فعّالة" حتى نهاية دوام
-     * العيادة اليوم، بدل الالتزام بنافذتها الأصلية.
+     * أن الحجز جديد فعلًا. لذلك تبقى هذه الحجوزات "فعّالة" حتى نهاية يومها
+     * — بمقارنة التاريخ نفسه لا بساعة إغلاق ثابتة (16:00)، لأن تلك الساعة قد
+     * تكون ماضية أصلًا وقت إنشاء الحجز نفسه (حجز يُنشأ الساعة 20:00 مثلًا)
+     * فتجعله "غير فعّال" فور إنشائه وتفتح ثغرة حجز مزدوج.
      */
     public function isActiveFor(User $user): bool
     {
@@ -108,23 +113,27 @@ class Booking extends Model
         }
 
         if ($user->isStudent() && $this->isStaffMinute()) {
-            return $this->booking_date->isToday()
-                && now()->lt($this->booking_date->copy()->setTime(self::CLOSE_HOUR, 0));
+            return $this->booking_date->gte(\Illuminate\Support\Carbon::today());
         }
 
         return $this->isUpcoming();
     }
 
     /**
-     * حجز المستخدم الوحيد "الفعّال" حاليًا لتاريخ معيّن، إن وُجد. مستخدَمة من
-     * كل من BookingController (بوابة /booking) ومسارات لوحات التحكم (بوابة
+     * حجز المستخدم الوحيد "الفعّال" حاليًا (أي تاريخ)، إن وُجد. القاعدة
+     * حجز فعّال واحد فقط بالمستخدم في كل الأوقات — وليست مقيدة بتاريخ معيّن،
+     * كي لا يقدر مستخدم يملك عدة حجوزات فعّالة متزامنة عبر أيام مختلفة الآن
+     * بعد أن صارت صفحة الحجز تعرض أكثر من يوم. مستخدَمة من كل من
+     * BookingController (بوابة /booking) ومسارات لوحات التحكم (بوابة
      * الداشبورد) لضمان نفس تعريف "الفعّال" في كلا المكانين.
      */
-    public static function findActiveFor(User $user, \Carbon\Carbon $date, bool $lock = false): ?self
+    public static function findActiveFor(User $user, bool $lock = false): ?self
     {
         $query = self::where('user_id', $user->id)
-            ->where('booking_date', $date)
-            ->where('status', 'confirmed');
+            ->where('status', 'confirmed')
+            // لا حجز قبل اليوم يقدر يكون فعّالًا أصلًا (isActiveFor يرفضه دائمًا)،
+            // فتقييد الاستعلام بهذا يمنع تحميل كل السجلات التاريخية للمستخدم
+            ->where('booking_date', '>=', \Illuminate\Support\Carbon::today());
 
         if ($lock) {
             $query->lockForUpdate();
@@ -147,13 +156,13 @@ class Booking extends Model
     }
 
     /**
-     * بيانات حجز المستخدم "الفعّال" اليوم (إن وُجد)، بالشكل الجاهز لمودال
-     * "لديك حجز حاليًا" — تُستخدم من لوحات التحكم (لعرض المودال في مكانه)
-     * ومن BookingController (بوابة /booking).
+     * بيانات حجز المستخدم "الفعّال" حاليًا (إن وُجد، أي تاريخ)، بالشكل الجاهز
+     * لمودال "لديك حجز حاليًا" — تُستخدم من لوحات التحكم (لعرض المودال في
+     * مكانه) ومن BookingController (بوابة /booking).
      */
     public static function activeViewDataFor(User $user): ?array
     {
-        $booking = self::findActiveFor($user, \Illuminate\Support\Carbon::today());
+        $booking = self::findActiveFor($user);
 
         if (!$booking) {
             return null;

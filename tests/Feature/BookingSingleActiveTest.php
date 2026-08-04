@@ -174,4 +174,45 @@ class BookingSingleActiveTest extends TestCase
         $response = $this->actingAs($staff)->get(route('booking.index'));
         $response->assertDontSee('لديك حجز حاليًا');
     }
+
+    // ------------------------------------------------------------------
+    // ثغرة الحجز المزدوج التي شُحنت بدون أن يُلاحظها أحد: isActiveFor كانت
+    // تعتبر حجز الخانة المحررة "غير فعّال" فقط لأن الوقت الحالي (now())
+    // تجاوز ساعة إغلاق ثابتة (16:00) — بصرف النظر عن متى أُنشئ الحجز نفسه.
+    // حجز يُنشأ الساعة 15:46 (قبل الإغلاق، حجز صالح تمامًا) يجب أن يبقى
+    // "فعّالًا" ويمنع حجزًا ثانيًا حتى بعد أن تتجاوز الساعة 16:00 بنفس اليوم.
+    // ------------------------------------------------------------------
+
+    public function test_a_released_slot_booking_still_blocks_a_second_booking_after_close_hour(): void
+    {
+        Carbon::setTestNow(Carbon::today()->setTime(15, 46));
+        $user = $this->student();
+
+        $first = $this->actingAs($user)->post(route('booking.store'), ['hour' => 15, 'minute' => 45]);
+        $first->assertSessionHas('success');
+        $this->assertDatabaseHas('bookings', ['user_id' => $user->id, 'booking_hour' => 15, 'booking_minute' => 45, 'status' => 'confirmed']);
+
+        // الوقت الآن تجاوز ساعة إغلاق العيادة (16:00) لكن ما زلنا في نفس اليوم
+        Carbon::setTestNow(Carbon::today()->setTime(16, 30));
+
+        $indexResponse = $this->actingAs($user)->get(route('booking.index'));
+        $indexResponse->assertSee('لديك حجز حاليًا');
+        $indexResponse->assertSee('3:45 مساءً');
+
+        // محاولة حجز ثانية على خانة عادية صالحة تمامًا (غدًا الساعة 9:00) —
+        // لا يوجد سبب آخر يرفضها (ليست ماضية، ليست مخصصة للموظفين) سوى بوابة
+        // "حجز فعّال واحد"، فهذا يعزل الاختبار على تلك البوابة تحديدًا.
+        $second = $this->actingAs($user)->post(route('booking.store'), [
+            'date' => Carbon::tomorrow()->toDateString(),
+            'hour' => 9,
+            'minute' => 0,
+        ]);
+        $second->assertSessionHas('error');
+
+        $this->assertSame(
+            1,
+            Booking::where('user_id', $user->id)->where('status', 'confirmed')->count()
+        );
+        $this->assertDatabaseMissing('bookings', ['user_id' => $user->id, 'booking_hour' => 9, 'booking_minute' => 0]);
+    }
 }
