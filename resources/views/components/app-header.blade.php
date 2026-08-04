@@ -129,9 +129,7 @@
         {{-- اللوجو --}}
         <a href="{{ route('home') }}" class="flex items-center shrink-0">
             @if ($transparent)
-                <span class="logo-badge rounded-2xl px-4 py-2 flex items-center">
-                    <img src="{{ asset('images/TTU-Clinic.png') }}" alt="عيادة TTU" class="h-14 sm:h-16 w-auto">
-                </span>
+                <img src="{{ asset('images/TTU-Clinic.png') }}" alt="عيادة TTU" class="h-14 sm:h-16 w-auto">
             @else
                 <img src="{{ asset('images/TTU-Clinic.png') }}" alt="عيادة TTU" class="h-14 w-auto">
             @endif
