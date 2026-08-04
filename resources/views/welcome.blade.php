@@ -56,8 +56,8 @@
                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m4-9.5c0-1.38-1.79-2.5-4-2.5s-4 1.12-4 2.5S9.79 11 12 11s4 1.12 4 2.5S14.21 16 12 16s-4-1.12-4-2.5" />
                     </svg>
                     <div class="leading-tight">
-                        <p class="text-[10px] text-ttu-gray font-semibold">رسوم الحجز</p>
-                        <p class="text-xs font-bold text-ttu-black">0.25 د.أ</p>
+                        <p class="text-[10px] text-ttu-gray font-semibold">رسوم الدواء</p>
+                        <p class="text-xs font-bold text-ttu-black">0.20 د.أ لكل دواء</p>
                     </div>
                 </div>
 

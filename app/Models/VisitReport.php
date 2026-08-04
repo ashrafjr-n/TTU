@@ -38,4 +38,13 @@ class VisitReport extends Model
             ->withPivot('quantity')
             ->withTimestamps();
     }
+
+    /**
+     * رسوم هذا التقرير: 0.20 د.أ لكل دواء موصوف (بصرف النظر عن الكمية) —
+     * تفترض أن medications محمَّلة مسبقًا (eager load) لتفادي استعلام إضافي.
+     */
+    public function medicationsFee(): float
+    {
+        return $this->medications->count() * Medication::PRICE_PER_ITEM;
+    }
 }

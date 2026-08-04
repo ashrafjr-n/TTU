@@ -29,8 +29,8 @@
             </div>
 
             <div class="rounded-2xl neu-pressed px-5 py-4 text-center">
-                <p class="text-[11px] text-ttu-gray mb-1">رسوم الحجز</p>
-                <p class="text-lg font-extrabold text-ttu-red">0.25 د.أ</p>
+                <p class="text-[11px] text-ttu-gray mb-1">رسوم الدواء</p>
+                <p class="text-lg font-extrabold text-ttu-red">0.20 د.أ لكل دواء</p>
             </div>
         </div>
 

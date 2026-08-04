@@ -24,14 +24,23 @@
         </div>
 
         @if ($reports->isEmpty())
-            <div class="rounded-[2.5rem] neu-raised-white p-8 text-center py-16">
-                <div class="w-16 h-16 rounded-full neu-pressed flex items-center justify-center mx-auto mb-4">
-                    <svg class="w-7 h-7 text-ttu-gray" fill="none" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor">
+            <div class="rounded-[2.5rem] neu-raised-white p-8 text-center py-20">
+                <div class="w-20 h-20 rounded-full neu-pressed flex items-center justify-center mx-auto mb-5">
+                    <svg class="w-8 h-8 text-ttu-gray" fill="none" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor">
                         <rect x="3" y="9" width="18" height="6" rx="3" />
                         <line x1="12" y1="9" x2="12" y2="15" />
                     </svg>
                 </div>
-                <p class="text-sm text-ttu-gray">لا توجد تقارير زيارة حتى الآن</p>
+                <h3 class="font-display text-lg font-bold mb-2">لا توجد تقارير بعد</h3>
+                <p class="text-sm text-ttu-gray max-w-sm mx-auto mb-8">
+                    بمجرد ما يكمّل الطبيب تقرير أول زيارة لك، رح تظهر هنا كل التقارير والأدوية الموصوفة.
+                </p>
+                <a href="{{ route('booking.index') }}" class="btn-hero cursor-pointer">
+                    احجز موعدك الآن
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2.2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+                    </svg>
+                </a>
             </div>
         @else
             <div class="space-y-6">
@@ -87,7 +96,17 @@
                         </div>
 
                         <div>
-                            <p class="text-xs font-bold text-ttu-gray mb-3">الأدوية الموصوفة</p>
+                            <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+                                <p class="text-xs font-bold text-ttu-gray">الأدوية الموصوفة</p>
+
+                                @if ($report->medications->isNotEmpty())
+                                    <span class="text-xs font-bold text-ttu-red bg-red-50 rounded-full px-3 py-1.5">
+                                        الرسوم: {{ number_format(\App\Models\Medication::PRICE_PER_ITEM, 2) }} د.أ ×
+                                        {{ $report->medications->count() }} =
+                                        {{ number_format($report->medicationsFee(), 2) }} د.أ
+                                    </span>
+                                @endif
+                            </div>
 
                             @if ($report->medications->isEmpty())
                                 <p class="text-xs text-ttu-gray">لم توصف أدوية لهذه الزيارة</p>

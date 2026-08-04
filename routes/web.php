@@ -8,6 +8,7 @@ use App\Http\Controllers\DoctorController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\VisitReportController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\ContactController;
 
 Route::middleware(['auth', 'role:doctor'])->group(function () {
     Route::get('/dashboard/doctor', [DoctorController::class, 'index'])->name('dashboard.doctor');
@@ -25,6 +26,7 @@ Route::get('/', function () {
 
 Route::view('/about', 'about')->name('about');
 Route::view('/contact', 'contact')->name('contact');
+Route::post('/contact', [ContactController::class, 'store'])->name('contact.store');
 
 // توجيه ذكي بعد تسجيل الدخول حسب الدور
 Route::middleware('auth')->get('/dashboard', function () {

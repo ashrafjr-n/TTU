@@ -31,7 +31,9 @@ class DashboardController extends Controller
     }
 
     /**
-     * صفحة "أدويتي" — عرض قراءة فقط لتقارير زيارات المستخدم السابقة.
+     * صفحة "أدويتي" — عرض قراءة فقط لتقارير زيارات المستخدم السابقة، الأحدث
+     * أولًا. الترتيب بتاريخ/وقت الموعد نفسه (لا وقت إنشاء سجل التقرير)، فهو
+     * المعيار الأدق لِـ"أحدث زيارة" من منظور المريض.
      */
     public function medications(): View
     {
@@ -39,8 +41,9 @@ class DashboardController extends Controller
 
         $reports = VisitReport::with(['medications', 'booking'])
             ->whereHas('booking', fn ($q) => $q->where('user_id', $user->id))
-            ->orderByDesc('created_at')
-            ->get();
+            ->get()
+            ->sortByDesc(fn (VisitReport $report) => $report->booking->slotStart())
+            ->values();
 
         return view('medications.mine', [
             'reports' => $reports,

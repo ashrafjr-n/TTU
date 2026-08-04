@@ -10,6 +10,9 @@ class Medication extends Model
 {
     use HasFactory;
 
+    /** رسوم كل دواء موصوف ضمن تقرير زيارة (بصرف النظر عن الكمية) */
+    const PRICE_PER_ITEM = 0.20;
+
     protected $fillable = [
         'name',
         'stock_quantity',

@@ -63,8 +63,8 @@
                         <p class="text-xs text-ttu-gray">أنواع حسابات</p>
                     </div>
                     <div class="rounded-2xl neu-pressed px-5 py-6 text-center">
-                        <p class="font-display text-2xl sm:text-3xl font-extrabold text-ttu-red mb-1">0.25</p>
-                        <p class="text-xs text-ttu-gray">د.أ رسوم الحجز</p>
+                        <p class="font-display text-2xl sm:text-3xl font-extrabold text-ttu-red mb-1">0.20</p>
+                        <p class="text-xs text-ttu-gray">د.أ لكل دواء</p>
                     </div>
                 </div>
 
