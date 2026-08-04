@@ -9,6 +9,8 @@
 <div class="min-h-[calc(100vh-80px)] bg-ttu-cream">
     <div class="max-w-6xl mx-auto px-6 py-16 lg:py-20">
 
+        @include('partials.admin-header')
+
         <h2 class="font-display text-2xl sm:text-3xl font-extrabold mb-8">سجلات الجامعة</h2>
 
         @if (session('success'))
