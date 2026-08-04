@@ -7,7 +7,6 @@
 <x-app-header />
 
 @php
-    $initial = mb_substr(auth()->user()->name, 0, 1);
     $lastVisit = $recentBookings->first();
 @endphp
 
@@ -19,7 +18,11 @@
         <div class="relative rounded-[2.5rem] neu-raised-white p-8 mb-10 flex flex-col sm:flex-row sm:items-center gap-6">
 
             <div class="w-20 h-20 rounded-full neu-icon bg-gradient-to-br from-ttu-red to-ttu-red-dark flex items-center justify-center shrink-0">
-                <span class="font-display text-3xl font-extrabold text-white">{{ $initial }}</span>
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-9 h-9 text-white" fill="none" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M21.42 10.922a1 1 0 0 0-.019-1.838L12.83 5.18a2 2 0 0 0-1.66 0L2.6 9.08a1 1 0 0 0 0 1.832l8.57 3.908a2 2 0 0 0 1.66 0z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M22 10v6" />
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 12.5V16a6 3 0 0 0 12 0v-3.5" />
+                </svg>
             </div>
 
             <div class="flex-1">

@@ -33,7 +33,7 @@ button,
     color: #fff;
     font-weight: 600;
     padding-bottom: 6px;
-    transition: transform .3s ease;
+    transition: opacity .3s ease;
 }
 .nav-link::after {
     content: '';
@@ -46,7 +46,7 @@ button,
     opacity: 1;
     transition: opacity .3s ease;
 }
-.nav-link:hover { transform: scale(1.1); }
+.nav-link:hover { opacity: .8; }
 .nav-link:hover::after { opacity: 0; }
 .nav-link-active::after { opacity: 1; }
 
@@ -57,7 +57,7 @@ button,
     color: var(--color-ttu-black);
     font-weight: 600;
     padding-bottom: 6px;
-    transition: transform .3s ease, color .3s ease;
+    transition: color .3s ease;
 }
 .nav-link-dark::after {
     content: '';
@@ -70,7 +70,7 @@ button,
     opacity: 1;
     transition: opacity .3s ease;
 }
-.nav-link-dark:hover { color: var(--color-ttu-red); transform: scale(1.1); }
+.nav-link-dark:hover { color: var(--color-ttu-red); }
 .nav-link-dark:hover::after { opacity: 0; }
 
 /* =========================================================
@@ -122,18 +122,16 @@ button,
     transition: transform .3s var(--neu-bounce), box-shadow .3s ease;
 }
 .btn-hero:hover {
-    transform: translateY(-3px);
-    box-shadow: 9px 9px 20px rgba(30, 64, 175, .5), -7px -7px 18px rgba(105, 120, 255, .35);
+    box-shadow: inset 3px 3px 8px rgba(20, 40, 109, .4), inset -2px -2px 6px rgba(140, 150, 255, .25);
 }
 .btn-hero:active {
     transform: translateY(1px) scale(.97);
     box-shadow: inset 4px 4px 10px rgba(20, 40, 109, .5), inset -3px -3px 8px rgba(140, 150, 255, .3);
 }
 
-/* كروت الأدوار / كروت "لماذا نظامنا" — رفع لفوق فقط عند الهوفر بدون ميلان */
+/* كروت الأدوار — تأثير "غاطس" عند الهوفر (بدل الرفع والميلان) */
 .neu-card-hover:hover {
-    transform: translateY(-8px);
-    box-shadow: 14px 14px 28px var(--neu-dark), -12px -12px 26px var(--neu-light);
+    box-shadow: inset 8px 8px 18px var(--neu-dark), inset -8px -8px 18px var(--neu-light);
 }
 
 /* ترجرج الأيقونة عند هوفر الكارت */
@@ -209,8 +207,7 @@ button,
     transition: transform .3s var(--neu-bounce), box-shadow .3s ease, background-color .3s ease, color .3s ease;
 }
 .neu-icon-btn:hover {
-    transform: translateY(-2px) rotate(-4deg);
-    box-shadow: 7px 7px 16px var(--neu-dark), -6px -6px 16px var(--neu-light);
+    box-shadow: inset 3px 3px 8px var(--neu-dark), inset -3px -3px 8px var(--neu-light);
 }
 .neu-icon-btn:active {
     transform: scale(.94);
@@ -222,12 +219,12 @@ button,
     background: rgba(255, 255, 255, .12);
     backdrop-filter: blur(6px);
     border: 1px solid rgba(255, 255, 255, .25);
-    transition: transform .3s var(--neu-bounce), background-color .3s ease, border-color .3s ease;
+    transition: transform .3s var(--neu-bounce), background-color .3s ease, border-color .3s ease, box-shadow .3s ease;
 }
 .glass-icon-btn:hover {
-    transform: translateY(-2px) rotate(-4deg);
-    background: rgba(255, 255, 255, .2);
+    background: rgba(255, 255, 255, .08);
     border-color: rgba(29, 78, 216, .5);
+    box-shadow: inset 3px 3px 8px rgba(0, 0, 0, .25), inset -2px -2px 6px rgba(255, 255, 255, .15);
 }
 .glass-icon-btn:active { transform: scale(.94); }
 
@@ -239,8 +236,8 @@ button,
     transition: transform .3s var(--neu-bounce), background-color .3s ease, box-shadow .3s ease, color .3s ease;
 }
 .neu-icon-btn-onred:hover {
-    transform: translateY(-2px) rotate(-4deg);
-    background: rgba(255, 255, 255, .22);
+    background: rgba(255, 255, 255, .10);
+    box-shadow: inset 3px 3px 7px rgba(0, 0, 0, .25), inset -2px -2px 6px rgba(255, 255, 255, .1);
 }
 .neu-icon-btn-onred:active {
     transform: scale(.94);

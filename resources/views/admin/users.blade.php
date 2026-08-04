@@ -41,7 +41,7 @@
                     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-2xl neu-pressed px-5 py-4">
                         <div class="flex items-center gap-4">
                             <span class="w-11 h-11 rounded-full neu-icon bg-ttu-cream flex items-center justify-center shrink-0 font-display font-bold text-ttu-red">
-                                {{ mb_substr($u->name, 0, 1) }}
+                                {{ $u->nameInitial() }}
                             </span>
                             <div>
                                 <p class="text-sm font-bold text-ttu-black">{{ $u->name }}</p>

@@ -120,6 +120,7 @@
                    class="{{ $navLinkClass }} {{ $transparent && request()->routeIs('home') ? 'nav-link-active' : '' }}">
                     الرئيسية
                 </a>
+                <a href="{{ route('contact') }}" class="{{ $navLinkClass }}">تواصل</a>
                 <a href="{{ route('about') }}" class="{{ $navLinkClass }}">حول</a>
             </nav>
 

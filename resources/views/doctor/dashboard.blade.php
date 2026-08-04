@@ -7,7 +7,6 @@
 <x-app-header />
 
 @php
-    $initial = mb_substr(auth()->user()->name, 0, 1);
     $todayCount = $bookings->count();
 @endphp
 
@@ -19,7 +18,13 @@
         <div class="relative rounded-[2.5rem] neu-raised-white p-8 mb-10 flex flex-col sm:flex-row sm:items-center gap-6">
 
             <div class="w-20 h-20 rounded-full neu-icon bg-gradient-to-br from-ttu-black to-ttu-black flex items-center justify-center shrink-0">
-                <span class="font-display text-3xl font-extrabold text-white">{{ $initial }}</span>
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-9 h-9 text-white" fill="none" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M11 2v2" />
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 2v2" />
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 3H4a2 2 0 0 0-2 2v4a6 6 0 0 0 12 0V5a2 2 0 0 0-2-2h-1" />
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M8 15a6 6 0 0 0 12 0v-3" />
+                    <circle cx="20" cy="10" r="2" />
+                </svg>
             </div>
 
             <div class="flex-1">
