@@ -1,0 +1,206 @@
+<?php
+
+namespace Tests\Feature;
+
+use App\Models\Booking;
+use App\Models\User;
+use App\Notifications\BookingCancelledByClinic;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Notification;
+use Tests\TestCase;
+
+/**
+ * إلغاء الدكتور لحجز مريض: يجب أن يُسجَّل في سجل النشاط ويُشعَر المريض —
+ * قبل ذلك كان الإلغاء صامتًا تمامًا (لا سجل ولا إشعار) فيمكن أن يحضر
+ * المريض لموعد ملغى دون أن يعلم.
+ */
+class DoctorCancelBookingTest extends TestCase
+{
+    use RefreshDatabase;
+
+    protected function tearDown(): void
+    {
+        Carbon::setTestNow();
+        parent::tearDown();
+    }
+
+    private function doctor(): User
+    {
+        return User::factory()->create(['role' => 'doctor', 'identifier' => fake()->unique()->safeEmail()]);
+    }
+
+    private function patient(string $role = 'student'): User
+    {
+        return User::factory()->create([
+            'role' => $role,
+            'identifier' => fake()->unique()->numerify('########'),
+        ]);
+    }
+
+    private function bookingFor(User $patient): Booking
+    {
+        return Booking::create([
+            'user_id' => $patient->id,
+            'booking_date' => Carbon::today(),
+            'booking_hour' => 9,
+            'booking_minute' => 30,
+            'price' => Booking::PRICE,
+            'status' => 'confirmed',
+        ]);
+    }
+
+    public function test_cancelling_marks_the_booking_cancelled(): void
+    {
+        Carbon::setTestNow(Carbon::today()->setTime(8, 0));
+        $booking = $this->bookingFor($this->patient());
+
+        $response = $this->actingAs($this->doctor())
+            ->post(route('doctor.bookings.cancel', $booking));
+
+        $response->assertSessionHas('success');
+        $this->assertSame('cancelled', $booking->fresh()->status);
+    }
+
+    public function test_the_patient_receives_a_cancellation_notification(): void
+    {
+        Notification::fake();
+        Carbon::setTestNow(Carbon::today()->setTime(8, 0));
+
+        $patient = $this->patient();
+        $booking = $this->bookingFor($patient);
+
+        $this->actingAs($this->doctor())->post(route('doctor.bookings.cancel', $booking));
+
+        Notification::assertSentTo($patient, BookingCancelledByClinic::class);
+        Notification::assertSentToTimes($patient, BookingCancelledByClinic::class, 1);
+    }
+
+    public function test_the_notification_body_names_the_date_and_time_and_the_clinic(): void
+    {
+        Carbon::setTestNow(Carbon::today()->setTime(8, 0));
+
+        $patient = $this->patient();
+        $booking = $this->bookingFor($patient);
+
+        $this->actingAs($this->doctor())->post(route('doctor.bookings.cancel', $booking));
+
+        $data = $patient->fresh()->notifications()->first()->data;
+
+        $this->assertSame('booking_cancelled', $data['type']);
+        $this->assertSame('تم إلغاء موعدك', $data['title']);
+        $this->assertStringContainsString('تم إلغاء موعدك يوم', $data['body']);
+        $this->assertStringContainsString($booking->booking_date->translatedFormat('d F Y'), $data['body']);
+        $this->assertStringContainsString('9:30 صباحًا', $data['body']);
+        $this->assertStringContainsString('من قبل العيادة', $data['body']);
+    }
+
+    public function test_the_notification_is_visible_in_the_patients_notification_panel(): void
+    {
+        Carbon::setTestNow(Carbon::today()->setTime(8, 0));
+
+        $patient = $this->patient();
+        $booking = $this->bookingFor($patient);
+
+        $this->actingAs($this->doctor())->post(route('doctor.bookings.cancel', $booking));
+
+        // جرس الإشعارات في الهيدر يقرأ من نفس الجدول — الطالب يجب أن يرى النص
+        $response = $this->actingAs($patient->fresh())->get(route('dashboard.student'));
+
+        $response->assertOk();
+        $response->assertSee('تم إلغاء موعدك');
+        $response->assertSee('من قبل العيادة');
+    }
+
+    public function test_an_activity_log_entry_is_written_under_the_doctor(): void
+    {
+        Carbon::setTestNow(Carbon::today()->setTime(8, 0));
+
+        $doctor = $this->doctor();
+        $patient = $this->patient();
+        $booking = $this->bookingFor($patient);
+
+        $this->actingAs($doctor)->post(route('doctor.bookings.cancel', $booking));
+
+        // الفاعل هو الدكتور (عمود user_id في activity_logs = الفاعل)
+        $this->assertDatabaseHas('activity_logs', [
+            'user_id' => $doctor->id,
+            'action' => 'booking_cancelled_by_doctor',
+        ]);
+
+        $log = \App\Models\ActivityLog::where('action', 'booking_cancelled_by_doctor')->first();
+        $this->assertStringContainsString($patient->name, $log->description);
+        $this->assertStringContainsString($booking->booking_date->toDateString(), $log->description);
+        $this->assertStringContainsString('9:30 صباحًا', $log->description);
+    }
+
+    public function test_an_already_cancelled_booking_cannot_be_cancelled_again(): void
+    {
+        Notification::fake();
+        Carbon::setTestNow(Carbon::today()->setTime(8, 0));
+
+        $patient = $this->patient();
+        $booking = $this->bookingFor($patient);
+        $booking->update(['status' => 'cancelled']);
+
+        $response = $this->actingAs($this->doctor())
+            ->post(route('doctor.bookings.cancel', $booking));
+
+        $response->assertSessionHas('error');
+        Notification::assertNothingSent();
+        $this->assertDatabaseMissing('activity_logs', ['action' => 'booking_cancelled_by_doctor']);
+    }
+
+    public function test_cancelling_twice_notifies_the_patient_only_once(): void
+    {
+        Carbon::setTestNow(Carbon::today()->setTime(8, 0));
+
+        $doctor = $this->doctor();
+        $patient = $this->patient();
+        $booking = $this->bookingFor($patient);
+
+        $this->actingAs($doctor)->post(route('doctor.bookings.cancel', $booking));
+        $this->actingAs($doctor)->post(route('doctor.bookings.cancel', $booking));
+
+        $this->assertSame(1, $patient->fresh()->notifications()->count());
+        $this->assertSame(1, \App\Models\ActivityLog::where('action', 'booking_cancelled_by_doctor')->count());
+    }
+
+    public function test_a_staff_patient_is_notified_the_same_way(): void
+    {
+        Carbon::setTestNow(Carbon::today()->setTime(8, 0));
+
+        $patient = $this->patient('staff');
+        $booking = $this->bookingFor($patient);
+
+        $this->actingAs($this->doctor())->post(route('doctor.bookings.cancel', $booking));
+
+        $this->assertSame(1, $patient->fresh()->notifications()->count());
+    }
+
+    public function test_cancelling_frees_the_slot_for_someone_else(): void
+    {
+        Carbon::setTestNow(Carbon::today()->setTime(8, 0));
+
+        $booking = $this->bookingFor($this->patient());
+        $this->actingAs($this->doctor())->post(route('doctor.bookings.cancel', $booking));
+
+        // الخانة صارت متاحة — active_slot_key يُفرَّغ عند الإلغاء
+        $other = $this->patient();
+        $response = $this->actingAs($other)
+            ->post(route('booking.store'), ['hour' => 9, 'minute' => 30]);
+
+        $response->assertSessionHas('success');
+    }
+
+    public function test_a_non_doctor_cannot_cancel_a_booking(): void
+    {
+        Carbon::setTestNow(Carbon::today()->setTime(8, 0));
+
+        $patient = $this->patient();
+        $booking = $this->bookingFor($patient);
+
+        $this->actingAs($patient)->post(route('doctor.bookings.cancel', $booking))->assertForbidden();
+        $this->assertSame('confirmed', $booking->fresh()->status);
+    }
+}

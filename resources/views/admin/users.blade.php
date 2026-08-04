@@ -64,6 +64,13 @@
                                 سجل النشاط
                             </a>
 
+                            @if ($u->isDoctor())
+                                <a href="{{ route('admin.doctors.edit', $u) }}"
+                                   class="neu-icon-btn bg-ttu-cream text-ttu-black text-sm font-bold px-4 py-2 rounded-xl">
+                                    تعديل
+                                </a>
+                            @endif
+
                             <form method="POST" action="{{ route('admin.users.toggle', $u) }}">
                                 @csrf
                                 <button type="submit" class="neu-icon-btn text-sm font-bold px-4 py-2 rounded-xl {{ $u->is_active ? 'bg-ttu-cream text-ttu-red hover:!bg-ttu-red hover:!text-white' : 'bg-ttu-cream text-green-600 hover:!bg-green-600 hover:!text-white' }}">

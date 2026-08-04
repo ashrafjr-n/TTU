@@ -6,6 +6,7 @@ use App\Models\ActivityLog;
 use App\Models\Booking;
 use App\Models\DoctorAttendance;
 use App\Models\Medication;
+use App\Notifications\BookingCancelledByClinic;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
@@ -46,26 +47,11 @@ class DoctorController extends Controller
     }
 
     /**
-     * تسجيل حضور الدكتور لليوم (صف واحد بالضبط لكل دكتور/يوم)
-     */
-    public function checkIn()
-    {
-        $attendance = DoctorAttendance::firstOrCreate(
-            ['doctor_id' => Auth::id(), 'date' => Carbon::today()->toDateString()],
-            ['check_in_at' => now()]
-        );
-
-        if (!$attendance->wasRecentlyCreated) {
-            return back()->with('error', 'لقد سجّلت حضورك اليوم مسبقًا.');
-        }
-
-        ActivityLog::record(Auth::id(), 'doctor_check_in', 'تسجيل حضور');
-
-        return back()->with('success', 'تم تسجيل حضورك بنجاح.');
-    }
-
-    /**
-     * تسجيل انصراف الدكتور لنفس صف الحضور اليومي
+     * تسجيل انصراف الدكتور لنفس صف الحضور اليومي.
+     *
+     * الحضور نفسه يُسجَّل تلقائيًا عند تسجيل الدخول (راجع
+     * App\Listeners\RecordDoctorAttendanceOnLogin) — الانصراف يبقى إجراءً
+     * يدويًا لأن مغادرة العيادة قرار صريح لا يمكن استنتاجه من الجلسة.
      */
     public function checkOut()
     {
@@ -89,12 +75,29 @@ class DoctorController extends Controller
     }
 
     /**
-     * إلغاء حجز مؤكد (من جدول الدكتور)
+     * إلغاء حجز مؤكد (من جدول الدكتور).
+     *
+     * الفاعل هنا الدكتور لا المريض، لذلك: نتحقق أولًا أن الحجز ما زال مؤكدًا
+     * (كي لا يُلغى حجز ملغى مسبقًا فيُرسَل إشعار مكرر للمريض)، نسجّل الحدث في
+     * سجل النشاط تحت حساب الدكتور مع ذكر اسم المريض، ونُشعر المريض بالإلغاء —
+     * وإلا لن يعرف أن موعده أُلغي وقد يحضر للعيادة.
      */
     public function cancelBooking(Booking $booking)
     {
+        if ($booking->status !== 'confirmed') {
+            return back()->with('error', 'هذا الحجز غير قابل للإلغاء.');
+        }
+
         $booking->update(['status' => 'cancelled']);
 
-        return back()->with('success', 'تم إلغاء الحجز.');
+        ActivityLog::record(
+            Auth::id(),
+            'booking_cancelled_by_doctor',
+            "إلغاء حجز المريض {$booking->user->name} بتاريخ {$booking->booking_date->toDateString()} الساعة {$booking->timeLabel()}"
+        );
+
+        $booking->user->notify(new BookingCancelledByClinic($booking));
+
+        return back()->with('success', 'تم إلغاء الحجز وإشعار المريض.');
     }
 }

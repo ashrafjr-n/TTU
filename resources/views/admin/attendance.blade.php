@@ -125,37 +125,41 @@
             </div>
         </div>
 
-        {{-- ============ جدول عمل الأطباء ============ --}}
+        {{-- ============ جدول عمل الأطباء (عرض فقط) ============ --}}
         <div class="rounded-[2.5rem] neu-raised-white p-6 sm:p-8">
-            <h3 class="font-display text-lg font-bold mb-6">جدول عمل الأطباء الأسبوعي</h3>
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
+                <h3 class="font-display text-lg font-bold">جدول عمل الأطباء الأسبوعي</h3>
+                <p class="text-xs text-ttu-gray">
+                    أيام العمل تُعيَّن من صفحة تعديل حساب الدكتور
+                </p>
+            </div>
 
             <div class="space-y-4">
                 @foreach ($doctors as $doctor)
                     @php
                         $workingDays = $doctor->doctorSchedule->working_days ?? [];
                     @endphp
-                    <form method="POST" action="{{ route('admin.doctors.schedule.update', $doctor) }}"
-                          class="rounded-2xl neu-pressed px-5 py-4 flex flex-col lg:flex-row lg:items-center gap-4">
-                        @csrf
-                        @method('PUT')
+                    <div class="rounded-2xl neu-pressed px-5 py-4 flex flex-col lg:flex-row lg:items-center gap-4">
 
                         <p class="text-sm font-bold text-ttu-black w-40 shrink-0">{{ $doctor->name }}</p>
 
-                        <div class="flex flex-wrap gap-3 flex-1">
-                            @foreach ($dayLabels as $dayNum => $label)
-                                <label class="flex items-center gap-1.5 text-xs font-bold rounded-lg bg-white px-3 py-2 cursor-pointer">
-                                    <input type="checkbox" name="working_days[]" value="{{ $dayNum }}"
-                                           {{ in_array($dayNum, $workingDays, true) ? 'checked' : '' }}
-                                           class="rounded text-ttu-red focus:ring-ttu-red/30">
-                                    {{ $label }}
-                                </label>
-                            @endforeach
+                        <div class="flex flex-wrap gap-2 flex-1">
+                            @if (empty($workingDays))
+                                <span class="text-xs text-ttu-gray py-2">لم تُعيَّن أيام عمل</span>
+                            @else
+                                @foreach ($dayLabels as $dayNum => $label)
+                                    @if (in_array($dayNum, $workingDays, true))
+                                        <span class="text-xs font-bold rounded-lg bg-blue-50 text-blue-600 px-3 py-2">{{ $label }}</span>
+                                    @endif
+                                @endforeach
+                            @endif
                         </div>
 
-                        <button type="submit" class="neu-icon-btn bg-ttu-cream text-ttu-black text-sm font-bold px-5 py-2 rounded-xl shrink-0">
-                            حفظ
-                        </button>
-                    </form>
+                        <a href="{{ route('admin.doctors.edit', $doctor) }}"
+                           class="neu-icon-btn bg-ttu-cream text-ttu-black text-sm font-bold px-5 py-2 rounded-xl shrink-0">
+                            تعديل
+                        </a>
+                    </div>
                 @endforeach
             </div>
         </div>

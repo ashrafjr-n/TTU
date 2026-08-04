@@ -13,7 +13,8 @@ Route::middleware(['auth', 'role:doctor'])->group(function () {
     Route::get('/dashboard/doctor', [DoctorController::class, 'index'])->name('dashboard.doctor');
     Route::post('/doctor/bookings/{booking}/cancel', [DoctorController::class, 'cancelBooking'])->name('doctor.bookings.cancel');
     Route::post('/doctor/bookings/{booking}/report', [VisitReportController::class, 'store'])->name('doctor.bookings.report.store');
-    Route::post('/doctor/attendance/check-in', [DoctorController::class, 'checkIn'])->name('doctor.attendance.checkin');
+    // الحضور يُسجَّل تلقائيًا عند الدخول (RecordDoctorAttendanceOnLogin) —
+    // الانصراف فقط يحتاج إجراءً يدويًا
     Route::post('/doctor/attendance/check-out', [DoctorController::class, 'checkOut'])->name('doctor.attendance.checkout');
 });
 
@@ -62,6 +63,8 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::get('/users/{user}/activity', [AdminController::class, 'userActivity'])->name('users.activity');
     Route::get('/doctors/create', [AdminController::class, 'createDoctor'])->name('doctors.create');
     Route::post('/doctors', [AdminController::class, 'storeDoctor'])->name('doctors.store');
+    Route::get('/doctors/{doctor}/edit', [AdminController::class, 'editDoctor'])->name('doctors.edit');
+    Route::put('/doctors/{doctor}', [AdminController::class, 'updateDoctor'])->name('doctors.update');
     Route::get('/records', [AdminController::class, 'records'])->name('records');
     Route::post('/records', [AdminController::class, 'storeRecord'])->name('records.store');
     Route::delete('/records/{record}', [AdminController::class, 'destroyRecord'])->name('records.destroy');
@@ -71,7 +74,6 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::post('/medications/{medication}/restock', [AdminController::class, 'restockMedication'])->name('medications.restock');
     Route::post('/medications/{medication}/toggle', [AdminController::class, 'toggleMedicationStatus'])->name('medications.toggle');
     Route::get('/attendance', [AdminController::class, 'attendance'])->name('attendance');
-    Route::put('/doctors/{doctor}/schedule', [AdminController::class, 'updateDoctorSchedule'])->name('doctors.schedule.update');
     Route::get('/activity-log', [AdminController::class, 'activityLog'])->name('activity-log');
 });
 

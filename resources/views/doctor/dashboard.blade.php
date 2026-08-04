@@ -46,7 +46,7 @@
                 @if (!$todayAttendance)
                     <p class="text-sm font-bold text-ttu-black flex items-center gap-1.5">
                         <span class="w-2 h-2 rounded-full bg-ttu-gray"></span>
-                        لم تسجل حضورك بعد
+                        لا يوجد سجل حضور اليوم
                     </p>
                 @elseif (!$todayAttendance->check_out_at)
                     <p class="text-sm font-bold text-green-600 flex items-center gap-1.5">
@@ -65,12 +65,8 @@
             </div>
 
             <div>
-                @if (!$todayAttendance)
-                    <form method="POST" action="{{ route('doctor.attendance.checkin') }}">
-                        @csrf
-                        <button type="submit" class="btn-hero !py-2.5 !px-6 text-sm">تسجيل الحضور</button>
-                    </form>
-                @elseif (!$todayAttendance->check_out_at)
+                {{-- لا يوجد زر "تسجيل الحضور": الحضور يُسجَّل تلقائيًا لحظة الدخول --}}
+                @if ($todayAttendance && !$todayAttendance->check_out_at)
                     <form method="POST" action="{{ route('doctor.attendance.checkout') }}">
                         @csrf
                         <button type="submit" class="neu-icon-btn bg-ttu-cream text-ttu-red text-sm font-bold px-6 py-2.5 rounded-xl hover:!bg-ttu-red hover:!text-white">

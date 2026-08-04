@@ -168,7 +168,8 @@ class AdminController extends Controller
     }
 
     /**
-     * حفظ دكتور جديد
+     * حفظ دكتور جديد — أيام العمل الأسبوعية تُعيَّن هنا مع الحساب نفسه،
+     * فصفحة الحضور صارت للعرض فقط.
      */
     public function storeDoctor(Request $request)
     {
@@ -176,9 +177,11 @@ class AdminController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|string|lowercase|email|max:255|unique:'.User::class,
             'password' => ['required', 'confirmed', Password::defaults()],
+            'working_days' => 'nullable|array',
+            'working_days.*' => 'integer|min:0|max:6',
         ]);
 
-        User::create([
+        $doctor = User::create([
             'name' => $validated['name'],
             'email' => $validated['email'],
             'password' => Hash::make($validated['password']),
@@ -186,9 +189,68 @@ class AdminController extends Controller
             'identifier' => $validated['email'],
         ]);
 
+        DoctorSchedule::create([
+            'doctor_id' => $doctor->id,
+            'working_days' => $this->normalizeWorkingDays($validated['working_days'] ?? []),
+        ]);
+
         ActivityLog::record(Auth::id(), 'doctor_created', "إنشاء حساب دكتور: {$validated['name']} ({$validated['email']})");
 
         return redirect()->route('admin.users')->with('success', 'تم إضافة حساب الدكتور بنجاح.');
+    }
+
+    /**
+     * عرض صفحة تعديل حساب دكتور (البيانات الأساسية + أيام العمل الأسبوعية)
+     */
+    public function editDoctor(User $doctor)
+    {
+        abort_unless($doctor->isDoctor(), 404);
+
+        $doctor->load('doctorSchedule');
+
+        return view('admin.edit-doctor', compact('doctor'));
+    }
+
+    /**
+     * تحديث حساب دكتور — الاسم/البريد + أيام العمل. هذا المكان الوحيد الذي
+     * تُعدَّل منه أيام العمل بعد إنشاء الحساب.
+     */
+    public function updateDoctor(Request $request, User $doctor)
+    {
+        abort_unless($doctor->isDoctor(), 404);
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', Rule::unique('users', 'email')->ignore($doctor->id)],
+            'working_days' => 'nullable|array',
+            'working_days.*' => 'integer|min:0|max:6',
+        ]);
+
+        $doctor->update([
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+            // identifier للأطباء هو بريدهم (لا يوجد رقم جامعي/وظيفي لهم) —
+            // يجب أن يتبع البريد وإلا صار تسجيل الدخول بالـidentifier القديم
+            'identifier' => $validated['email'],
+        ]);
+
+        DoctorSchedule::updateOrCreate(
+            ['doctor_id' => $doctor->id],
+            ['working_days' => $this->normalizeWorkingDays($validated['working_days'] ?? [])]
+        );
+
+        ActivityLog::record(Auth::id(), 'doctor_updated', "تحديث حساب دكتور: \"{$doctor->name}\"");
+
+        return redirect()->route('admin.users')->with('success', "تم تحديث حساب \"{$doctor->name}\".");
+    }
+
+    /**
+     * قيم checkbox تصل كنصوص دائمًا — لازم تحويلها لأرقام صحيحة، لأن
+     * isWorkingOn() تقارنها بـ Carbon::dayOfWeek بمقارنة صارمة (strict)
+     */
+    private function normalizeWorkingDays(array $days): array
+    {
+        return collect($days)->map(fn ($day) => (int) $day)->unique()->sort()->values()->all();
     }
 
     /**
@@ -322,7 +384,8 @@ class AdminController extends Controller
 
     /**
      * صفحة الحضور: سجل يوم مختار (افتراضيًا اليوم) لكل الأطباء + المناوبون غدًا
-     * + فورم تعيين أيام العمل الأسبوعية لكل دكتور
+     * + عرض (للقراءة فقط) لجدول العمل الأسبوعي. التعديل نفسه يتم من صفحة
+     * تعديل حساب الدكتور.
      */
     public function attendance(Request $request)
     {
@@ -362,32 +425,6 @@ class AdminController extends Controller
             'onDutyTomorrow' => $onDutyTomorrow,
             'tomorrow' => $tomorrow,
         ]);
-    }
-
-    /**
-     * تعيين/تعديل أيام العمل الأسبوعية لدكتور معيّن
-     */
-    public function updateDoctorSchedule(Request $request, User $doctor)
-    {
-        abort_unless($doctor->isDoctor(), 404);
-
-        $validated = $request->validate([
-            'working_days' => 'nullable|array',
-            'working_days.*' => 'integer|min:0|max:6',
-        ]);
-
-        // قيم checkbox تصل كنصوص دائمًا — لازم تحويلها لأرقام صحيحة، لأن
-        // isWorkingOn() تقارنها بـ Carbon::dayOfWeek بمقارنة صارمة (strict)
-        $workingDays = collect($validated['working_days'] ?? [])->map(fn ($day) => (int) $day)->values()->all();
-
-        DoctorSchedule::updateOrCreate(
-            ['doctor_id' => $doctor->id],
-            ['working_days' => $workingDays]
-        );
-
-        ActivityLog::record(Auth::id(), 'doctor_schedule_updated', "تحديث جدول عمل \"{$doctor->name}\"");
-
-        return back()->with('success', "تم تحديث جدول عمل \"{$doctor->name}\".");
     }
 
     /**
