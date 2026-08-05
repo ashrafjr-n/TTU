@@ -14,10 +14,10 @@
         <h2 class="font-display text-2xl sm:text-3xl font-extrabold mb-8">{{ __('admin_users.heading') }}</h2>
 
         @if (session('success'))
-            <div class="rounded-2xl neu-pressed text-green-700 text-sm px-5 py-3.5 mb-6">{{ session('success') }}</div>
+            <div class="rounded-2xl neu-pressed text-green-700 dark:text-green-400 text-sm px-5 py-3.5 mb-6">{{ session('success') }}</div>
         @endif
         @if (session('error'))
-            <div class="rounded-2xl neu-pressed text-red-600 text-sm px-5 py-3.5 mb-6">{{ session('error') }}</div>
+            <div class="rounded-2xl neu-pressed text-red-600 dark:text-red-400 text-sm px-5 py-3.5 mb-6">{{ session('error') }}</div>
         @endif
 
         @include('partials.admin-nav')
@@ -53,11 +53,11 @@
 
                         <div class="flex items-center gap-3">
                             <span class="text-xs font-bold px-3 py-1.5 rounded-full neu-pressed
-                                {{ $u->role == 'student' ? 'text-blue-600' : ($u->role == 'staff' ? 'text-green-600' : 'text-purple-600') }}">
+                                {{ $u->role == 'student' ? 'text-blue-600 dark:text-blue-400' : ($u->role == 'staff' ? 'text-green-600 dark:text-green-400' : 'text-purple-600 dark:text-purple-400') }}">
                                 {{ __('common.roles.'.$u->role) }}
                             </span>
 
-                            <span class="text-xs font-bold px-3 py-1.5 rounded-full {{ $u->is_active ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-500' }}">
+                            <span class="text-xs font-bold px-3 py-1.5 rounded-full {{ $u->is_active ? 'bg-green-50 dark:bg-green-500/15 text-green-600 dark:text-green-400' : 'bg-red-50 dark:bg-red-500/15 text-red-500 dark:text-red-400' }}">
                                 {{ $u->is_active ? __('admin_users.status.active') : __('admin_users.status.inactive') }}
                             </span>
 
@@ -75,7 +75,7 @@
 
                             <form method="POST" action="{{ route('admin.users.toggle', $u) }}">
                                 @csrf
-                                <button type="submit" class="neu-icon-btn text-sm font-bold px-4 py-2 rounded-xl {{ $u->is_active ? 'bg-ttu-cream text-ttu-red hover:!bg-ttu-red hover:!text-white' : 'bg-ttu-cream text-green-600 hover:!bg-green-600 hover:!text-white' }}">
+                                <button type="submit" class="neu-icon-btn text-sm font-bold px-4 py-2 rounded-xl {{ $u->is_active ? 'bg-ttu-cream text-ttu-red hover:!bg-ttu-red hover:!text-white' : 'bg-ttu-cream text-green-600 dark:text-green-400 hover:!bg-green-600 hover:!text-white' }}">
                                     {{ $u->is_active ? __('admin_users.toggle.deactivate') : __('admin_users.toggle.activate') }}
                                 </button>
                             </form>

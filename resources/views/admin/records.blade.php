@@ -14,10 +14,10 @@
         <h2 class="font-display text-2xl sm:text-3xl font-extrabold mb-8">{{ __('admin_records.heading') }}</h2>
 
         @if (session('success'))
-            <div class="rounded-2xl neu-pressed text-green-700 text-sm px-5 py-3.5 mb-6">{{ session('success') }}</div>
+            <div class="rounded-2xl neu-pressed text-green-700 dark:text-green-400 text-sm px-5 py-3.5 mb-6">{{ session('success') }}</div>
         @endif
         @if ($errors->any())
-            <div class="rounded-2xl neu-pressed text-red-600 text-sm px-5 py-3.5 mb-6">
+            <div class="rounded-2xl neu-pressed text-red-600 dark:text-red-400 text-sm px-5 py-3.5 mb-6">
                 @foreach ($errors->all() as $error)
                     <p>{{ $error }}</p>
                 @endforeach

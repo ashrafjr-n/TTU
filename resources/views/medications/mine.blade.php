@@ -63,7 +63,7 @@
                                     </p>
                                 </div>
                             </div>
-                            <span class="text-xs font-bold text-green-600 bg-green-50 rounded-full px-3 py-1.5">{{ __('medications.report.completed_badge') }}</span>
+                            <span class="text-xs font-bold text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-500/15 rounded-full px-3 py-1.5">{{ __('medications.report.completed_badge') }}</span>
                         </div>
 
                         <div class="grid sm:grid-cols-2 gap-4 mb-6">
@@ -100,7 +100,7 @@
                                 <p class="text-xs font-bold text-ttu-gray">{{ __('medications.report.medications') }}</p>
 
                                 @if ($report->medications->isNotEmpty())
-                                    <span class="text-xs font-bold text-ttu-red bg-red-50 rounded-full px-3 py-1.5">
+                                    <span class="text-xs font-bold text-ttu-red bg-red-50 dark:bg-red-500/15 rounded-full px-3 py-1.5">
                                         {{ __('medications.report.fee_line', [
                                             'price' => number_format(\App\Models\Medication::PRICE_PER_ITEM, 2),
                                             'count' => $report->medications->count(),

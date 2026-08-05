@@ -47,7 +47,7 @@
                 </div>
                 <div class="rounded-2xl neu-pressed px-4 py-3 text-center min-w-[100px]">
                     <p class="text-[11px] text-ttu-gray mb-1">{{ __('dashboard.status') }}</p>
-                    <p class="text-sm font-bold text-green-600 flex items-center justify-center gap-1.5">
+                    <p class="text-sm font-bold text-green-600 dark:text-green-400 flex items-center justify-center gap-1.5">
                         <span class="w-2 h-2 rounded-full bg-green-500"></span> {{ __('dashboard.active') }}
                     </p>
                 </div>
@@ -159,7 +159,7 @@
                                     <p class="text-xs text-ttu-gray mt-0.5">{{ __('dashboard.visits.hour_prefix') }} {{ sprintf('%d:%02d', $booking->booking_hour, $booking->booking_minute) }}</p>
                                 </div>
                             </div>
-                            <span class="text-xs font-bold text-green-600 bg-green-50 rounded-full px-3 py-1.5">{{ __('dashboard.visits.confirmed') }}</span>
+                            <span class="text-xs font-bold text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-500/15 rounded-full px-3 py-1.5">{{ __('dashboard.visits.confirmed') }}</span>
                         </div>
                     @endforeach
                 </div>

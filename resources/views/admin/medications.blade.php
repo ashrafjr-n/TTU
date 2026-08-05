@@ -14,10 +14,10 @@
         <h2 class="font-display text-2xl sm:text-3xl font-extrabold mb-8">{{ __('admin_medications.heading') }}</h2>
 
         @if (session('success'))
-            <div class="rounded-2xl neu-pressed text-green-700 text-sm px-5 py-3.5 mb-6">{{ session('success') }}</div>
+            <div class="rounded-2xl neu-pressed text-green-700 dark:text-green-400 text-sm px-5 py-3.5 mb-6">{{ session('success') }}</div>
         @endif
         @if ($errors->any())
-            <div class="rounded-2xl neu-pressed text-red-600 text-sm px-5 py-3.5 mb-6">
+            <div class="rounded-2xl neu-pressed text-red-600 dark:text-red-400 text-sm px-5 py-3.5 mb-6">
                 @foreach ($errors->all() as $error)
                     <p>{{ $error }}</p>
                 @endforeach
@@ -48,7 +48,7 @@
             <div class="space-y-3">
                 @forelse ($medications as $m)
                     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-2xl neu-pressed px-5 py-4
-                        {{ $m->isLowStock() ? '!bg-red-50' : '' }} {{ !$m->is_active ? 'opacity-60' : '' }}">
+                        {{ $m->isLowStock() ? '!bg-red-50 dark:!bg-red-500/15' : '' }} {{ !$m->is_active ? 'opacity-60' : '' }}">
                         <div class="flex items-center gap-4">
                             <span class="w-11 h-11 rounded-full neu-icon bg-ttu-cream flex items-center justify-center shrink-0 font-display font-bold text-ttu-red">
                                 {{ mb_substr($m->name, 0, 1) }}
@@ -64,15 +64,15 @@
                         <div class="flex flex-wrap items-center gap-3">
                             <div class="text-center rounded-xl neu-pressed px-4 py-2 min-w-[90px]">
                                 <p class="text-[10px] text-ttu-gray">{{ __('admin_medications.current_stock') }}</p>
-                                <p class="text-sm font-bold {{ $m->isLowStock() ? 'text-red-600' : 'text-ttu-black' }}">{{ $m->stock_quantity }}</p>
+                                <p class="text-sm font-bold {{ $m->isLowStock() ? 'text-red-600 dark:text-red-400' : 'text-ttu-black' }}">{{ $m->stock_quantity }}</p>
                             </div>
 
                             @if ($m->isLowStock())
-                                <span class="text-xs font-bold px-3 py-1.5 rounded-full bg-red-100 text-red-600">{{ __('admin_medications.low_stock') }}</span>
+                                <span class="text-xs font-bold px-3 py-1.5 rounded-full bg-red-100 dark:bg-red-500/20 text-red-600 dark:text-red-400">{{ __('admin_medications.low_stock') }}</span>
                             @endif
 
                             @unless ($m->is_active)
-                                <span class="text-xs font-bold px-3 py-1.5 rounded-full bg-gray-100 text-gray-500">{{ __('admin_medications.inactive') }}</span>
+                                <span class="text-xs font-bold px-3 py-1.5 rounded-full bg-gray-100 dark:bg-white/10 text-gray-500 dark:text-gray-400">{{ __('admin_medications.inactive') }}</span>
                             @endunless
 
                             {{-- إضافة كمية --}}
@@ -92,7 +92,7 @@
 
                             <form method="POST" action="{{ route('admin.medications.toggle', $m) }}">
                                 @csrf
-                                <button type="submit" class="neu-icon-btn text-xs font-bold px-3 py-2 rounded-lg {{ $m->is_active ? 'bg-ttu-cream text-ttu-red hover:!bg-ttu-red hover:!text-white' : 'bg-ttu-cream text-green-600 hover:!bg-green-600 hover:!text-white' }}">
+                                <button type="submit" class="neu-icon-btn text-xs font-bold px-3 py-2 rounded-lg {{ $m->is_active ? 'bg-ttu-cream text-ttu-red hover:!bg-ttu-red hover:!text-white' : 'bg-ttu-cream text-green-600 dark:text-green-400 hover:!bg-green-600 hover:!text-white' }}">
                                     {{ $m->is_active ? __('admin_medications.toggle.deactivate') : __('admin_medications.toggle.activate') }}
                                 </button>
                             </form>
@@ -108,17 +108,17 @@
                             <div class="flex-1 min-w-[160px]">
                                 <label class="block text-xs font-bold text-ttu-gray mb-1">{{ __('admin_medications.edit_form.name_label') }}</label>
                                 <input type="text" name="name" value="{{ old('name', $m->name) }}" required
-                                       class="w-full rounded-lg border-0 bg-white px-3 py-2 text-sm focus:ring-2 focus:ring-ttu-red/30 outline-none">
+                                       class="w-full rounded-lg border-0 bg-white dark:bg-ttu-white px-3 py-2 text-sm focus:ring-2 focus:ring-ttu-red/30 outline-none">
                             </div>
                             <div class="w-32">
                                 <label class="block text-xs font-bold text-ttu-gray mb-1">{{ __('admin_medications.edit_form.unit_label') }}</label>
                                 <input type="text" name="unit" value="{{ old('unit', $m->unit) }}"
-                                       class="w-full rounded-lg border-0 bg-white px-3 py-2 text-sm focus:ring-2 focus:ring-ttu-red/30 outline-none">
+                                       class="w-full rounded-lg border-0 bg-white dark:bg-ttu-white px-3 py-2 text-sm focus:ring-2 focus:ring-ttu-red/30 outline-none">
                             </div>
                             <div class="w-32">
                                 <label class="block text-xs font-bold text-ttu-gray mb-1">{{ __('admin_medications.edit_form.threshold_label') }}</label>
                                 <input type="number" name="low_stock_threshold" min="0" value="{{ old('low_stock_threshold', $m->low_stock_threshold) }}" required
-                                       class="w-full rounded-lg border-0 bg-white px-3 py-2 text-sm focus:ring-2 focus:ring-ttu-red/30 outline-none">
+                                       class="w-full rounded-lg border-0 bg-white dark:bg-ttu-white px-3 py-2 text-sm focus:ring-2 focus:ring-ttu-red/30 outline-none">
                             </div>
                             <button type="submit" class="btn-hero !py-2.5 !px-5 text-sm">{{ __('admin_medications.edit_form.save') }}</button>
                         </form>

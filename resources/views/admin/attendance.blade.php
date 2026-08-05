@@ -19,13 +19,13 @@
         <h2 class="font-display text-2xl sm:text-3xl font-extrabold mb-8">{{ __('admin_attendance.heading') }}</h2>
 
         @if (session('success'))
-            <div class="rounded-2xl neu-pressed text-green-700 text-sm px-5 py-3.5 mb-6">{{ session('success') }}</div>
+            <div class="rounded-2xl neu-pressed text-green-700 dark:text-green-400 text-sm px-5 py-3.5 mb-6">{{ session('success') }}</div>
         @endif
         @if (session('error'))
-            <div class="rounded-2xl neu-pressed text-red-600 text-sm px-5 py-3.5 mb-6">{{ session('error') }}</div>
+            <div class="rounded-2xl neu-pressed text-red-600 dark:text-red-400 text-sm px-5 py-3.5 mb-6">{{ session('error') }}</div>
         @endif
         @if ($errors->any())
-            <div class="rounded-2xl neu-pressed text-red-600 text-sm px-5 py-3.5 mb-6">
+            <div class="rounded-2xl neu-pressed text-red-600 dark:text-red-400 text-sm px-5 py-3.5 mb-6">
                 @foreach ($errors->all() as $error)
                     <p>{{ $error }}</p>
                 @endforeach
@@ -90,12 +90,12 @@
                         </div>
 
                         <div class="flex flex-wrap items-center gap-3">
-                            <span class="text-xs font-bold px-3 py-1.5 rounded-full {{ $entry['scheduled'] ? 'bg-blue-50 text-blue-600' : 'bg-gray-100 text-gray-500' }}">
+                            <span class="text-xs font-bold px-3 py-1.5 rounded-full {{ $entry['scheduled'] ? 'bg-blue-50 dark:bg-blue-500/15 text-blue-600 dark:text-blue-400' : 'bg-gray-100 dark:bg-white/10 text-gray-500 dark:text-gray-400' }}">
                                 {{ $entry['scheduled'] ? __('admin_attendance.scheduled') : __('admin_attendance.not_scheduled') }}
                             </span>
 
                             @if ($isToday && $entry['on_duty_now'])
-                                <span class="text-xs font-bold px-3 py-1.5 rounded-full bg-green-50 text-green-600 flex items-center gap-1.5">
+                                <span class="text-xs font-bold px-3 py-1.5 rounded-full bg-green-50 dark:bg-green-500/15 text-green-600 dark:text-green-400 flex items-center gap-1.5">
                                     <span class="w-2 h-2 rounded-full bg-green-500"></span> {{ __('admin_attendance.on_duty_now') }}
                                 </span>
                             @endif
@@ -112,12 +112,12 @@
                                     </p>
                                 </div>
                                 @if ($attendance->is_auto_checkout)
-                                    <span class="text-[11px] font-bold text-ttu-red bg-red-50 rounded-full px-2.5 py-1.5 whitespace-nowrap">
+                                    <span class="text-[11px] font-bold text-ttu-red bg-red-50 dark:bg-red-500/15 rounded-full px-2.5 py-1.5 whitespace-nowrap">
                                         {{ __('admin_attendance.auto_checkout_badge') }}
                                     </span>
                                 @endif
                             @elseif ($entry['scheduled'])
-                                <span class="text-xs font-bold px-3 py-1.5 rounded-full bg-red-50 text-red-600">{{ __('admin_attendance.did_not_attend') }}</span>
+                                <span class="text-xs font-bold px-3 py-1.5 rounded-full bg-red-50 dark:bg-red-500/15 text-red-600 dark:text-red-400">{{ __('admin_attendance.did_not_attend') }}</span>
                             @else
                                 <span class="text-xs text-ttu-gray">{{ __('admin_attendance.no_record') }}</span>
                             @endif
@@ -151,7 +151,7 @@
                             @else
                                 @foreach ($dayLabels as $dayNum => $label)
                                     @if (in_array($dayNum, $workingDays, true))
-                                        <span class="text-xs font-bold rounded-lg bg-blue-50 text-blue-600 px-3 py-2">{{ $label }}</span>
+                                        <span class="text-xs font-bold rounded-lg bg-blue-50 dark:bg-blue-500/15 text-blue-600 dark:text-blue-400 px-3 py-2">{{ $label }}</span>
                                     @endif
                                 @endforeach
                             @endif

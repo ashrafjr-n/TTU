@@ -17,7 +17,7 @@
         {{-- ============ بطاقة الملف الشخصي ============ --}}
         <div class="relative rounded-[2.5rem] neu-raised-white p-8 mb-10 flex flex-col sm:flex-row sm:items-center gap-6">
 
-            <div class="w-20 h-20 rounded-full neu-icon bg-gradient-to-br from-ttu-black to-ttu-black flex items-center justify-center shrink-0">
+            <div class="w-20 h-20 rounded-full neu-icon bg-gradient-to-br from-ttu-black to-ttu-black dark:from-ttu-red dark:to-ttu-red-dark flex items-center justify-center shrink-0">
                 <svg xmlns="http://www.w3.org/2000/svg" class="w-9 h-9 text-white" fill="none" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M11 2v2" />
                     <path stroke-linecap="round" stroke-linejoin="round" d="M5 2v2" />
@@ -54,7 +54,7 @@
                         {{ __('doctor.attendance.none_today') }}
                     </p>
                 @elseif (!$todayAttendance->check_out_at)
-                    <p class="text-sm font-bold text-green-600 flex items-center gap-1.5">
+                    <p class="text-sm font-bold text-green-600 dark:text-green-400 flex items-center gap-1.5">
                         <span class="w-2 h-2 rounded-full bg-green-500"></span>
                         {{ __('doctor.attendance.present', ['time' => $todayAttendance->check_in_at->format('H:i')]) }}
                     </p>
@@ -63,7 +63,7 @@
                         <span class="w-2 h-2 rounded-full bg-ttu-gray"></span>
                         {{ __('doctor.attendance.ended', ['in' => $todayAttendance->check_in_at->format('H:i'), 'out' => $todayAttendance->check_out_at->format('H:i')]) }}
                         @if ($todayAttendance->is_auto_checkout)
-                            <span class="text-[11px] font-bold text-ttu-red bg-red-50 rounded-full px-2.5 py-1">{{ __('doctor.attendance.auto_checkout') }}</span>
+                            <span class="text-[11px] font-bold text-ttu-red bg-red-50 dark:bg-red-500/15 rounded-full px-2.5 py-1">{{ __('doctor.attendance.auto_checkout') }}</span>
                         @endif
                     </p>
                 @endif
@@ -104,13 +104,13 @@
 
         {{-- رسائل النجاح/الخطأ --}}
         @if (session('success'))
-            <div class="rounded-2xl neu-pressed text-green-700 text-sm px-5 py-3.5 mb-6">
+            <div class="rounded-2xl neu-pressed text-green-700 dark:text-green-400 text-sm px-5 py-3.5 mb-6">
                 {{ session('success') }}
             </div>
         @endif
 
         @if (session('error'))
-            <div class="rounded-2xl neu-pressed text-red-600 text-sm px-5 py-3.5 mb-6">
+            <div class="rounded-2xl neu-pressed text-red-600 dark:text-red-400 text-sm px-5 py-3.5 mb-6">
                 {{ session('error') }}
             </div>
         @endif
@@ -167,7 +167,7 @@
                         </div>
 
                         <div class="flex items-center gap-3">
-                            <span class="text-xs font-bold px-3 py-1.5 rounded-full neu-pressed {{ $b->user->role == 'student' ? 'text-blue-600' : 'text-green-600' }}">
+                            <span class="text-xs font-bold px-3 py-1.5 rounded-full neu-pressed {{ $b->user->role == 'student' ? 'text-blue-600 dark:text-blue-400' : 'text-green-600 dark:text-green-400' }}">
                                 {{ $b->user->role == 'student' ? __('common.roles.student') : __('common.roles.staff') }}
                             </span>
 

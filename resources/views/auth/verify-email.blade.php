@@ -23,7 +23,7 @@
         </p>
 
         @if (session('status') == 'verification-link-sent')
-            <div class="rounded-2xl neu-pressed text-green-700 text-sm px-4 py-3 mb-6">
+            <div class="rounded-2xl neu-pressed text-green-700 dark:text-green-400 text-sm px-4 py-3 mb-6">
                 {{ __('auth_forms.verify_email.link_sent') }}
             </div>
         @endif

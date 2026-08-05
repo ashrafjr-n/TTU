@@ -1,6 +1,6 @@
 {{-- بطاقة البروفايل --}}
 <div class="relative rounded-[2.5rem] neu-raised-white p-8 mb-10 flex items-center gap-6">
-    <div class="w-20 h-20 rounded-full neu-icon bg-gradient-to-br from-ttu-black to-ttu-black flex items-center justify-center shrink-0">
+    <div class="w-20 h-20 rounded-full neu-icon bg-gradient-to-br from-ttu-black to-ttu-black dark:from-ttu-red dark:to-ttu-red-dark flex items-center justify-center shrink-0">
         <svg xmlns="http://www.w3.org/2000/svg" class="w-9 h-9 text-white" fill="none" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z" />
             <path stroke-linecap="round" stroke-linejoin="round" d="m9 12 2 2 4-4" />

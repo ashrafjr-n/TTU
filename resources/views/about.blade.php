@@ -16,7 +16,7 @@
         <div class="relative max-w-2xl mx-auto">
             <img src="{{ asset('images/TTU-logo.png') }}"
                  alt="{{ __('about.logo_alt') }}"
-                 class="w-24 h-24 sm:w-28 sm:h-28 mx-auto mb-6 object-contain rounded-3xl neu-icon bg-white p-3">
+                 class="w-24 h-24 sm:w-28 sm:h-28 mx-auto mb-6 object-contain rounded-3xl neu-icon bg-white dark:bg-ttu-white p-3">
 
             <span class="inline-block text-xs font-bold tracking-widest text-ttu-red mb-3">{{ __('about.hero.eyebrow') }}</span>
             <h1 class="font-display text-3xl sm:text-4xl lg:text-[2.75rem] font-extrabold leading-[1.3] mb-4">
@@ -123,7 +123,7 @@
 </div>
 
 {{-- ============ فوتر بسيط ============ --}}
-<footer class="border-t border-black/10 bg-ttu-cream">
+<footer class="border-t border-black/10 dark:border-white/10 bg-ttu-cream">
     <div class="max-w-7xl mx-auto px-6 py-8 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-ttu-gray">
         <span>{{ __('common.footer.copyright') }}</span>
         <span>{{ __('common.footer.project') }}</span>

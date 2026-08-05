@@ -23,7 +23,7 @@
         </p>
 
         @if ($errors->any())
-            <div class="rounded-2xl neu-pressed text-red-600 text-sm px-4 py-3 mb-4">
+            <div class="rounded-2xl neu-pressed text-red-600 dark:text-red-400 text-sm px-4 py-3 mb-4">
                 <ul class="list-disc list-inside space-y-1">
                     @foreach ($errors->all() as $error)
                         <li>{{ $error }}</li>

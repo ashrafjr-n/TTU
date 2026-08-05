@@ -3,7 +3,7 @@
 @php
     $headerClass = $transparent
         ? 'absolute top-0 inset-x-0 z-50 bg-white/0'
-        : 'sticky top-0 z-50 bg-ttu-cream/90 backdrop-blur border-b border-black/5';
+        : 'sticky top-0 z-50 bg-ttu-cream/90 backdrop-blur border-b border-black/5 dark:border-white/10';
 
     $heightClass = $transparent ? 'h-24' : 'h-20';
     $iconBtnClass = $transparent ? 'glass-icon-btn' : 'neu-icon-btn bg-ttu-cream';
@@ -46,7 +46,7 @@
 
                     <div id="notif-panel"
                          class="hidden absolute top-full start-0 mt-3 w-80 max-w-[90vw] rounded-2xl neu-raised-white p-3 z-50">
-                        <div class="flex items-center justify-between px-1 pb-2 mb-2 border-b border-black/10">
+                        <div class="flex items-center justify-between px-1 pb-2 mb-2 border-b border-black/10 dark:border-white/10">
                             <span class="text-sm font-bold text-ttu-black">{{ __('common.header.notifications') }}</span>
                             @if ($unreadCount > 0)
                                 <button type="button" id="notif-mark-all" class="text-xs font-bold text-ttu-red hover:underline">
@@ -79,7 +79,7 @@
                                                 {{ __('common.header.reply') }}
                                             </button>
                                         </div>
-                                        <p class="notif-reply-status hidden text-[10px] text-green-600 mt-1.5">{{ __('common.header.reply_sent') }} ✓</p>
+                                        <p class="notif-reply-status hidden text-[10px] text-green-600 dark:text-green-400 mt-1.5">{{ __('common.header.reply_sent') }} ✓</p>
                                     @endif
                                 </div>
                             @empty
@@ -122,10 +122,14 @@
                 </div>
 
                 {{-- الوضع الليلي --}}
-                <button type="button" title="{{ __('common.header.dark_mode') }}" aria-label="{{ __('common.header.dark_mode') }}"
+                <button type="button" id="theme-toggle" title="{{ __('common.header.dark_mode') }}" aria-label="{{ __('common.header.dark_mode') }}"
                         class="{{ $iconBtnClass }} w-10 h-10 flex items-center justify-center rounded-full">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 {{ $iconColorClass }}" fill="none" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 {{ $iconColorClass }} dark:hidden" fill="none" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M21 12.8A9 9 0 1111.2 3a7 7 0 009.8 9.8z" />
+                    </svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 {{ $iconColorClass }} hidden dark:block" fill="none" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor">
+                        <circle cx="12" cy="12" r="4" />
+                        <path stroke-linecap="round" d="M12 3v1.5M12 19.5V21M4.6 4.6l1.06 1.06M18.34 18.34l1.06 1.06M3 12h1.5M19.5 12H21M4.6 19.4l1.06-1.06M18.34 5.66l1.06-1.06" />
                     </svg>
                 </button>
 
@@ -287,4 +291,17 @@
             panel.classList.add('hidden');
         }
     });
+</script>
+
+<script>
+    (function () {
+        const themeToggle = document.getElementById('theme-toggle');
+        if (!themeToggle) return;
+
+        themeToggle.addEventListener('click', function () {
+            const isDark = document.documentElement.classList.toggle('dark');
+            localStorage.setItem('ttu-theme', isDark ? 'dark' : 'light');
+            document.dispatchEvent(new CustomEvent('ttu-theme-change', { detail: { dark: isDark } }));
+        });
+    })();
 </script>

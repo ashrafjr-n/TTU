@@ -40,7 +40,7 @@
             </div>
 
             {{-- شريط معلومات — خلفية حليبية بدون ظل --}}
-            <div class="mt-8 inline-flex items-stretch rounded-[24px] bg-ttu-cream divide-x divide-x-reverse divide-black/5 max-w-xl">
+            <div class="mt-8 inline-flex items-stretch rounded-[24px] bg-ttu-cream divide-x divide-x-reverse divide-black/5 dark:divide-white/10 max-w-xl">
                 <div class="flex items-center gap-3 px-5 py-4">
                     <svg class="w-5 h-5 text-ttu-red shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6l4 2M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -302,7 +302,7 @@
 </section>
 
 {{-- ============ فوتر بسيط ============ --}}
-<footer class="border-t border-black/10 bg-ttu-cream">
+<footer class="border-t border-black/10 dark:border-white/10 bg-ttu-cream">
     <div class="max-w-7xl mx-auto px-6 py-8 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-ttu-gray">
         <span>{{ __('common.footer.copyright') }}</span>
         <span>{{ __('common.footer.project') }}</span>

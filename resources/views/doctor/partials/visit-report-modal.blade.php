@@ -34,7 +34,7 @@
 
         {{-- تنبيه أخطاء عام --}}
         <template x-if="Object.keys(errors).length">
-            <div class="rounded-2xl neu-pressed text-red-600 text-sm px-5 py-3.5 mb-6 space-y-1">
+            <div class="rounded-2xl neu-pressed text-red-600 dark:text-red-400 text-sm px-5 py-3.5 mb-6 space-y-1">
                 <template x-for="(msgs, field) in errors" :key="field">
                     <p x-text="Array.isArray(msgs) ? msgs[0] : msgs"></p>
                 </template>
@@ -115,7 +115,7 @@
                                        x-on:input="row.open = true; row.medicationId = null"
                                        placeholder="{{ __('doctor.report_modal.search_placeholder') }}"
                                        autocomplete="off"
-                                       class="w-full rounded-lg border-0 bg-white px-3 py-2 text-sm focus:ring-2 focus:ring-ttu-red/30 outline-none">
+                                       class="w-full rounded-lg border-0 bg-white dark:bg-ttu-white px-3 py-2 text-sm focus:ring-2 focus:ring-ttu-red/30 outline-none">
                                 <input type="hidden" x-bind:name="'medications[' + index + '][medication_id]'" x-bind:value="row.medicationId">
 
                                 <div x-show="row.open" x-on:click.outside="row.open = false"
@@ -133,10 +133,10 @@
 
                             <input type="number" min="1" x-model.number="row.quantity"
                                    x-bind:name="'medications[' + index + '][quantity]'"
-                                   class="w-20 rounded-lg border-0 bg-white px-3 py-2 text-sm text-center focus:ring-2 focus:ring-ttu-red/30 outline-none">
+                                   class="w-20 rounded-lg border-0 bg-white dark:bg-ttu-white px-3 py-2 text-sm text-center focus:ring-2 focus:ring-ttu-red/30 outline-none">
 
                             <button type="button" x-on:click="medRows.splice(index, 1)"
-                                    class="w-9 h-9 rounded-full neu-icon-btn bg-white text-ttu-red flex items-center justify-center shrink-0">
+                                    class="w-9 h-9 rounded-full neu-icon-btn bg-white dark:bg-ttu-white text-ttu-red flex items-center justify-center shrink-0">
                                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2.2" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
                                 </svg>

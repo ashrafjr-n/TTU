@@ -44,19 +44,19 @@
         </div>
 
         @if (session('status'))
-            <div class="rounded-2xl neu-pressed text-green-700 text-sm px-4 py-3 mb-4">
+            <div class="rounded-2xl neu-pressed text-green-700 dark:text-green-400 text-sm px-4 py-3 mb-4">
                 {{ session('status') }}
             </div>
         @endif
 
         @if (session('error'))
-            <div class="rounded-2xl neu-pressed text-red-600 text-sm px-4 py-3 mb-4">
+            <div class="rounded-2xl neu-pressed text-red-600 dark:text-red-400 text-sm px-4 py-3 mb-4">
                 {{ session('error') }}
             </div>
         @endif
 
         @if ($errors->any())
-            <div class="rounded-2xl neu-pressed text-red-600 text-sm px-4 py-3 mb-4">
+            <div class="rounded-2xl neu-pressed text-red-600 dark:text-red-400 text-sm px-4 py-3 mb-4">
                 <ul class="list-disc list-inside space-y-1">
                     @foreach ($errors->all() as $error)
                         <li>{{ $error }}</li>
@@ -85,7 +85,7 @@
 
             <div class="flex items-center justify-between">
                 <label class="flex items-center gap-2 text-sm text-ttu-gray">
-                    <input type="checkbox" name="remember" class="rounded border-black/20">
+                    <input type="checkbox" name="remember" class="rounded border-black/20 dark:border-white/20">
                     {{ __('auth_forms.login.remember') }}
                 </label>
 

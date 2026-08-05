@@ -21,7 +21,7 @@
         <div class="absolute inset-0 m-auto w-96 h-96 rounded-full bg-ttu-red/5 blur-3xl pointer-events-none"></div>
 
         <div class="relative max-w-2xl mx-auto">
-            <div class="w-20 h-20 rounded-3xl neu-icon bg-white p-3 flex items-center justify-center mx-auto mb-6">
+            <div class="w-20 h-20 rounded-3xl neu-icon bg-white dark:bg-ttu-white p-3 flex items-center justify-center mx-auto mb-6">
                 <i data-lucide="mail" class="w-8 h-8 text-ttu-red" stroke-width="1.6"></i>
             </div>
 
@@ -84,13 +84,13 @@
             </div>
 
             @if (session('success'))
-                <div class="max-w-xl mx-auto rounded-2xl neu-pressed text-green-700 text-sm px-5 py-3.5 mb-6">
+                <div class="max-w-xl mx-auto rounded-2xl neu-pressed text-green-700 dark:text-green-400 text-sm px-5 py-3.5 mb-6">
                     {{ session('success') }}
                 </div>
             @endif
 
             @if ($errors->any())
-                <div class="max-w-xl mx-auto rounded-2xl neu-pressed text-red-600 text-sm px-5 py-3.5 mb-6">
+                <div class="max-w-xl mx-auto rounded-2xl neu-pressed text-red-600 dark:text-red-400 text-sm px-5 py-3.5 mb-6">
                     @foreach ($errors->all() as $error)
                         <p>{{ $error }}</p>
                     @endforeach
@@ -137,7 +137,7 @@
 </div>
 
 {{-- ============ فوتر بسيط ============ --}}
-<footer class="border-t border-black/10 bg-ttu-cream">
+<footer class="border-t border-black/10 dark:border-white/10 bg-ttu-cream">
     <div class="max-w-7xl mx-auto px-6 py-8 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-ttu-gray">
         <span>{{ __('common.footer.copyright') }}</span>
         <span>{{ __('common.footer.project') }}</span>

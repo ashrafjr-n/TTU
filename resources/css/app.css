@@ -1,5 +1,7 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 @theme {
     --color-ttu-black: #0A0A0A;
     --color-ttu-white: #FFFFFF;
@@ -12,6 +14,30 @@
 
     --font-display: 'IBM Plex Sans Arabic', sans-serif;
     --font-body: 'IBM Plex Sans Arabic', sans-serif;
+}
+
+/* =========================================================
+   الوضع الليلي — إعادة تعريف متغيرات الألوان الأساسية.
+   بما أن كل الموقع مبني على هذه المتغيرات (bg-ttu-cream،
+   text-ttu-black، text-ttu-gray...) فإن استبدالها هنا تحت
+   .dark يكفي لتحويل تصميم الموقع بالكامل تلقائيًا دون الحاجة
+   لإضافة dark: على كل عنصر — يبقى نظام النيومورفيزم واللون
+   الأزرق المميز (ttu-red) كما هو، فقط بسطوح وظلال داكنة.
+   ========================================================= */
+.dark {
+    --color-ttu-black: #EAF1F8;
+    --color-ttu-white: #16202B;
+    --color-ttu-offwhite: #1B2631;
+    --color-ttu-cream: #0D141C;
+    --color-ttu-red: #3B82F6;
+    --color-ttu-red-dark: #2563EB;
+    --color-ttu-yellow: #FBBF24;
+    --color-ttu-gray: #93A2B4;
+
+    --neu-dark: rgba(0, 0, 0, .55);
+    --neu-light: rgba(255, 255, 255, .045);
+
+    color-scheme: dark;
 }
 
 /* ===== كل عنصر قابل للنقر ياخد يد الماوس (Pointer) ===== */
@@ -92,7 +118,10 @@ button,
 .neu-raised-white {
     background: linear-gradient(160deg, #FFFFFF, var(--color-ttu-cream) 130%);
     box-shadow: 10px 10px 22px var(--neu-dark), -10px -10px 22px var(--neu-light);
-    transition: transform .35s var(--neu-bounce), box-shadow .35s ease;
+    transition: transform .35s var(--neu-bounce), box-shadow .35s ease, background .35s ease;
+}
+.dark .neu-raised-white {
+    background: linear-gradient(160deg, var(--color-ttu-white), var(--color-ttu-cream) 130%);
 }
 
 /* سطح غاطس (Pressed) — للشارات والـ chips */
@@ -170,6 +199,8 @@ button,
     background: #D2D2D2 !important;
     box-shadow: none !important;
 }
+.dark .role-locked svg { color: #5B6672 !important; }
+.dark .role-locked .neu-icon { background: #29323C !important; }
 
 @media (prefers-reduced-motion: reduce) {
     .neu-raised, .neu-raised-white, .neu-icon, .btn-hero, .neu-card-hover {
@@ -252,4 +283,7 @@ button,
 .logo-badge {
     background: linear-gradient(160deg, #FFFFFF, var(--color-ttu-cream) 130%);
     box-shadow: 4px 4px 10px rgba(0, 0, 0, .18), -3px -3px 8px rgba(255, 255, 255, .1);
+}
+.dark .logo-badge {
+    background: linear-gradient(160deg, var(--color-ttu-white), var(--color-ttu-cream) 130%);
 }

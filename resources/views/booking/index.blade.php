@@ -36,13 +36,13 @@
 
         {{-- رسائل النجاح/الخطأ --}}
         @if (session('success'))
-            <div class="rounded-2xl neu-pressed text-green-700 text-sm px-5 py-3.5 mb-6">
+            <div class="rounded-2xl neu-pressed text-green-700 dark:text-green-400 text-sm px-5 py-3.5 mb-6">
                 {{ session('success') }}
             </div>
         @endif
 
         @if (session('error'))
-            <div class="rounded-2xl neu-pressed text-red-600 text-sm px-5 py-3.5 mb-6">
+            <div class="rounded-2xl neu-pressed text-red-600 dark:text-red-400 text-sm px-5 py-3.5 mb-6">
                 {{ session('error') }}
             </div>
         @endif
@@ -128,7 +128,7 @@
                                                     @class([
                                                         'neu-icon-btn rounded-xl px-3.5 py-2.5 text-xs font-bold transition-colors',
                                                         'bg-ttu-cream text-ttu-yellow hover:!bg-ttu-yellow hover:!text-white' => $slot['released'],
-                                                        'bg-ttu-cream text-green-600 hover:!bg-green-600 hover:!text-white' => !$slot['released'],
+                                                        'bg-ttu-cream text-green-600 dark:text-green-400 hover:!bg-green-600 hover:!text-white' => !$slot['released'],
                                                     ])
                                                     title="{{ $slot['released'] ? __('booking.legend.released') : __('booking.book_this_slot') }}">
                                                 {{ $slot['time_label'] }}
@@ -162,7 +162,7 @@
         <div id="bookModalCard" class="w-full max-w-sm rounded-[2rem] neu-raised-white p-8 text-center scale-95 opacity-0 transition-all duration-300">
 
             <div class="w-16 h-16 rounded-full neu-icon bg-ttu-cream flex items-center justify-center mx-auto mb-5">
-                <svg class="w-7 h-7 text-green-600" fill="none" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor">
+                <svg class="w-7 h-7 text-green-600 dark:text-green-400" fill="none" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
                 </svg>
             </div>

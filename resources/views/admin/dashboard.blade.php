@@ -12,10 +12,10 @@
         @include('partials.admin-header')
 
         @if (session('success'))
-            <div class="rounded-2xl neu-pressed text-green-700 text-sm px-5 py-3.5 mb-6">{{ session('success') }}</div>
+            <div class="rounded-2xl neu-pressed text-green-700 dark:text-green-400 text-sm px-5 py-3.5 mb-6">{{ session('success') }}</div>
         @endif
         @if (session('error'))
-            <div class="rounded-2xl neu-pressed text-red-600 text-sm px-5 py-3.5 mb-6">{{ session('error') }}</div>
+            <div class="rounded-2xl neu-pressed text-red-600 dark:text-red-400 text-sm px-5 py-3.5 mb-6">{{ session('error') }}</div>
         @endif
 
         @include('partials.admin-nav')
@@ -110,103 +110,120 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        const blue = '#1D4ED8';
-        const blueDark = '#1E40AF';
-        const blueSoft = 'rgba(29, 78, 216, 0.45)';
-        const gray = '#9CA3AF';
-        const gridColor = 'rgba(10, 10, 10, 0.06)';
-
-        Chart.defaults.font.family = "'IBM Plex Sans Arabic', sans-serif";
-        Chart.defaults.color = '#6B6B6B';
-
         const weekChart = @json($weekChart);
         const roleChart = @json($roleChart);
         const hourlyChart = @json($hourlyChart);
         const busiestHours = @json($busiestHours->pluck('hour'));
         const occupancySuffix = @json(__('admin_dashboard.hourly_chart.occupancy_suffix'));
 
-        new Chart(document.getElementById('weekChartCanvas'), {
-            type: 'bar',
-            data: {
-                labels: weekChart.labels,
-                datasets: [{
-                    data: weekChart.data,
-                    backgroundColor: blue,
-                    borderRadius: 10,
-                    maxBarThickness: 34,
-                }],
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { display: false },
-                    tooltip: { backgroundColor: '#0A0A0A', padding: 10, cornerRadius: 10 },
-                },
-                scales: {
-                    x: { grid: { display: false }, border: { display: false } },
-                    y: { beginAtZero: true, ticks: { precision: 0 }, grid: { color: gridColor }, border: { display: false } },
-                },
-            },
-        });
+        Chart.defaults.font.family = "'IBM Plex Sans Arabic', sans-serif";
 
-        new Chart(document.getElementById('roleChartCanvas'), {
-            type: 'doughnut',
-            data: {
-                labels: roleChart.labels,
-                datasets: [{
-                    data: roleChart.data,
-                    backgroundColor: [blue, gray],
-                    borderWidth: 0,
-                    hoverOffset: 6,
-                }],
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                cutout: '68%',
-                plugins: {
-                    legend: { position: 'bottom', labels: { padding: 16, boxWidth: 10, boxHeight: 10, usePointStyle: true } },
-                    tooltip: { backgroundColor: '#0A0A0A', padding: 10, cornerRadius: 10 },
-                },
-            },
-        });
+        let charts = [];
 
-        new Chart(document.getElementById('hourlyChartCanvas'), {
-            type: 'bar',
-            data: {
-                labels: hourlyChart.labels,
-                datasets: [{
-                    data: hourlyChart.rates,
-                    backgroundColor: hourlyChart.hours.map((h) => busiestHours.includes(h) ? blueDark : blueSoft),
-                    borderRadius: 10,
-                    maxBarThickness: 40,
-                }],
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { display: false },
-                    tooltip: {
-                        backgroundColor: '#0A0A0A',
-                        padding: 10,
-                        cornerRadius: 10,
-                        callbacks: { label: (ctx) => ctx.parsed.y + occupancySuffix },
+        function renderCharts() {
+            charts.forEach((c) => c.destroy());
+            charts = [];
+
+            const isDark = document.documentElement.classList.contains('dark');
+            const blue = isDark ? '#3B82F6' : '#1D4ED8';
+            const blueDark = isDark ? '#60A5FA' : '#1E40AF';
+            const blueSoft = isDark ? 'rgba(59, 130, 246, 0.35)' : 'rgba(29, 78, 216, 0.45)';
+            const gray = isDark ? '#6B7A8C' : '#9CA3AF';
+            const gridColor = isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(10, 10, 10, 0.06)';
+            const tickColor = isDark ? '#93A2B4' : '#6B6B6B';
+            const tooltipBg = isDark ? '#1B2631' : '#0A0A0A';
+            const tooltipColor = isDark ? '#EAF1F8' : '#FFFFFF';
+
+            Chart.defaults.color = tickColor;
+
+            charts.push(new Chart(document.getElementById('weekChartCanvas'), {
+                type: 'bar',
+                data: {
+                    labels: weekChart.labels,
+                    datasets: [{
+                        data: weekChart.data,
+                        backgroundColor: blue,
+                        borderRadius: 10,
+                        maxBarThickness: 34,
+                    }],
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: { backgroundColor: tooltipBg, titleColor: tooltipColor, bodyColor: tooltipColor, padding: 10, cornerRadius: 10 },
+                    },
+                    scales: {
+                        x: { ticks: { color: tickColor }, grid: { display: false }, border: { display: false } },
+                        y: { beginAtZero: true, ticks: { precision: 0, color: tickColor }, grid: { color: gridColor }, border: { display: false } },
                     },
                 },
-                scales: {
-                    x: { grid: { display: false }, border: { display: false } },
-                    y: {
-                        beginAtZero: true,
-                        max: 100,
-                        ticks: { callback: (v) => v + '%' },
-                        grid: { color: gridColor },
-                        border: { display: false },
+            }));
+
+            charts.push(new Chart(document.getElementById('roleChartCanvas'), {
+                type: 'doughnut',
+                data: {
+                    labels: roleChart.labels,
+                    datasets: [{
+                        data: roleChart.data,
+                        backgroundColor: [blue, gray],
+                        borderWidth: 0,
+                        hoverOffset: 6,
+                    }],
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '68%',
+                    plugins: {
+                        legend: { position: 'bottom', labels: { color: tickColor, padding: 16, boxWidth: 10, boxHeight: 10, usePointStyle: true } },
+                        tooltip: { backgroundColor: tooltipBg, titleColor: tooltipColor, bodyColor: tooltipColor, padding: 10, cornerRadius: 10 },
                     },
                 },
-            },
-        });
+            }));
+
+            charts.push(new Chart(document.getElementById('hourlyChartCanvas'), {
+                type: 'bar',
+                data: {
+                    labels: hourlyChart.labels,
+                    datasets: [{
+                        data: hourlyChart.rates,
+                        backgroundColor: hourlyChart.hours.map((h) => busiestHours.includes(h) ? blueDark : blueSoft),
+                        borderRadius: 10,
+                        maxBarThickness: 40,
+                    }],
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: tooltipBg,
+                            titleColor: tooltipColor,
+                            bodyColor: tooltipColor,
+                            padding: 10,
+                            cornerRadius: 10,
+                            callbacks: { label: (ctx) => ctx.parsed.y + occupancySuffix },
+                        },
+                    },
+                    scales: {
+                        x: { ticks: { color: tickColor }, grid: { display: false }, border: { display: false } },
+                        y: {
+                            beginAtZero: true,
+                            max: 100,
+                            ticks: { callback: (v) => v + '%', color: tickColor },
+                            grid: { color: gridColor },
+                            border: { display: false },
+                        },
+                    },
+                },
+            }));
+        }
+
+        renderCharts();
+        document.addEventListener('ttu-theme-change', renderCharts);
     });
 </script>
 

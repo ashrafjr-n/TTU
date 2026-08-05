@@ -24,7 +24,7 @@
         <div class="max-w-md rounded-[2.5rem] neu-raised-white p-8">
 
             @if ($errors->any())
-                <div class="rounded-2xl neu-pressed text-red-600 text-sm px-5 py-3.5 mb-4">
+                <div class="rounded-2xl neu-pressed text-red-600 dark:text-red-400 text-sm px-5 py-3.5 mb-4">
                     @foreach ($errors->all() as $error)
                         <p>{{ $error }}</p>
                     @endforeach
