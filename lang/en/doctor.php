@@ -20,7 +20,7 @@ return [
 
     'bookings_table' => [
         'heading' => 'Bookings schedule',
-        'view' => 'View',
+        'choose_day' => 'Choose day',
         'edit_report' => 'Edit report',
         'attach_report' => 'Attach report',
         'cancel_confirm' => 'Are you sure you want to cancel this booking?',

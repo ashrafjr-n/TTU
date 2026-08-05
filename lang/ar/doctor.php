@@ -20,7 +20,7 @@ return [
 
     'bookings_table' => [
         'heading' => 'جدول الحجوزات',
-        'view' => 'عرض',
+        'choose_day' => 'اختر اليوم',
         'edit_report' => 'تعديل التقرير',
         'attach_report' => 'إرفاق تقرير',
         'cancel_confirm' => 'هل أنت متأكد من إلغاء هذا الحجز؟',

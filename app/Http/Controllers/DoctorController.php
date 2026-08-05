@@ -7,30 +7,33 @@ use App\Models\Booking;
 use App\Models\DoctorAttendance;
 use App\Models\Medication;
 use App\Notifications\BookingCancelledByClinic;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
 
 class DoctorController extends Controller
 {
     /**
-     * عرض لوحة الدكتور مع إمكانية اختيار تاريخ
+     * عرض لوحة الدكتور — بنفس نافذة الأيام الثلاثة (اليوم + يومين قادمين)
+     * المتاحة للطلاب/الموظفين بصفحة الحجز، بدل تاريخ واحد يُختار عبر حقل حر.
      */
-    public function index(Request $request)
+    public function index()
     {
-        // التاريخ المختار (افتراضيًا اليوم)، مع التحقق إنو تنسيقه صحيح
-        $validated = $request->validate(['date' => 'nullable|date']);
+        $days = [];
+        foreach ($this->viewableDates() as $index => $date) {
+            $dayBookings = Booking::with(['user', 'visitReport.medications'])
+                ->whereDate('booking_date', $date->toDateString())
+                ->where('status', 'confirmed')
+                ->orderBy('booking_hour')
+                ->orderBy('booking_minute')
+                ->get();
 
-        $date = $validated['date'] ?? null
-            ? Carbon::parse($validated['date'])
-            : Carbon::today();
-
-        $bookings = Booking::with(['user', 'visitReport.medications'])
-            ->where('booking_date', $date->toDateString())
-            ->where('status', 'confirmed')
-            ->orderBy('booking_hour')
-            ->orderBy('booking_minute')
-            ->get();
+            $days[] = [
+                'index' => $index,
+                'date' => $date->toDateString(),
+                'label' => $this->dayLabel($index, $date),
+                'bookings' => $dayBookings,
+            ];
+        }
 
         $medications = Medication::where('is_active', true)->orderBy('name')->get(['id', 'name', 'unit', 'stock_quantity']);
 
@@ -39,11 +42,40 @@ class DoctorController extends Controller
             ->first();
 
         return view('doctor.dashboard', [
-            'bookings' => $bookings,
-            'selectedDate' => $date,
+            'days' => $days,
+            'todayBookingsCount' => $days[0]['bookings']->count(),
             'medications' => $medications,
             'todayAttendance' => $todayAttendance,
         ]);
+    }
+
+    /**
+     * الأيام الثلاثة القابلة للعرض بلوحة الدكتور: اليوم + يومين قادمين —
+     * نفس نافذة الحجز (راجع BookingController::bookableDates).
+     */
+    private function viewableDates(): array
+    {
+        $dates = [];
+        for ($i = 0; $i < Booking::BOOKING_WINDOW_DAYS; $i++) {
+            $dates[] = Carbon::today()->addDays($i);
+        }
+
+        return $dates;
+    }
+
+    /**
+     * تسمية اليوم المعروضة فوق تبويبه (مثال: "اليوم — 5 أغسطس") — مطابقة
+     * لنفس التسمية بصفحة الحجز (راجع BookingController::dayLabel).
+     */
+    private function dayLabel(int $index, Carbon $date): string
+    {
+        $prefix = match ($index) {
+            0 => __('booking.day.today'),
+            1 => __('booking.day.tomorrow'),
+            default => __('booking.day.day_after'),
+        };
+
+        return $prefix.' — '.$date->translatedFormat('j F');
     }
 
     /**
