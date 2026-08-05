@@ -142,6 +142,7 @@
                     @forelse ($day['bookings'] as $b)
                         @php
                             $existingReport = $b->visitReport;
+                            $reportAvailable = $b->hasStarted();
                             $reportPayload = [
                                 'bookingId' => $b->id,
                                 'isEdit' => (bool) $existingReport,
@@ -179,13 +180,23 @@
                                     {{ $b->user->role == 'student' ? __('common.roles.student') : __('common.roles.staff') }}
                                 </span>
 
-                                <button type="button" onclick='openVisitReportModal(@json($reportPayload))'
-                                        class="neu-icon-btn bg-ttu-cream text-ttu-black text-xs font-bold px-3.5 py-2 rounded-xl flex items-center gap-1.5">
-                                    <svg class="w-4 h-4 text-ttu-red" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                    </svg>
-                                    {{ $existingReport ? __('doctor.bookings_table.edit_report') : __('doctor.bookings_table.attach_report') }}
-                                </button>
+                                @if ($reportAvailable)
+                                    <button type="button" onclick='openVisitReportModal(@json($reportPayload))'
+                                            class="neu-icon-btn bg-ttu-cream text-ttu-black text-xs font-bold px-3.5 py-2 rounded-xl flex items-center gap-1.5">
+                                        <svg class="w-4 h-4 text-ttu-red" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                        </svg>
+                                        {{ $existingReport ? __('doctor.bookings_table.edit_report') : __('doctor.bookings_table.attach_report') }}
+                                    </button>
+                                @else
+                                    <span title="{{ __('doctor.bookings_table.not_available_yet_hint') }}"
+                                          class="neu-pressed text-ttu-gray text-xs font-bold px-3.5 py-2 rounded-xl flex items-center gap-1.5 opacity-70 cursor-not-allowed">
+                                        <svg class="w-4 h-4 text-ttu-gray" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6l4 2M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
+                                        {{ __('doctor.bookings_table.not_available_yet') }}
+                                    </span>
+                                @endif
 
                                 <form method="POST" action="{{ route('doctor.bookings.cancel', $b) }}"
                                       onsubmit="return confirm('{{ __('doctor.bookings_table.cancel_confirm') }}');">

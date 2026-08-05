@@ -24,6 +24,10 @@ class VisitReportController extends Controller
             return back()->with('error', __('doctor.report_modal.not_confirmed'));
         }
 
+        if (!$booking->hasStarted()) {
+            return back()->with('error', __('doctor.report_modal.not_started_yet'));
+        }
+
         $validated = $request->validate([
             'condition' => 'required|string',
             'examination' => 'required|string',
