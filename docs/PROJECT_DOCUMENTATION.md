@@ -2,7 +2,7 @@
 
 *Compiled from direct inspection of the codebase (commit `7f64b3c`, branch `master`). Every claim below was verified against the actual migrations, models, controllers, routes, middleware, views, configuration, and the passing test suite — nothing here is reconstructed from memory or design intent.*
 
----
+----
 
 ## 1. Project Overview
 
