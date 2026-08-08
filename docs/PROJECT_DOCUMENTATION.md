@@ -32,7 +32,7 @@ Verified directly from `composer.json`, `composer.lock`, `package.json`, and the
 
 **Database**
 - MySQL (`ttu_clinic`) in the development environment (`DB_CONNECTION=mysql` in `.env`)
-- SQLite used automatically for the test suite
+- PostgreSQL used automatically for the test suite
 
 **Testing**
 - PHPUnit 12.5 via Laravel's test runner
