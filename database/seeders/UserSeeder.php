@@ -10,8 +10,8 @@ class UserSeeder extends Seeder
 {
     public function run(): void
     {
-        // لا يوجد تسجيل ذاتي — كل رقم جامعي/وظيفي مصرّح به (UniversityRecordSeeder)
-        // لازم يقابله هنا حساب مستخدم جاهز فعليًا، وإلا ما في طريقة لأصحابه يدخلوا.
+        // لا يوجد تسجيل ذاتي — كل حساب لازم يُزرع جاهزًا هنا مباشرة، وإلا ما
+        // في طريقة لصاحبه يدخل.
         $students = [
             ['identifier' => '20210123', 'name' => 'أحمد خالد',   'email' => 'student@ttu.edu.jo'],
             ['identifier' => '20210456', 'name' => 'سارة عبدالله', 'email' => 'student-2@ttu.edu.jo'],

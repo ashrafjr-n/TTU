@@ -46,8 +46,6 @@ return [
         'user_deactivated' => 'تم تعطيل حساب :name.',
         'doctor_created' => 'تم إضافة حساب الطبيب بنجاح.',
         'doctor_updated' => 'تم تحديث حساب ":name".',
-        'record_added' => 'تمت إضافة الرقم بنجاح.',
-        'record_removed' => 'تم حذف السجل بنجاح.',
         'medication_added' => 'تمت إضافة الدواء بنجاح.',
         'medication_edited' => 'تم تحديث بيانات الدواء بنجاح.',
         'medication_restocked' => 'تمت إضافة :amount إلى مخزون ":name".',

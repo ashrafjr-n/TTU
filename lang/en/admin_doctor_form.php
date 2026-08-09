@@ -16,7 +16,8 @@ return [
     ],
 
     'name_label' => 'Full name',
-    'email_label' => 'Email address',
+    'identifier_label' => 'Staff ID number',
+    'identifier_placeholder' => 'e.g. 000',
     'password_label' => 'Password',
     'password_confirmation_label' => 'Confirm password',
     'working_days_label' => 'Weekly working days',

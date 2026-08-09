@@ -24,7 +24,7 @@ class DoctorScheduleManagementTest extends TestCase
     {
         $doctor = User::factory()->create([
             'role' => 'doctor',
-            'identifier' => fake()->unique()->safeEmail(),
+            'identifier' => fake()->unique()->numerify('###'),
         ]);
 
         if ($working !== null) {
@@ -42,7 +42,7 @@ class DoctorScheduleManagementTest extends TestCase
     {
         $response = $this->actingAs($this->admin())->post(route('admin.doctors.store'), [
             'name' => 'د. نور',
-            'email' => 'doctor-new@ttu.edu.jo',
+            'identifier' => '901',
             'password' => 'Password123!',
             'password_confirmation' => 'Password123!',
             'working_days' => ['0', '2', '4'],
@@ -50,7 +50,7 @@ class DoctorScheduleManagementTest extends TestCase
 
         $response->assertRedirect(route('admin.users'));
 
-        $doctor = User::where('email', 'doctor-new@ttu.edu.jo')->first();
+        $doctor = User::where('identifier', '901')->first();
         $this->assertNotNull($doctor);
         // قيم الـcheckbox تصل كنصوص — لازم تُخزَّن كأعداد صحيحة وإلا فشلت
         // مقارنة isWorkingOn() الصارمة
@@ -61,12 +61,12 @@ class DoctorScheduleManagementTest extends TestCase
     {
         $this->actingAs($this->admin())->post(route('admin.doctors.store'), [
             'name' => 'د. بلا جدول',
-            'email' => 'doctor-empty@ttu.edu.jo',
+            'identifier' => '902',
             'password' => 'Password123!',
             'password_confirmation' => 'Password123!',
         ]);
 
-        $doctor = User::where('email', 'doctor-empty@ttu.edu.jo')->first();
+        $doctor = User::where('identifier', '902')->first();
         $this->assertNotNull($doctor->doctorSchedule);
         $this->assertSame([], $doctor->doctorSchedule->working_days);
     }
@@ -75,14 +75,44 @@ class DoctorScheduleManagementTest extends TestCase
     {
         $response = $this->actingAs($this->admin())->post(route('admin.doctors.store'), [
             'name' => 'د. خطأ',
-            'email' => 'doctor-bad@ttu.edu.jo',
+            'identifier' => '903',
             'password' => 'Password123!',
             'password_confirmation' => 'Password123!',
             'working_days' => ['9'],
         ]);
 
         $response->assertSessionHasErrors('working_days.0');
-        $this->assertDatabaseMissing('users', ['email' => 'doctor-bad@ttu.edu.jo']);
+        $this->assertDatabaseMissing('users', ['identifier' => '903']);
+    }
+
+    public function test_the_identifier_must_be_exactly_three_digits(): void
+    {
+        $response = $this->actingAs($this->admin())->post(route('admin.doctors.store'), [
+            'name' => 'د. رقم خطأ',
+            'identifier' => '12',
+            'password' => 'Password123!',
+            'password_confirmation' => 'Password123!',
+        ]);
+
+        $response->assertSessionHasErrors('identifier');
+        $this->assertDatabaseMissing('users', ['name' => 'د. رقم خطأ']);
+    }
+
+    public function test_a_new_doctor_can_log_in_with_the_identifier_and_chosen_password(): void
+    {
+        $this->actingAs($this->admin())->post(route('admin.doctors.store'), [
+            'name' => 'د. نور',
+            'identifier' => '904',
+            'password' => 'Password123!',
+            'password_confirmation' => 'Password123!',
+        ]);
+
+        $this->post(route('logout'));
+
+        $response = $this->post(route('login'), ['login' => '904', 'password' => 'Password123!']);
+
+        $this->assertAuthenticated();
+        $response->assertRedirect(route('dashboard'));
     }
 
     // ------------------------------------------------------------------
@@ -100,13 +130,13 @@ class DoctorScheduleManagementTest extends TestCase
         $response->assertSee('value="1"', false);
     }
 
-    public function test_updating_a_doctor_changes_name_email_and_working_days(): void
+    public function test_updating_a_doctor_changes_name_identifier_and_working_days(): void
     {
         $doctor = $this->doctor([1, 3]);
 
         $response = $this->actingAs($this->admin())->put(route('admin.doctors.update', $doctor), [
             'name' => 'د. الاسم الجديد',
-            'email' => 'renamed@ttu.edu.jo',
+            'identifier' => '905',
             'working_days' => ['5', '6'],
         ]);
 
@@ -114,9 +144,7 @@ class DoctorScheduleManagementTest extends TestCase
 
         $doctor->refresh();
         $this->assertSame('د. الاسم الجديد', $doctor->name);
-        $this->assertSame('renamed@ttu.edu.jo', $doctor->email);
-        // identifier للأطباء هو البريد — لازم يتبعه وإلا انكسر الدخول بالمعرّف
-        $this->assertSame('renamed@ttu.edu.jo', $doctor->identifier);
+        $this->assertSame('905', $doctor->identifier);
         $this->assertSame([5, 6], $doctor->doctorSchedule->working_days);
     }
 
@@ -126,7 +154,7 @@ class DoctorScheduleManagementTest extends TestCase
 
         $this->actingAs($this->admin())->put(route('admin.doctors.update', $doctor), [
             'name' => $doctor->name,
-            'email' => $doctor->email,
+            'identifier' => $doctor->identifier,
         ]);
 
         $this->assertSame([], $doctor->fresh()->doctorSchedule->working_days);
@@ -139,28 +167,28 @@ class DoctorScheduleManagementTest extends TestCase
 
         $this->actingAs($this->admin())->put(route('admin.doctors.update', $doctor), [
             'name' => $doctor->name,
-            'email' => $doctor->email,
+            'identifier' => $doctor->identifier,
             'working_days' => ['2'],
         ]);
 
         $this->assertSame([2], $doctor->fresh()->doctorSchedule->working_days);
     }
 
-    public function test_a_duplicate_email_is_rejected_but_the_doctors_own_email_is_allowed(): void
+    public function test_a_duplicate_identifier_is_rejected_but_the_doctors_own_identifier_is_allowed(): void
     {
         $admin = $this->admin();
         $doctor = $this->doctor([1]);
-        User::factory()->create(['role' => 'student', 'identifier' => '20211111', 'email' => 'taken@ttu.edu.jo']);
+        User::factory()->create(['role' => 'doctor', 'identifier' => '777']);
 
         $this->actingAs($admin)->put(route('admin.doctors.update', $doctor), [
             'name' => $doctor->name,
-            'email' => 'taken@ttu.edu.jo',
-        ])->assertSessionHasErrors('email');
+            'identifier' => '777',
+        ])->assertSessionHasErrors('identifier');
 
-        // نفس بريده الحالي يجب أن يُقبل (قاعدة unique تتجاهل صفّه)
+        // نفس رقمه الحالي يجب أن يُقبل (قاعدة unique تتجاهل صفّه)
         $this->actingAs($admin)->put(route('admin.doctors.update', $doctor), [
             'name' => 'اسم محدّث',
-            'email' => $doctor->email,
+            'identifier' => $doctor->identifier,
         ])->assertSessionHasNoErrors();
 
         $this->assertSame('اسم محدّث', $doctor->fresh()->name);
@@ -174,7 +202,7 @@ class DoctorScheduleManagementTest extends TestCase
         $this->actingAs($admin)->get(route('admin.doctors.edit', $student))->assertNotFound();
         $this->actingAs($admin)->put(route('admin.doctors.update', $student), [
             'name' => 'x',
-            'email' => 'x@ttu.edu.jo',
+            'identifier' => '999',
         ])->assertNotFound();
     }
 

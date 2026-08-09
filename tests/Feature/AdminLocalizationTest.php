@@ -4,7 +4,6 @@ namespace Tests\Feature;
 
 use App\Models\ActivityLog;
 use App\Models\Medication;
-use App\Models\UniversityRecord;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -51,21 +50,6 @@ class AdminLocalizationTest extends TestCase
         $en->assertSee('Deactivate');
     }
 
-    public function test_admin_records_page_switches_language(): void
-    {
-        $admin = $this->admin();
-        UniversityRecord::create(['identifier' => '12345678', 'type' => 'student', 'is_valid' => true]);
-
-        $ar = $this->actingAs($admin)->get(route('admin.records'));
-        $ar->assertOk();
-        $ar->assertSee('سجلات الجامعة');
-
-        $en = $this->actingAs($admin)->withSession(['locale' => 'en'])->get(route('admin.records'));
-        $en->assertOk();
-        $en->assertSee('University Records');
-        $en->assertSee('Student');
-    }
-
     public function test_admin_medications_page_switches_language(): void
     {
         $admin = $this->admin();
@@ -101,7 +85,7 @@ class AdminLocalizationTest extends TestCase
     {
         $admin = $this->admin();
         ActivityLog::record($admin->id, 'doctor_created', 'activity_log.doctor_created', [
-            'name' => 'Dr. Sami', 'email' => 'sami@ttu.edu.jo',
+            'name' => 'Dr. Sami', 'identifier' => '333',
         ]);
 
         $ar = $this->actingAs($admin)->get(route('admin.activity-log'));

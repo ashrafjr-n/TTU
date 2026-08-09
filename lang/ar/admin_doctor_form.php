@@ -16,7 +16,8 @@ return [
     ],
 
     'name_label' => 'الاسم الكامل',
-    'email_label' => 'البريد الإلكتروني',
+    'identifier_label' => 'الرقم الوظيفي',
+    'identifier_placeholder' => 'مثال: 000',
     'password_label' => 'كلمة المرور',
     'password_confirmation_label' => 'تأكيد كلمة المرور',
     'working_days_label' => 'أيام العمل الأسبوعية',

@@ -42,8 +42,9 @@
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium text-ttu-black mb-1.5">{{ __('admin_doctor_form.email_label') }}</label>
-                    <input type="email" name="email" value="{{ old('email', $doctor->email) }}" required
+                    <label class="block text-sm font-medium text-ttu-black mb-1.5">{{ __('admin_doctor_form.identifier_label') }}</label>
+                    <input type="text" name="identifier" value="{{ old('identifier', $doctor->identifier) }}" required
+                           inputmode="numeric" pattern="\d{3}" maxlength="3"
                            class="w-full px-4 py-2.5 rounded-xl neu-pressed bg-ttu-cream border-0 focus:ring-2 focus:ring-ttu-red/30 outline-none">
                 </div>
 

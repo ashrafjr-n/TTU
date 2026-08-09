@@ -46,8 +46,6 @@ return [
         'user_deactivated' => 'The account :name has been deactivated.',
         'doctor_created' => 'The doctor account was added successfully.',
         'doctor_updated' => 'The account ":name" was updated.',
-        'record_added' => 'The ID was added successfully.',
-        'record_removed' => 'The record was deleted successfully.',
         'medication_added' => 'The medication was added successfully.',
         'medication_edited' => 'The medication details were updated successfully.',
         'medication_restocked' => 'Added :amount to the stock of ":name".',

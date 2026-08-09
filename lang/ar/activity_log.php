@@ -5,11 +5,8 @@ return [
     'user_activated' => 'تفعيل حساب ":name"',
     'user_deactivated' => 'تعطيل حساب ":name"',
 
-    'doctor_created' => 'إنشاء حساب طبيب: :name (:email)',
+    'doctor_created' => 'إنشاء حساب طبيب: :name (:identifier)',
     'doctor_updated' => 'تحديث حساب طبيب: ":name"',
-
-    'university_record_added' => 'إضافة رقم :identifier (:type)',
-    'university_record_removed' => 'حذف رقم :identifier',
 
     'medication_added' => 'إضافة دواء: :name',
     'medication_edited' => 'تعديل بيانات دواء: :name',

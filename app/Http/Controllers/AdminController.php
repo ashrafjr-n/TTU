@@ -7,7 +7,6 @@ use App\Models\Booking;
 use App\Models\DoctorAttendance;
 use App\Models\DoctorSchedule;
 use App\Models\Medication;
-use App\Models\UniversityRecord;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
@@ -179,7 +178,7 @@ class AdminController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|string|lowercase|email|max:255|unique:'.User::class,
+            'identifier' => ['required', 'digits:3', 'unique:'.User::class.',identifier'],
             'password' => ['required', 'confirmed', Password::defaults()],
             'working_days' => 'nullable|array',
             'working_days.*' => 'integer|min:0|max:6',
@@ -187,10 +186,10 @@ class AdminController extends Controller
 
         $doctor = User::create([
             'name' => $validated['name'],
-            'email' => $validated['email'],
+            'email' => $this->syntheticDoctorEmail($validated['identifier']),
             'password' => Hash::make($validated['password']),
             'role' => 'doctor',
-            'identifier' => $validated['email'],
+            'identifier' => $validated['identifier'],
         ]);
 
         DoctorSchedule::create([
@@ -200,7 +199,7 @@ class AdminController extends Controller
 
         ActivityLog::record(Auth::id(), 'doctor_created', 'activity_log.doctor_created', [
             'name' => $validated['name'],
-            'email' => $validated['email'],
+            'identifier' => $validated['identifier'],
         ]);
 
         return redirect()->route('admin.users')->with('success', __('admin_dashboard.flash.doctor_created'));
@@ -228,17 +227,18 @@ class AdminController extends Controller
 
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', Rule::unique('users', 'email')->ignore($doctor->id)],
+            'identifier' => ['required', 'digits:3', Rule::unique('users', 'identifier')->ignore($doctor->id)],
             'working_days' => 'nullable|array',
             'working_days.*' => 'integer|min:0|max:6',
         ]);
 
         $doctor->update([
             'name' => $validated['name'],
-            'email' => $validated['email'],
-            // identifier للأطباء هو بريدهم (لا يوجد رقم جامعي/وظيفي لهم) —
-            // يجب أن يتبع البريد وإلا صار تسجيل الدخول بالـidentifier القديم
-            'identifier' => $validated['email'],
+            'identifier' => $validated['identifier'],
+            // البريد للأطباء داخلي بحت (لا يُستخدم للدخول) — موجود فقط لإرضاء
+            // قيد "email" الفريد على جدول users. يُشتق من الرقم الوظيفي نفسه
+            // فيبقى متزامنًا معه دائمًا، بدل العكس كما كان سابقًا.
+            'email' => $this->syntheticDoctorEmail($validated['identifier']),
         ]);
 
         DoctorSchedule::updateOrCreate(
@@ -252,65 +252,21 @@ class AdminController extends Controller
     }
 
     /**
+     * بريد داخلي فريد للطبيب — لا يُعرض ولا يُستخدم للدخول، فقط يُرضي قيد
+     * "email" الفريد على جدول users (الدخول الفعلي بالرقم الوظيفي وحده).
+     */
+    private function syntheticDoctorEmail(string $identifier): string
+    {
+        return "doctor-{$identifier}@ttu.edu.jo";
+    }
+
+    /**
      * قيم checkbox تصل كنصوص دائمًا — لازم تحويلها لأرقام صحيحة، لأن
      * isWorkingOn() تقارنها بـ Carbon::dayOfWeek بمقارنة صارمة (strict)
      */
     private function normalizeWorkingDays(array $days): array
     {
         return collect($days)->map(fn ($day) => (int) $day)->unique()->sort()->values()->all();
-    }
-
-    /**
-     * عرض سجلات الجامعة (university_records)
-     */
-    public function records(Request $request)
-    {
-        $query = UniversityRecord::query();
-
-        if ($request->filled('type')) {
-            $query->where('type', $request->input('type'));
-        }
-
-        $records = $query->orderByDesc('created_at')->paginate(20);
-
-        return view('admin.records', compact('records'));
-    }
-
-    /**
-     * إضافة سجل جديد (رقم جامعي/وظيفي صحيح)
-     */
-    public function storeRecord(Request $request)
-    {
-        $validated = $request->validate([
-            'identifier' => ['required', 'string', 'unique:university_records,identifier'],
-            'type' => ['required', 'in:student,staff'],
-        ]);
-
-        UniversityRecord::create([
-            'identifier' => $validated['identifier'],
-            'type' => $validated['type'],
-            'is_valid' => true,
-        ]);
-
-        ActivityLog::record(Auth::id(), 'university_record_added', 'activity_log.university_record_added', [
-            'identifier' => $validated['identifier'],
-            'type' => __('common.roles.'.$validated['type']),
-        ]);
-
-        return back()->with('success', __('admin_dashboard.flash.record_added'));
-    }
-
-    /**
-     * حذف سجل (إبطال رقم)
-     */
-    public function destroyRecord(UniversityRecord $record)
-    {
-        $identifier = $record->identifier;
-        $record->delete();
-
-        ActivityLog::record(Auth::id(), 'university_record_removed', 'activity_log.university_record_removed', ['identifier' => $identifier]);
-
-        return back()->with('success', __('admin_dashboard.flash.record_removed'));
     }
 
     /**

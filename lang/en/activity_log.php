@@ -5,11 +5,8 @@ return [
     'user_activated' => 'Activated account ":name"',
     'user_deactivated' => 'Deactivated account ":name"',
 
-    'doctor_created' => 'Created doctor account: :name (:email)',
+    'doctor_created' => 'Created doctor account: :name (:identifier)',
     'doctor_updated' => 'Updated doctor account: ":name"',
-
-    'university_record_added' => 'Added ID :identifier (:type)',
-    'university_record_removed' => 'Removed ID :identifier',
 
     'medication_added' => 'Added medication: :name',
     'medication_edited' => 'Edited medication details: :name',
