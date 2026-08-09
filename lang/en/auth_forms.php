@@ -13,7 +13,6 @@ return [
         'role_student' => 'Student',
         'role_staff' => 'Staff',
         'login_field' => 'University or staff ID number',
-        'login_placeholder' => 'e.g. 20210123',
         'password' => 'Password',
         'remember' => 'Remember me',
         'forgot_password' => 'Forgot your password?',

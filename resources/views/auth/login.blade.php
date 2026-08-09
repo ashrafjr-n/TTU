@@ -73,8 +73,7 @@
                     {{ __('auth_forms.login.login_field') }}
                 </label>
                 <input type="text" name="login" value="{{ old('login') }}" required autofocus
-                       class="w-full px-4 py-2.5 rounded-xl neu-pressed bg-ttu-cream border-0 focus:ring-2 focus:ring-ttu-red/30 outline-none transition"
-                       placeholder="{{ __('auth_forms.login.login_placeholder') }}">
+                       class="w-full px-4 py-2.5 rounded-xl neu-pressed bg-ttu-cream border-0 focus:ring-2 focus:ring-ttu-red/30 outline-none transition">
             </div>
 
             <div>

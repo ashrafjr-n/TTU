@@ -13,7 +13,6 @@ return [
         'role_student' => 'الطالب',
         'role_staff' => 'الموظف',
         'login_field' => 'الرقم الجامعي أو الوظيفي',
-        'login_placeholder' => 'مثال: 20210123',
         'password' => 'كلمة المرور',
         'remember' => 'تذكرني',
         'forgot_password' => 'نسيت كلمة المرور؟',
