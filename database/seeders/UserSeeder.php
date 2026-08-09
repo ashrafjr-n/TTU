@@ -11,22 +11,26 @@ class UserSeeder extends Seeder
     public function run(): void
     {
         // طالب تجريبي
-        User::create([
-            'name' => 'أحمد خالد',
-            'email' => 'student@ttu.edu.jo',
-            'password' => Hash::make('password'),
-            'role' => 'student',
-            'identifier' => '20210123',
-        ]);
+        User::firstOrCreate(
+            ['email' => 'student@ttu.edu.jo'],
+            [
+                'name' => 'أحمد خالد',
+                'password' => Hash::make('password'),
+                'role' => 'student',
+                'identifier' => '20210123',
+            ],
+        );
 
         // موظف تجريبي
-        User::create([
-            'name' => 'محمد علي',
-            'email' => 'staff@ttu.edu.jo',
-            'password' => Hash::make('password'),
-            'role' => 'staff',
-            'identifier' => '2320',
-        ]);
+        User::firstOrCreate(
+            ['email' => 'staff@ttu.edu.jo'],
+            [
+                'name' => 'محمد علي',
+                'password' => Hash::make('password'),
+                'role' => 'staff',
+                'identifier' => '2320',
+            ],
+        );
 
         // ثلاثة حسابات دكاترة ثابتة فقط — لا يوجد تسجيل عام لهذا الدور
         $doctors = [
@@ -35,23 +39,27 @@ class UserSeeder extends Seeder
             ['name' => 'د. خالد ناصر',   'email' => 'doctor-3@ttu.edu.jo'],
         ];
 
-// حساب المدير الثابت — لا يوجد تسجيل عام لهذا الدور
-User::create([
-    'name' => 'إدارة عيادة TTU',
-    'email' => 'admin@ttu.edu.jo',
-    'password' => Hash::make('password'),
-    'role' => 'admin',
-    'identifier' => 'admin@ttu.edu.jo',
-]);
+        // حساب المدير الثابت — لا يوجد تسجيل عام لهذا الدور
+        User::firstOrCreate(
+            ['email' => 'admin@ttu.edu.jo'],
+            [
+                'name' => 'إدارة عيادة TTU',
+                'password' => Hash::make('password'),
+                'role' => 'admin',
+                'identifier' => 'admin@ttu.edu.jo',
+            ],
+        );
 
         foreach ($doctors as $doctor) {
-            User::create([
-                'name' => $doctor['name'],
-                'email' => $doctor['email'],
-                'password' => Hash::make('password'),
-                'role' => 'doctor',
-                'identifier' => $doctor['email'],
-            ]);
+            User::firstOrCreate(
+                ['email' => $doctor['email']],
+                [
+                    'name' => $doctor['name'],
+                    'password' => Hash::make('password'),
+                    'role' => 'doctor',
+                    'identifier' => $doctor['email'],
+                ],
+            );
         }
     }
 }

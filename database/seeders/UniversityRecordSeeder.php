@@ -13,22 +13,20 @@ class UniversityRecordSeeder extends Seeder
         $students = ['20210123', '20210456', '20210789', '20210999', '20210555'];
 
         foreach ($students as $id) {
-            UniversityRecord::create([
-                'identifier' => $id,
-                'type' => 'student',
-                'is_valid' => true,
-            ]);
+            UniversityRecord::firstOrCreate(
+                ['identifier' => $id],
+                ['type' => 'student', 'is_valid' => true],
+            );
         }
 
         // أرقام وظيفية وهمية صحيحة (موظفين) — 4 أرقام بالضبط
         $staff = ['2320', '4491', '7758'];
 
         foreach ($staff as $id) {
-            UniversityRecord::create([
-                'identifier' => $id,
-                'type' => 'staff',
-                'is_valid' => true,
-            ]);
+            UniversityRecord::firstOrCreate(
+                ['identifier' => $id],
+                ['type' => 'staff', 'is_valid' => true],
+            );
         }
     }
 }
