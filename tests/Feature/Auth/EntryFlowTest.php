@@ -41,4 +41,20 @@ class EntryFlowTest extends TestCase
 
         $response->assertRedirect('/login?role=staff');
     }
+
+    public function test_login_page_hides_the_notification_bell_for_guests(): void
+    {
+        $response = $this->get('/login');
+
+        $response->assertDontSee('id="notif-toggle"', false);
+    }
+
+    public function test_guest_header_shows_the_notification_bell_for_authenticated_users(): void
+    {
+        $user = \App\Models\User::factory()->create(['identifier' => fake()->unique()->numerify('########')]);
+
+        $response = $this->actingAs($user)->get('/about');
+
+        $response->assertSee('id="notif-toggle"', false);
+    }
 }

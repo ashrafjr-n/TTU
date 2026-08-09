@@ -255,4 +255,35 @@ class Booking extends Model
 
         return self::confirmedCountInSemester($user, $semester) >= self::SEMESTER_BOOKING_LIMIT;
     }
+
+    /**
+     * الأيام الثلاثة القابلة للحجز/العرض: اليوم + يومين قادمين — مشتركة بين
+     * صفحة الحجز (BookingController) ولوحة الدكتور (DoctorController)، كي
+     * تبقى نافذة "الأيام المعروضة" واحدة في كل مكان تظهر فيه.
+     */
+    public static function bookableDates(): array
+    {
+        $dates = [];
+
+        for ($i = 0; $i < self::BOOKING_WINDOW_DAYS; $i++) {
+            $dates[] = \Illuminate\Support\Carbon::today()->addDays($i);
+        }
+
+        return $dates;
+    }
+
+    /**
+     * تسمية اليوم المعروضة فوق تبويبه (مثال: "اليوم — 4 أغسطس") — مشتركة بين
+     * صفحة الحجز ولوحة الدكتور (راجع bookableDates أعلاه لنفس السبب).
+     */
+    public static function dayLabel(int $index, \Carbon\Carbon $date): string
+    {
+        $prefix = match ($index) {
+            0 => __('booking.day.today'),
+            1 => __('booking.day.tomorrow'),
+            default => __('booking.day.day_after'),
+        };
+
+        return $prefix.' — '.$date->translatedFormat('j F');
+    }
 }

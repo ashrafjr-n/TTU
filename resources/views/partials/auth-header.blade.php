@@ -17,7 +17,8 @@
 
             <div class="flex items-center gap-2">
 
-                {{-- الإشعارات --}}
+                {{-- الإشعارات — تظهر فقط لمستخدم مسجّل دخوله --}}
+                @auth
                 <div class="relative">
                     <button type="button" id="notif-toggle" title="{{ __('common.header.notifications') }}" aria-label="{{ __('common.header.notifications') }}"
                             class="neu-icon-btn relative w-10 h-10 flex items-center justify-center rounded-full bg-ttu-cream">
@@ -31,40 +32,39 @@
                         @endif
                     </button>
 
-                    @auth
-                        <div id="notif-panel"
-                             class="hidden absolute top-full start-0 mt-3 w-80 max-w-[90vw] rounded-2xl neu-raised-white p-3 z-50">
-                            <div class="flex items-center justify-between px-1 pb-2 mb-2 border-b border-black/10 dark:border-white/10">
-                                <span class="text-sm font-bold text-ttu-black">{{ __('common.header.notifications') }}</span>
-                                @if ($unreadCount > 0)
-                                    <button type="button" id="notif-mark-all" class="text-xs font-bold text-ttu-red hover:underline">
-                                        {{ __('common.header.mark_all_read') }}
-                                    </button>
-                                @endif
-                            </div>
-
-                            <div class="max-h-96 overflow-y-auto space-y-2">
-                                @forelse ($recentNotifications as $n)
-                                    <div class="notif-item rounded-xl px-3 py-2.5 cursor-pointer transition neu-pressed {{ $n->read_at ? 'opacity-60' : '' }}"
-                                         data-id="{{ $n->id }}"
-                                         data-url="{{ $n->data['url'] ?? '' }}"
-                                         data-read="{{ $n->read_at ? '1' : '0' }}">
-                                        <div class="flex items-start justify-between gap-2">
-                                            <p class="text-xs font-bold text-ttu-black">{{ isset($n->data['title_key']) ? __($n->data['title_key'], $n->data['title_params'] ?? []) : ($n->data['title'] ?? '') }}</p>
-                                            @if (!$n->read_at)
-                                                <span class="notif-dot w-2 h-2 rounded-full bg-ttu-red mt-1 shrink-0"></span>
-                                            @endif
-                                        </div>
-                                        <p class="text-xs text-ttu-gray mt-1 leading-relaxed">{{ isset($n->data['body_key']) ? __($n->data['body_key'], $n->data['body_params'] ?? []) : ($n->data['body'] ?? '') }}</p>
-                                        <p class="text-[10px] text-ttu-gray/70 mt-1.5">{{ $n->created_at->diffForHumans() }}</p>
-                                    </div>
-                                @empty
-                                    <p class="text-xs text-ttu-gray text-center py-6">{{ __('common.header.no_notifications') }}</p>
-                                @endforelse
-                            </div>
+                    <div id="notif-panel"
+                         class="hidden absolute top-full start-0 mt-3 w-80 max-w-[90vw] rounded-2xl neu-raised-white p-3 z-50">
+                        <div class="flex items-center justify-between px-1 pb-2 mb-2 border-b border-black/10 dark:border-white/10">
+                            <span class="text-sm font-bold text-ttu-black">{{ __('common.header.notifications') }}</span>
+                            @if ($unreadCount > 0)
+                                <button type="button" id="notif-mark-all" class="text-xs font-bold text-ttu-red hover:underline">
+                                    {{ __('common.header.mark_all_read') }}
+                                </button>
+                            @endif
                         </div>
-                    @endauth
+
+                        <div class="max-h-96 overflow-y-auto space-y-2">
+                            @forelse ($recentNotifications as $n)
+                                <div class="notif-item rounded-xl px-3 py-2.5 cursor-pointer transition neu-pressed {{ $n->read_at ? 'opacity-60' : '' }}"
+                                     data-id="{{ $n->id }}"
+                                     data-url="{{ $n->data['url'] ?? '' }}"
+                                     data-read="{{ $n->read_at ? '1' : '0' }}">
+                                    <div class="flex items-start justify-between gap-2">
+                                        <p class="text-xs font-bold text-ttu-black">{{ isset($n->data['title_key']) ? __($n->data['title_key'], $n->data['title_params'] ?? []) : ($n->data['title'] ?? '') }}</p>
+                                        @if (!$n->read_at)
+                                            <span class="notif-dot w-2 h-2 rounded-full bg-ttu-red mt-1 shrink-0"></span>
+                                        @endif
+                                    </div>
+                                    <p class="text-xs text-ttu-gray mt-1 leading-relaxed">{{ isset($n->data['body_key']) ? __($n->data['body_key'], $n->data['body_params'] ?? []) : ($n->data['body'] ?? '') }}</p>
+                                    <p class="text-[10px] text-ttu-gray/70 mt-1.5">{{ $n->created_at->diffForHumans() }}</p>
+                                </div>
+                            @empty
+                                <p class="text-xs text-ttu-gray text-center py-6">{{ __('common.header.no_notifications') }}</p>
+                            @endforelse
+                        </div>
+                    </div>
                 </div>
+                @endauth
 
                 {{-- اللغة + البانل --}}
                 <div class="relative">

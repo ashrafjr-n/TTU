@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
+use App\Models\User;
 use Illuminate\Notifications\DatabaseNotification;
 use Illuminate\Support\Facades\Auth;
 
@@ -11,7 +11,7 @@ class NotificationController extends Controller
     public function markRead(DatabaseNotification $notification)
     {
         abort_unless(
-            $notification->notifiable_type === \App\Models\User::class && $notification->notifiable_id === Auth::id(),
+            $notification->notifiable_type === User::class && $notification->notifiable_id === Auth::id(),
             403
         );
 
@@ -22,7 +22,7 @@ class NotificationController extends Controller
         ]);
     }
 
-    public function markAllRead(Request $request)
+    public function markAllRead()
     {
         Auth::user()->unreadNotifications->markAsRead();
 

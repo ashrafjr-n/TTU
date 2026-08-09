@@ -7,8 +7,8 @@ use App\Models\Booking;
 use App\Models\DoctorAttendance;
 use App\Models\Medication;
 use App\Notifications\BookingCancelledByClinic;
-use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Auth;
 
 class DoctorController extends Controller
 {
@@ -19,7 +19,7 @@ class DoctorController extends Controller
     public function index()
     {
         $days = [];
-        foreach ($this->viewableDates() as $index => $date) {
+        foreach (Booking::bookableDates() as $index => $date) {
             $dayBookings = Booking::with(['user', 'visitReport.medications'])
                 ->whereDate('booking_date', $date->toDateString())
                 ->where('status', 'confirmed')
@@ -30,7 +30,7 @@ class DoctorController extends Controller
             $days[] = [
                 'index' => $index,
                 'date' => $date->toDateString(),
-                'label' => $this->dayLabel($index, $date),
+                'label' => Booking::dayLabel($index, $date),
                 'bookings' => $dayBookings,
             ];
         }
@@ -47,35 +47,6 @@ class DoctorController extends Controller
             'medications' => $medications,
             'todayAttendance' => $todayAttendance,
         ]);
-    }
-
-    /**
-     * الأيام الثلاثة القابلة للعرض بلوحة الدكتور: اليوم + يومين قادمين —
-     * نفس نافذة الحجز (راجع BookingController::bookableDates).
-     */
-    private function viewableDates(): array
-    {
-        $dates = [];
-        for ($i = 0; $i < Booking::BOOKING_WINDOW_DAYS; $i++) {
-            $dates[] = Carbon::today()->addDays($i);
-        }
-
-        return $dates;
-    }
-
-    /**
-     * تسمية اليوم المعروضة فوق تبويبه (مثال: "اليوم — 5 أغسطس") — مطابقة
-     * لنفس التسمية بصفحة الحجز (راجع BookingController::dayLabel).
-     */
-    private function dayLabel(int $index, Carbon $date): string
-    {
-        $prefix = match ($index) {
-            0 => __('booking.day.today'),
-            1 => __('booking.day.tomorrow'),
-            default => __('booking.day.day_after'),
-        };
-
-        return $prefix.' — '.$date->translatedFormat('j F');
     }
 
     /**

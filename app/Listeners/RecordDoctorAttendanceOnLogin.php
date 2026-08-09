@@ -59,7 +59,7 @@ class RecordDoctorAttendanceOnLogin
                 'date' => Carbon::today(),
                 'check_in_at' => now(),
             ]);
-        } catch (QueryException $e) {
+        } catch (QueryException) {
             // تسابق نادر (دخولان متزامنان): قيد unique هو الحكم النهائي —
             // الحضور مسجَّل فعلًا، فلا داعي لإفشال عملية الدخول نفسها.
             return;

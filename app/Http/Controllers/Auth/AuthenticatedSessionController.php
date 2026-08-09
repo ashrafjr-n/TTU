@@ -13,7 +13,7 @@ class AuthenticatedSessionController extends Controller
 {
     /**
      * Display the login view — يحمل نوع الحساب من الرابط (إن وُجد) فقط لأغراض
-     * العرض وربط رابط "إنشاء حساب"، الدخول نفسه غير مقيد بالدور.
+     * العرض (شارة الدور)، الدخول نفسه غير مقيد بالدور.
      */
     public function create(Request $request): View
     {

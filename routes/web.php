@@ -1,16 +1,15 @@
 <?php
 
-
-use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\AdminController;
 use App\Http\Controllers\BookingController;
+use App\Http\Controllers\ContactController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DoctorController;
-use App\Http\Controllers\AdminController;
-use App\Http\Controllers\VisitReportController;
-use App\Http\Controllers\NotificationController;
-use App\Http\Controllers\ContactController;
-use App\Http\Controllers\MessageController;
 use App\Http\Controllers\LocaleController;
+use App\Http\Controllers\MessageController;
+use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\VisitReportController;
+use Illuminate\Support\Facades\Route;
 
 Route::get('/locale/{locale}', [LocaleController::class, 'switch'])->name('locale.switch');
 
@@ -52,7 +51,6 @@ Route::middleware('auth')->group(function () {
 Route::middleware(['auth', 'role:student'])->get('/dashboard/student', [DashboardController::class, 'student'])->name('dashboard.student');
 Route::middleware(['auth', 'role:staff'])->get('/dashboard/staff', [DashboardController::class, 'staff'])->name('dashboard.staff');
 
-
 // صفحات الحجز (طالب وموظف فقط)
 Route::middleware(['auth', 'role:student,staff'])->group(function () {
     Route::get('/booking', [BookingController::class, 'index'])->name('booking.index');
@@ -62,7 +60,6 @@ Route::middleware(['auth', 'role:student,staff'])->group(function () {
     Route::get('/contact', [ContactController::class, 'create'])->name('contact');
     Route::post('/contact', [ContactController::class, 'store'])->name('contact.store');
 });
-
 
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/', [AdminController::class, 'index'])->name('dashboard');

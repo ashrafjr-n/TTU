@@ -45,8 +45,8 @@ class LoginRequest extends FormRequest
 
         $login = trim((string) $this->input('login'));
 
-        // البريد يُطبَّع لحالة أحرف صغيرة دائمًا (يطابق كيفية تخزينه عند التسجيل)
-        // بدل الاعتماد على collation قاعدة البيانات، الذي يختلف بين البيئات.
+        // البريد يُطبَّع لحالة أحرف صغيرة دائمًا (يطابق كيفية تخزينه بقاعدة
+        // البيانات) بدل الاعتماد على collation قاعدة البيانات، الذي يختلف بين البيئات.
         $email = filter_var($login, FILTER_VALIDATE_EMAIL)
             ? Str::lower($login)
             : optional(User::where('identifier', $login)->first())->email;

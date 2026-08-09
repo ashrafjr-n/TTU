@@ -6,6 +6,7 @@ use App\Models\Booking;
 use App\Models\User;
 use App\Models\VisitReport;
 use Illuminate\Contracts\View\View;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Auth;
 
 class DashboardController extends Controller
@@ -53,7 +54,7 @@ class DashboardController extends Controller
     /**
      * آخر 5 حجوزات مؤكدة للمستخدم — مشتركة بين لوحتي الطالب والموظف.
      */
-    private function recentBookingsFor(User $user)
+    private function recentBookingsFor(User $user): Collection
     {
         return $user->bookings()
             ->where('status', 'confirmed')

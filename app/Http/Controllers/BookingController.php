@@ -5,10 +5,11 @@ namespace App\Http\Controllers;
 use App\Models\ActivityLog;
 use App\Models\Booking;
 use App\Models\User;
+use Carbon\Carbon;
+use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Carbon\Carbon;
 use Illuminate\Validation\Rule;
 
 class BookingController extends Controller
@@ -27,7 +28,7 @@ class BookingController extends Controller
             ]);
         }
 
-        $bookableDates = $this->bookableDates();
+        $bookableDates = Booking::bookableDates();
 
         // الحد الفصلي (3 حجوزات مؤكدة كحد أقصى) — نافذة الحجز المعروضة (اليوم
         // + يومين قادمين) قد تعبر حدود فصلين قرب نهاية/بداية فصل، فنخفي
@@ -62,7 +63,7 @@ class BookingController extends Controller
             $days[] = [
                 'index' => $index,
                 'date' => $date->toDateString(),
-                'label' => $this->dayLabel($index, $date),
+                'label' => Booking::dayLabel($index, $date),
                 'hours' => $hours,
                 'default_hour' => $this->defaultHour($hours),
             ];
@@ -73,33 +74,6 @@ class BookingController extends Controller
             'activeBooking' => null,
             'semesterLimitReached' => false,
         ]);
-    }
-
-    /**
-     * الأيام الثلاثة القابلة للحجز/العرض في صفحة الحجز: اليوم + يومين قادمين.
-     */
-    private function bookableDates(): array
-    {
-        $dates = [];
-        for ($i = 0; $i < Booking::BOOKING_WINDOW_DAYS; $i++) {
-            $dates[] = Carbon::today()->addDays($i);
-        }
-
-        return $dates;
-    }
-
-    /**
-     * تسمية اليوم المعروضة فوق تبويباته (مثال: "اليوم — 4 أغسطس").
-     */
-    private function dayLabel(int $index, Carbon $date): string
-    {
-        $prefix = match ($index) {
-            0 => __('booking.day.today'),
-            1 => __('booking.day.tomorrow'),
-            default => __('booking.day.day_after'),
-        };
-
-        return $prefix.' — '.$date->translatedFormat('j F');
     }
 
     /**
@@ -218,7 +192,7 @@ class BookingController extends Controller
     public function store(Request $request)
     {
         $allMinutes = [...Booking::STUDENT_MINUTES, ...Booking::STAFF_MINUTES];
-        $bookableDates = collect($this->bookableDates())->map->toDateString()->all();
+        $bookableDates = collect(Booking::bookableDates())->map->toDateString()->all();
 
         $validated = $request->validate([
             // اختياري: لو غاب، نفترض اليوم (توافقًا مع أي مستدعٍ لا يرسل تاريخًا)
@@ -301,7 +275,7 @@ class BookingController extends Controller
                     'price' => Booking::PRICE,
                     'status' => 'confirmed',
                 ]);
-            } catch (\Illuminate\Database\QueryException $e) {
+            } catch (QueryException) {
                 // شبكة أمان أخيرة على مستوى قاعدة البيانات (active_slot_key فريد)
                 // في حال تسابق تجاوز الفحص أعلاه
                 return back()->with('error', __('booking.errors.just_taken'));

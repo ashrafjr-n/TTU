@@ -51,8 +51,8 @@ return [
 
     'verify_email' => [
         'heading' => 'Verify your email',
-        'intro' => "Thanks for signing up! Please verify your email by clicking the link we sent you before you get started. If you didn't get the email, we're happy to send another one.",
-        'link_sent' => 'A new verification link has been sent to the email address you used when signing up.',
+        'intro' => "Please verify your email by clicking the link we sent you before you get started. If you didn't get the email, we're happy to send another one.",
+        'link_sent' => 'A new verification link has been sent to your email address on file.',
         'resend' => 'Resend verification email',
     ],
 
