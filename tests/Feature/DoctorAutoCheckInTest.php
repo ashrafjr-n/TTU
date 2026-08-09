@@ -2,7 +2,6 @@
 
 namespace Tests\Feature;
 
-use App\Models\ActivityLog;
 use App\Models\DoctorAttendance;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
