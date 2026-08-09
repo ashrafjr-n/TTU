@@ -18,6 +18,9 @@ class UserSeeder extends Seeder
             ['identifier' => '20210789', 'name' => 'عمر ياسين',    'email' => 'student-3@ttu.edu.jo'],
             ['identifier' => '20210999', 'name' => 'لمى حسن',      'email' => 'student-4@ttu.edu.jo'],
             ['identifier' => '20210555', 'name' => 'يوسف مراد',    'email' => 'student-5@ttu.edu.jo'],
+            ['identifier' => '00000000', 'name' => 'رنا فؤاد',     'email' => 'student-6@ttu.edu.jo'],
+            ['identifier' => '11111111', 'name' => 'كريم سامي',    'email' => 'student-7@ttu.edu.jo'],
+            ['identifier' => '22222222', 'name' => 'ديما نمر',     'email' => 'student-8@ttu.edu.jo'],
         ];
 
         foreach ($students as $student) {

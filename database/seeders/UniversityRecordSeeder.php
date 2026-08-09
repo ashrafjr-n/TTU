@@ -10,7 +10,7 @@ class UniversityRecordSeeder extends Seeder
     public function run(): void
     {
         // أرقام جامعية وهمية صحيحة (طلاب) — 8 أرقام
-        $students = ['20210123', '20210456', '20210789', '20210999', '20210555'];
+        $students = ['20210123', '20210456', '20210789', '20210999', '20210555', '00000000', '11111111', '22222222'];
 
         foreach ($students as $id) {
             UniversityRecord::firstOrCreate(
