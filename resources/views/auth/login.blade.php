@@ -87,12 +87,6 @@
                     <input type="checkbox" name="remember" class="rounded border-black/20 dark:border-white/20">
                     {{ __('auth_forms.login.remember') }}
                 </label>
-
-                @if (Route::has('password.request'))
-                    <a href="{{ route('password.request') }}" class="text-sm text-ttu-red hover:underline">
-                        {{ __('auth_forms.login.forgot_password') }}
-                    </a>
-                @endif
             </div>
 
             <button type="submit" class="w-full btn-hero justify-center">

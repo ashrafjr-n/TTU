@@ -15,7 +15,6 @@ return [
         'login_field' => 'University or staff ID number',
         'password' => 'Password',
         'remember' => 'Remember me',
-        'forgot_password' => 'Forgot your password?',
         'submit' => 'Log In',
         'errors' => [
             'login_required' => 'Please enter your ID number.',
@@ -24,21 +23,6 @@ return [
             'account_disabled' => 'This account has been disabled. Please contact the clinic administration.',
             'too_many_attempts' => 'Too many attempts. Please try again in :seconds seconds.',
         ],
-    ],
-
-    'forgot_password' => [
-        'heading' => 'Forgot your password?',
-        'intro' => "No problem. Enter your email and we'll send you a link to reset your password.",
-        'email' => 'Email',
-        'submit' => 'Send reset link',
-    ],
-
-    'reset_password' => [
-        'heading' => 'Reset your password',
-        'email' => 'Email',
-        'password' => 'New password',
-        'confirm_password' => 'Confirm password',
-        'submit' => 'Reset password',
     ],
 
     'confirm_password' => [

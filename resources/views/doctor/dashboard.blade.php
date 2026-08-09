@@ -162,6 +162,7 @@
                                         'quantity' => $m->pivot->quantity,
                                     ])->values()->all()
                                     : [],
+                                'history' => $b->patientHistory,
                             ];
                         @endphp
                         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-2xl neu-pressed px-5 py-4">
@@ -279,6 +280,7 @@
             'notes' => old('notes', ''),
             'medications' => collect(old('medications', []))->values()->all(),
             'errors' => $errors->toArray(),
+            'history' => $reopenBooking->patientHistory,
         ];
     @endphp
     <script>

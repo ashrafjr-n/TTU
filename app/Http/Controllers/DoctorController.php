@@ -6,6 +6,7 @@ use App\Models\ActivityLog;
 use App\Models\Booking;
 use App\Models\DoctorAttendance;
 use App\Models\Medication;
+use App\Models\VisitReport;
 use App\Notifications\BookingCancelledByClinic;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
@@ -35,6 +36,8 @@ class DoctorController extends Controller
             ];
         }
 
+        $this->attachPatientHistory($days);
+
         $medications = Medication::where('is_active', true)->orderBy('name')->get(['id', 'name', 'unit', 'stock_quantity']);
 
         $todayAttendance = DoctorAttendance::where('doctor_id', Auth::id())
@@ -47,6 +50,37 @@ class DoctorController extends Controller
             'medications' => $medications,
             'todayAttendance' => $todayAttendance,
         ]);
+    }
+
+    /**
+     * يُلحق بكل حجز معروض تاريخ زيارات صاحبه السابقة (باستثناء تقرير هذا
+     * الحجز نفسه)، جاهزًا كمصفوفة لمودال التقرير — مرة واحدة هنا بدل حساب
+     * نفس الشيء مرتين بالعرض (بطاقات الحجوزات + إعادة فتح المودال بعد خطأ
+     * تحقّق)، وبدل استعلام منفصل لكل حجز (N+1) على 3 أيام من الحجوزات.
+     */
+    private function attachPatientHistory(array $days): void
+    {
+        $bookings = collect($days)->flatMap(fn (array $day) => $day['bookings']);
+        $patientIds = $bookings->pluck('user_id')->unique();
+
+        $reportsByPatient = VisitReport::with(['medications', 'booking'])
+            ->whereHas('booking', fn ($q) => $q->whereIn('user_id', $patientIds))
+            ->get()
+            ->groupBy(fn (VisitReport $report) => $report->booking->user_id);
+
+        foreach ($bookings as $booking) {
+            $booking->patientHistory = ($reportsByPatient->get($booking->user_id) ?? collect())
+                ->reject(fn (VisitReport $report) => $report->booking_id === $booking->id)
+                ->sortByDesc(fn (VisitReport $report) => $report->booking->slotStart())
+                ->values()
+                ->map(fn (VisitReport $report) => [
+                    'dateLabel' => $report->booking->booking_date->translatedFormat('d F Y'),
+                    'condition' => $report->condition,
+                    'diagnosis' => $report->diagnosis,
+                    'medications' => $report->medications->pluck('name')->all(),
+                ])
+                ->all();
+        }
     }
 
     /**

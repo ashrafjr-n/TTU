@@ -61,6 +61,30 @@
             </div>
         </div>
 
+        {{-- تاريخ الزيارات السابقة (قراءة فقط) — تظهر فقط لو للمريض تقارير سابقة --}}
+        <div x-show="history.length > 0" class="mb-6">
+            <p class="text-xs font-bold text-ttu-gray mb-3">{{ __('doctor.report_modal.history_heading') }}</p>
+            <div class="space-y-2 max-h-56 overflow-y-auto">
+                <template x-for="(item, idx) in history" :key="idx">
+                    <div class="rounded-xl neu-pressed px-4 py-3 space-y-1">
+                        <p class="text-xs font-bold text-ttu-black" x-text="item.dateLabel"></p>
+                        <p class="text-xs text-ttu-gray" x-show="item.condition">
+                            <span class="font-semibold" x-text="labels.historyCondition"></span>:
+                            <span x-text="item.condition"></span>
+                        </p>
+                        <p class="text-xs text-ttu-gray" x-show="item.diagnosis">
+                            <span class="font-semibold" x-text="labels.historyDiagnosis"></span>:
+                            <span x-text="item.diagnosis"></span>
+                        </p>
+                        <p class="text-xs text-ttu-gray" x-show="item.medications.length">
+                            <span class="font-semibold" x-text="labels.historyMedications"></span>:
+                            <span x-text="item.medications.join('، ')"></span>
+                        </p>
+                    </div>
+                </template>
+            </div>
+        </div>
+
         <form x-ref="form" method="POST" x-bind:action="formAction"
               x-on:submit.prevent="medRows = medRows.filter(r => r.medicationId); $nextTick(() => $refs.form.submit())">
             @csrf
@@ -181,6 +205,9 @@
                 saveEdit: @json(__('doctor.report_modal.save_edit')),
                 saveCreate: @json(__('doctor.report_modal.save_create')),
                 availablePrefix: @json(__('doctor.report_modal.available_prefix')),
+                historyCondition: @json(__('doctor.report_modal.history_condition')),
+                historyDiagnosis: @json(__('doctor.report_modal.history_diagnosis')),
+                historyMedications: @json(__('doctor.report_modal.history_medications')),
             },
 
             bookingId: null,
@@ -195,6 +222,7 @@
             treatmentPlan: '',
             notes: '',
             medRows: [],
+            history: [],
             errors: {},
             formAction: '',
             _rowSeq: 0,
@@ -211,6 +239,7 @@
                 this.diagnosis = payload.diagnosis || '';
                 this.treatmentPlan = payload.treatmentPlan || '';
                 this.notes = payload.notes || '';
+                this.history = payload.history || [];
                 this.errors = payload.errors || {};
 
                 this.medRows = (payload.medications || []).map((m) => {
