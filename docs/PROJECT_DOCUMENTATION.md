@@ -31,8 +31,8 @@ Verified directly from `composer.json`, `composer.lock`, `package.json`, and the
 - Hand-built neumorphic (soft-UI) design system in `resources/css/app.css` — not a third-party library
 
 **Database**
-- MySQL (`ttu_clinic`) in the development environment (`DB_CONNECTION=mysql` in `.env`)
-- PostgreSQL used automatically for the test suite
+- PostgreSQL (`ttu_clinic`) in development and production (`DB_CONNECTION=pgsql` in `.env`; Render supplies a single `DATABASE_URL` in production, which `config/database.php` parses automatically)
+- SQLite (`:memory:`) used automatically for the test suite
 
 **Testing**
 - PHPUnit 12.5 via Laravel's test runner

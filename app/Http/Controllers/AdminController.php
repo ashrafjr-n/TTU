@@ -126,9 +126,12 @@ class AdminController extends Controller
         if ($request->filled('search')) {
             $search = $request->input('search');
             $query->where(function ($q) use ($search) {
-                $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('email', 'like', "%{$search}%")
-                  ->orWhere('identifier', 'like', "%{$search}%");
+                // whereLike (not where(..., 'like', ...)) so the search stays
+                // case-insensitive on Postgres too — a plain LIKE is
+                // case-sensitive there, unlike SQLite/MySQL's default collation.
+                $q->whereLike('name', "%{$search}%")
+                  ->orWhereLike('email', "%{$search}%")
+                  ->orWhereLike('identifier', "%{$search}%");
             });
         }
 
