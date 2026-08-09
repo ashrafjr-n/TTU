@@ -15,4 +15,6 @@ RUN composer install --no-dev --optimize-autoloader
 
 RUN chmod -R 777 storage bootstrap/cache
 
-CMD php artisan migrate --force && php artisan serve --host=0.0.0.0 --port=${PORT}
+RUN chmod +x docker-entrypoint.sh
+
+ENTRYPOINT ["./docker-entrypoint.sh"]
