@@ -27,6 +27,9 @@ class Booking extends Model
 
     const PRICE = 0.25;
 
+    /** الحد الأقصى للحجوزات المؤكدة (غير الملغاة) لكل مستخدم بالفصل الواحد */
+    const SEMESTER_BOOKING_LIMIT = 3;
+
     protected $fillable = [
         'user_id',
         'booking_date',
@@ -183,5 +186,73 @@ class Booking extends Model
             'time_label' => $booking->timeLabel(),
             'date_label' => $booking->booking_date->translatedFormat('d F Y'),
         ];
+    }
+
+    /**
+     * الفصل الذي يقع فيه تاريخ معيّن، بحدوده الفعلية — أو null لو التاريخ
+     * يقع بين فصلين (فترة عطلة). حدود الفصول ثابتة بالكود عمدًا (غير قابلة
+     * للتعديل من لوحة الإدارة)، وتواريخ خارج الفصول الثلاثة لا يُطبَّق عليها
+     * حد الحجز الفصلي إطلاقًا (بدل افتراض أقرب فصل، تفاديًا لأي التباس).
+     *
+     * الفصل الأول يمتد عبر حدود السنة الميلادية (8 أكتوبر → 15 يناير من
+     * السنة التالية)، فنبني له نافذتين محتملتين حسب سنة التاريخ المُعطى
+     * (بادئة بهذه السنة، أو بادئة بالسنة الماضية) ونتحقق من كليهما — بعكس
+     * الفصلين الآخرين الواقعين بالكامل ضمن سنة ميلادية واحدة.
+     */
+    public static function semesterFor(\Carbon\Carbon $date): ?array
+    {
+        $date = $date->copy()->startOfDay();
+        $year = $date->year;
+
+        $semester1Candidates = [
+            [\Illuminate\Support\Carbon::create($year, 10, 8)->startOfDay(), \Illuminate\Support\Carbon::create($year + 1, 1, 15)->endOfDay()],
+            [\Illuminate\Support\Carbon::create($year - 1, 10, 8)->startOfDay(), \Illuminate\Support\Carbon::create($year, 1, 15)->endOfDay()],
+        ];
+
+        foreach ($semester1Candidates as [$start, $end]) {
+            if ($date->between($start, $end)) {
+                return ['key' => 'semester_1', 'start' => $start, 'end' => $end];
+            }
+        }
+
+        $semester2 = [\Illuminate\Support\Carbon::create($year, 2, 17)->startOfDay(), \Illuminate\Support\Carbon::create($year, 6, 15)->endOfDay()];
+        if ($date->between($semester2[0], $semester2[1])) {
+            return ['key' => 'semester_2', 'start' => $semester2[0], 'end' => $semester2[1]];
+        }
+
+        $summer = [\Illuminate\Support\Carbon::create($year, 7, 11)->startOfDay(), \Illuminate\Support\Carbon::create($year, 9, 20)->endOfDay()];
+        if ($date->between($summer[0], $summer[1])) {
+            return ['key' => 'summer', 'start' => $summer[0], 'end' => $summer[1]];
+        }
+
+        return null;
+    }
+
+    /**
+     * عدد حجوزات المستخدم المؤكدة (غير الملغاة) بتاريخ ضمن حدود فصل معيّن —
+     * الحجز الملغى لا يُحتسب إطلاقًا، فإلغاؤه يُحرر خانة من الثلاث فورًا.
+     */
+    public static function confirmedCountInSemester(User $user, array $semester): int
+    {
+        return self::where('user_id', $user->id)
+            ->where('status', 'confirmed')
+            ->whereBetween('booking_date', [$semester['start']->toDateString(), $semester['end']->toDateString()])
+            ->count();
+    }
+
+    /**
+     * هل بلغ المستخدم الحد الأقصى لحجوزات الفصل الذي يقع فيه هذا التاريخ؟
+     * تواريخ خارج الفصول الثلاثة (بين فصلين) بلا حد فصلي إطلاقًا — راجع
+     * semesterFor().
+     */
+    public static function hasReachedSemesterLimit(User $user, \Carbon\Carbon $date): bool
+    {
+        $semester = self::semesterFor($date);
+
+        if (!$semester) {
+            return false;
+        }
+
+        return self::confirmedCountInSemester($user, $semester) >= self::SEMESTER_BOOKING_LIMIT;
     }
 }

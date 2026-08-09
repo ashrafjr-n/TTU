@@ -23,11 +23,27 @@ class BookingController extends Controller
             return view('booking.index', [
                 'days' => [],
                 'activeBooking' => Booking::activeViewDataFor($user),
+                'semesterLimitReached' => false,
+            ]);
+        }
+
+        $bookableDates = $this->bookableDates();
+
+        // الحد الفصلي (3 حجوزات مؤكدة كحد أقصى) — نافذة الحجز المعروضة (اليوم
+        // + يومين قادمين) قد تعبر حدود فصلين قرب نهاية/بداية فصل، فنخفي
+        // الصفحة كليًا فقط لو كانت كل أيام النافذة محظورة فعلًا؛ لو يوم واحد
+        // منها لا يزال مسموحًا (فصل مختلف، أو فجوة بلا فصل نشط) تُعرض شبكة
+        // الأوقات كالمعتاد، ويبقى store() هو الفيصل الفعلي لكل تاريخ على حدة.
+        if (collect($bookableDates)->every(fn (Carbon $date) => Booking::hasReachedSemesterLimit($user, $date))) {
+            return view('booking.index', [
+                'days' => [],
+                'activeBooking' => null,
+                'semesterLimitReached' => true,
             ]);
         }
 
         $days = [];
-        foreach ($this->bookableDates() as $index => $date) {
+        foreach ($bookableDates as $index => $date) {
             // كل حجوزات هذا اليوم المؤكدة، مفهرسة بالساعة والدقيقة لتفادي استعلامات متكررة
             $dayBookings = Booking::where('booking_date', $date)
                 ->where('status', 'confirmed')
@@ -55,6 +71,7 @@ class BookingController extends Controller
         return view('booking.index', [
             'days' => $days,
             'activeBooking' => null,
+            'semesterLimitReached' => false,
         ]);
     }
 
@@ -255,6 +272,13 @@ class BookingController extends Controller
             // الحجز) — يجب إلغاء الحجز الحالي أولًا قبل حجز موعد جديد.
             if ($this->findActiveBooking($user, lock: true)) {
                 return back()->with('error', __('booking.errors.already_have_active_booking'));
+            }
+
+            // قاعدة إضافية (وليست بديلة عن السابقة): 3 حجوزات مؤكدة كحد أقصى
+            // بالفصل الواحد — على تاريخ الحجز الفعلي نفسه، لا "اليوم"، كي
+            // تبقى صحيحة حتى لو نافذة الحجز المعروضة عبرت حدود فصلين.
+            if (Booking::hasReachedSemesterLimit($user, $date)) {
+                return back()->with('error', __('booking.errors.semester_limit_reached'));
             }
 
             $existing = Booking::where('booking_date', $date)

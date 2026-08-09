@@ -47,12 +47,19 @@ return [
         'cancel_booking' => 'Cancel this booking',
     ],
 
+    'semester_limit_modal' => [
+        'close' => 'Close',
+        'heading' => 'Semester booking limit reached',
+        'intro' => "You've reached the maximum of 3 bookings for this semester. Please get in touch with us.",
+    ],
+
     'errors' => [
         'students_only' => 'This time is for students only.',
         'staff_only' => 'This time is for staff only.',
         'released_slot_closed' => 'The booking window for released extra slots has ended for today.',
         'slot_expired' => 'This appointment time has already passed.',
         'already_have_active_booking' => 'You already have an active booking. You must cancel it before booking a new appointment.',
+        'semester_limit_reached' => "You've reached the maximum of 3 bookings for this semester. Please get in touch with us.",
         'just_taken' => 'Sorry, this time was just booked. Please try another time.',
         'not_authorized_to_cancel' => 'You are not authorized to cancel this booking.',
         'not_cancellable' => 'This booking cannot be cancelled.',

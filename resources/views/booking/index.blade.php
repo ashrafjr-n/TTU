@@ -47,7 +47,7 @@
             </div>
         @endif
 
-        @if (!$activeBooking)
+        @if (!$activeBooking && !$semesterLimitReached)
             {{-- ============ مفتاح الألوان ============ --}}
             <div class="flex flex-wrap items-center gap-4 mb-6 px-2">
                 <span class="flex items-center gap-2 text-xs text-ttu-gray">
@@ -156,7 +156,7 @@
     </div>
 </div>
 
-@if (!$activeBooking)
+@if (!$activeBooking && !$semesterLimitReached)
     {{-- ============ مودال تأكيد الحجز ============ --}}
     <div id="bookModalOverlay" class="fixed inset-0 z-[100] hidden items-center justify-center bg-black/40 backdrop-blur-sm px-4">
         <div id="bookModalCard" class="w-full max-w-sm rounded-[2rem] neu-raised-white p-8 text-center scale-95 opacity-0 transition-all duration-300">
@@ -266,9 +266,12 @@
             if (e.key === 'Escape') closeBookModal();
         });
     </script>
-@else
+@elseif ($activeBooking)
     {{-- ============ مودال "لديك حجز حاليًا" — يظهر مباشرة بدل قائمة الأوقات ============ --}}
     @include('booking.partials.active-booking-modal', ['activeBooking' => $activeBooking, 'autoOpen' => true])
+@else
+    {{-- ============ مودال "بلغت الحد الأقصى لحجوزات الفصل" — يظهر بدل قائمة الأوقات ============ --}}
+    @include('booking.partials.semester-limit-modal')
 @endif
 
 @endsection
