@@ -10,34 +10,45 @@ class UserSeeder extends Seeder
 {
     public function run(): void
     {
-        // طالب تجريبي
-        User::firstOrCreate(
-            ['email' => 'student@ttu.edu.jo'],
-            [
-                'name' => 'أحمد خالد',
-                'password' => Hash::make('password'),
-                'role' => 'student',
-                'identifier' => '20210123',
-            ],
-        );
-
-        // موظف تجريبي
-        User::firstOrCreate(
-            ['email' => 'staff@ttu.edu.jo'],
-            [
-                'name' => 'محمد علي',
-                'password' => Hash::make('password'),
-                'role' => 'staff',
-                'identifier' => '2320',
-            ],
-        );
-
-        // ثلاثة حسابات دكاترة ثابتة فقط — لا يوجد تسجيل عام لهذا الدور
-        $doctors = [
-            ['name' => 'د. أشرف جرابعة', 'email' => 'doctor-1@ttu.edu.jo'],
-            ['name' => 'د. سارة يوسف',   'email' => 'doctor-2@ttu.edu.jo'],
-            ['name' => 'د. خالد ناصر',   'email' => 'doctor-3@ttu.edu.jo'],
+        // لا يوجد تسجيل ذاتي — كل رقم جامعي/وظيفي مصرّح به (UniversityRecordSeeder)
+        // لازم يقابله هنا حساب مستخدم جاهز فعليًا، وإلا ما في طريقة لأصحابه يدخلوا.
+        $students = [
+            ['identifier' => '20210123', 'name' => 'أحمد خالد',   'email' => 'student@ttu.edu.jo'],
+            ['identifier' => '20210456', 'name' => 'سارة عبدالله', 'email' => 'student-2@ttu.edu.jo'],
+            ['identifier' => '20210789', 'name' => 'عمر ياسين',    'email' => 'student-3@ttu.edu.jo'],
+            ['identifier' => '20210999', 'name' => 'لمى حسن',      'email' => 'student-4@ttu.edu.jo'],
+            ['identifier' => '20210555', 'name' => 'يوسف مراد',    'email' => 'student-5@ttu.edu.jo'],
         ];
+
+        foreach ($students as $student) {
+            User::firstOrCreate(
+                ['email' => $student['email']],
+                [
+                    'name' => $student['name'],
+                    'password' => Hash::make('password'),
+                    'role' => 'student',
+                    'identifier' => $student['identifier'],
+                ],
+            );
+        }
+
+        $staffMembers = [
+            ['identifier' => '2320', 'name' => 'محمد علي', 'email' => 'staff@ttu.edu.jo'],
+            ['identifier' => '4491', 'name' => 'هبة سالم',  'email' => 'staff-2@ttu.edu.jo'],
+            ['identifier' => '7758', 'name' => 'زياد قاسم', 'email' => 'staff-3@ttu.edu.jo'],
+        ];
+
+        foreach ($staffMembers as $staff) {
+            User::firstOrCreate(
+                ['email' => $staff['email']],
+                [
+                    'name' => $staff['name'],
+                    'password' => Hash::make('password'),
+                    'role' => 'staff',
+                    'identifier' => $staff['identifier'],
+                ],
+            );
+        }
 
         // حساب المدير الثابت — لا يوجد تسجيل عام لهذا الدور
         User::firstOrCreate(
@@ -49,6 +60,13 @@ class UserSeeder extends Seeder
                 'identifier' => 'admin@ttu.edu.jo',
             ],
         );
+
+        // ثلاثة حسابات دكاترة ثابتة فقط — لا يوجد تسجيل عام لهذا الدور
+        $doctors = [
+            ['name' => 'د. أشرف جرابعة', 'email' => 'doctor-1@ttu.edu.jo'],
+            ['name' => 'د. سارة يوسف',   'email' => 'doctor-2@ttu.edu.jo'],
+            ['name' => 'د. خالد ناصر',   'email' => 'doctor-3@ttu.edu.jo'],
+        ];
 
         foreach ($doctors as $doctor) {
             User::firstOrCreate(

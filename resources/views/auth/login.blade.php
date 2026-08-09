@@ -101,14 +101,6 @@
             </button>
         </form>
 
-        <p class="text-center text-sm text-ttu-gray mt-6">
-            {{ __('auth_forms.login.no_account') }}
-            <a href="{{ $role ? route('register', ['role' => $role]) : route('home').'#roles' }}"
-               class="text-ttu-red font-semibold hover:underline">
-                {{ __('auth_forms.login.register_now') }}
-            </a>
-        </p>
-
     </div>
 </div>
 @endsection

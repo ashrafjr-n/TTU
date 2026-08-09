@@ -4,6 +4,20 @@
 
 @section('content')
 
+<script>
+    // الصفحة الرئيسية لازم تفتح دائمًا من الهيرو بالأعلى — لو الرابط الوارد
+    // فيه #roles (رابط "تغيير النوع" بصفحة الدخول، سجل تصفح، Bookmark قديم)
+    // المتصفح يقفز تلقائيًا لقسم اختيار الحساب بمجرد التحميل. نشيل الـ hash
+    // قبل ما يوصلها المتصفح، ونمنع استرجاع موضع التمرير القديم عند العودة
+    // بزر الرجوع — النقر اليدوي على روابط #roles بنفس الصفحة يضل يشتغل عادي.
+    if ('scrollRestoration' in history) {
+        history.scrollRestoration = 'manual';
+    }
+    if (location.hash) {
+        history.replaceState(null, '', location.pathname + location.search);
+    }
+</script>
+
 <x-app-header transparent />
 
 {{-- ============ الهيرو ============ --}}

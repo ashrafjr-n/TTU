@@ -7,7 +7,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 /**
- * صفحات المصادقة (تسجيل الدخول/إنشاء حساب/نسيت كلمة المرور/إعادة التعيين/
+ * صفحات المصادقة (تسجيل الدخول/نسيت كلمة المرور/إعادة التعيين/
  * تأكيد كلمة المرور/تأكيد البريد) كانت سابقًا بلا هيدر ولا زر لغة إطلاقًا
  * (Breeze الافتراضي بدون تخصيص) — هذا الاختبار يتأكد أنها الآن جزء فعلي من
  * نظام تبديل اللغة، وليست استثناءً منسيًا.
@@ -28,13 +28,6 @@ class AuthPagesLocalizationTest extends TestCase
         $en->assertSee('dir="ltr"', false);
         $en->assertSee('Log In');
         $en->assertDontSee('تسجيل الدخول');
-    }
-
-    public function test_register_page_switches_language(): void
-    {
-        $en = $this->withSession(['locale' => 'en'])->get('/register?role=student');
-        $en->assertOk();
-        $en->assertSee('Create a Student Account');
     }
 
     public function test_forgot_password_page_has_language_switcher_and_translates(): void

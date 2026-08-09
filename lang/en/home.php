@@ -49,7 +49,7 @@ return [
     'how_it_works' => [
         'eyebrow' => 'How it works',
         'heading' => 'How do you book your appointment?',
-        'step_1' => 'Create your account',
+        'step_1' => 'Log in to your account',
         'step_2' => 'Pick an available time',
         'step_3' => 'Confirm your booking',
         'step_4' => 'Show up on time',
