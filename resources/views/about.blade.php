@@ -57,7 +57,7 @@
                     </div>
                     <div class="rounded-2xl neu-pressed px-5 py-6 text-center">
                         <p class="font-display text-2xl sm:text-3xl font-extrabold text-ttu-red mb-1">3</p>
-                        <p class="text-xs text-ttu-gray">{{ __('about.project.stat_account_types') }}</p>
+                        <p class="text-xs text-ttu-gray">{{ __('about.project.stat_booking_limit') }}</p>
                     </div>
                     <div class="rounded-2xl neu-pressed px-5 py-6 text-center">
                         <p class="font-display text-2xl sm:text-3xl font-extrabold text-ttu-red mb-1">0.20</p>

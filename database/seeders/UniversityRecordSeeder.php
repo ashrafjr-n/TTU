@@ -20,7 +20,7 @@ class UniversityRecordSeeder extends Seeder
         }
 
         // أرقام وظيفية وهمية صحيحة (موظفين) — 4 أرقام بالضبط
-        $staff = ['2320', '4491', '7758'];
+        $staff = ['2320', '4491', '7758', '0000', '1111', '2222'];
 
         foreach ($staff as $id) {
             UniversityRecord::firstOrCreate(

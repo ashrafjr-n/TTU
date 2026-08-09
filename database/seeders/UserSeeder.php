@@ -39,6 +39,9 @@ class UserSeeder extends Seeder
             ['identifier' => '2320', 'name' => 'محمد علي', 'email' => 'staff@ttu.edu.jo'],
             ['identifier' => '4491', 'name' => 'هبة سالم',  'email' => 'staff-2@ttu.edu.jo'],
             ['identifier' => '7758', 'name' => 'زياد قاسم', 'email' => 'staff-3@ttu.edu.jo'],
+            ['identifier' => '0000', 'name' => 'نور إبراهيم', 'email' => 'staff-4@ttu.edu.jo'],
+            ['identifier' => '1111', 'name' => 'باسل عودة',   'email' => 'staff-5@ttu.edu.jo'],
+            ['identifier' => '2222', 'name' => 'ريم صالح',    'email' => 'staff-6@ttu.edu.jo'],
         ];
 
         foreach ($staffMembers as $staff) {
@@ -64,21 +67,24 @@ class UserSeeder extends Seeder
             ],
         );
 
-        // ثلاثة حسابات دكاترة ثابتة فقط — لا يوجد تسجيل عام لهذا الدور
+        // ثلاثة حسابات دكاترة ثابتة فقط — لا يوجد تسجيل عام لهذا الدور.
+        // identifier صار رقمًا وظيفيًا من 3 خانات (بدل البريد سابقًا) —
+        // updateOrCreate هنا عمدًا (لا firstOrCreate) كي يُصحَّح identifier
+        // القديم (بريد) على أي قاعدة بيانات سبق زرعها بالنسخة السابقة.
         $doctors = [
-            ['name' => 'د. أشرف جرابعة', 'email' => 'doctor-1@ttu.edu.jo'],
-            ['name' => 'د. سارة يوسف',   'email' => 'doctor-2@ttu.edu.jo'],
-            ['name' => 'د. خالد ناصر',   'email' => 'doctor-3@ttu.edu.jo'],
+            ['name' => 'د. أشرف جرابعة', 'email' => 'doctor-1@ttu.edu.jo', 'identifier' => '000'],
+            ['name' => 'د. سارة يوسف',   'email' => 'doctor-2@ttu.edu.jo', 'identifier' => '111'],
+            ['name' => 'د. خالد ناصر',   'email' => 'doctor-3@ttu.edu.jo', 'identifier' => '222'],
         ];
 
         foreach ($doctors as $doctor) {
-            User::firstOrCreate(
+            User::updateOrCreate(
                 ['email' => $doctor['email']],
                 [
                     'name' => $doctor['name'],
                     'password' => Hash::make('password'),
                     'role' => 'doctor',
-                    'identifier' => $doctor['email'],
+                    'identifier' => $doctor['identifier'],
                 ],
             );
         }

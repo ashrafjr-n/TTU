@@ -37,7 +37,7 @@ return [
         'doctor' => [
             'title' => 'Doctor',
             'description' => 'Manage the clinic schedule and review booking requests.',
-            'login_via' => 'Log in with your university email',
+            'login_via' => 'Log in with your staff ID',
         ],
         'admin' => [
             'title' => 'Admin',
@@ -64,7 +64,7 @@ return [
         'paragraph_2_after' => 'at the university clinic. It became a graduation project that builds a platform to fully organize the booking process and gives the doctor an easy tool to manage their daily schedule.',
         'stat_electronic' => 'Fully online',
         'stat_hours' => 'hours open per day',
-        'stat_account_types' => 'account types',
+        'stat_booking_limit' => 'max bookings per semester',
         'stat_fee' => 'JD per medication',
     ],
 

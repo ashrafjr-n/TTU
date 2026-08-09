@@ -19,7 +19,7 @@ return [
         'paragraph_2' => 'The system was built as a graduation project to create an online platform that fully organizes the booking process, splits time slots fairly between students and staff, and gives the doctor an easy tool to manage their daily schedule.',
         'stat_electronic' => 'Fully online',
         'stat_hours' => 'hours open per day',
-        'stat_account_types' => 'account types',
+        'stat_booking_limit' => 'max bookings per semester',
         'stat_fee' => 'JD per medication',
     ],
 
