@@ -13,6 +13,11 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        // Render (وأي مستضيف يوقف TLS عند الحافة) يمرر المخطط الحقيقي عبر
+        // X-Forwarded-Proto — بدون الوثوق بالبروكسي يولّد Laravel روابط http://
+        // داخل صفحة https فيحجبها المتصفح كـ mixed content.
+        $middleware->trustProxies(at: '*');
+
         $middleware->alias([
             'role' => \App\Http\Middleware\EnsureUserHasRole::class,
         ]);
