@@ -1,0 +1,13 @@
+.git
+.env
+.env.backup
+.env.production
+node_modules
+vendor
+public/build
+public/hot
+public/storage
+storage/logs/*.log
+.phpunit.result.cache
+.phpunit.cache
+.DS_Store

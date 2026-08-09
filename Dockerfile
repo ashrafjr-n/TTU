@@ -1,3 +1,16 @@
+FROM node:22-slim AS assets
+
+WORKDIR /app
+
+COPY package.json package-lock.json ./
+
+RUN npm ci --no-audit --no-fund
+
+COPY . .
+
+RUN npm run build
+
+
 FROM php:8.4-cli
 
 WORKDIR /app
@@ -10,6 +23,8 @@ RUN curl -sS https://getcomposer.org/installer | php \
     -- --install-dir=/usr/local/bin --filename=composer
 
 COPY . .
+
+COPY --from=assets /app/public/build ./public/build
 
 RUN composer install --no-dev --optimize-autoloader
 
