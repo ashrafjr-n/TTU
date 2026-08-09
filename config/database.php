@@ -86,7 +86,13 @@ return [
 
         'pgsql' => [
             'driver' => 'pgsql',
-            'url' => env('DB_URL'),
+            // Render (and most managed Postgres hosts) injects a single
+            // DATABASE_URL instead of discrete DB_HOST/DB_PORT/etc vars.
+            // Laravel's connection factory parses a `url` config value and
+            // uses its parts to override host/port/database/username/password
+            // below, so prefer DATABASE_URL when it's present and fall back
+            // to the standard DB_URL / discrete vars otherwise.
+            'url' => env('DATABASE_URL', env('DB_URL')),
             'host' => env('DB_HOST', '127.0.0.1'),
             'port' => env('DB_PORT', '5432'),
             'database' => env('DB_DATABASE', 'laravel'),
