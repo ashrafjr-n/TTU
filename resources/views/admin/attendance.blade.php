@@ -58,7 +58,7 @@
                     <span class="text-sm font-normal text-ttu-gray">({{ $dayLabels[$selectedDate->dayOfWeek] }})</span>
                 </h3>
 
-                <form method="GET" action="{{ route('admin.attendance') }}" class="flex items-center gap-2">
+                <form method="GET" action="{{ route('admin.attendance') }}" class="flex flex-wrap items-center gap-2">
                     <input type="date" name="date" value="{{ $selectedDate->format('Y-m-d') }}"
                            class="rounded-xl neu-pressed bg-ttu-cream border-0 px-4 py-2 text-sm focus:ring-2 focus:ring-ttu-red/30 outline-none">
                     <button type="submit" class="neu-icon-btn bg-ttu-cream text-ttu-black text-sm font-bold px-5 py-2 rounded-xl">

@@ -51,7 +51,7 @@
                             </div>
                         </div>
 
-                        <div class="flex items-center gap-3">
+                        <div class="flex flex-wrap items-center gap-3">
                             <span class="text-xs font-bold px-3 py-1.5 rounded-full neu-pressed
                                 {{ $u->role == 'student' ? 'text-blue-600 dark:text-blue-400' : ($u->role == 'staff' ? 'text-green-600 dark:text-green-400' : 'text-purple-600 dark:text-purple-400') }}">
                                 {{ __('common.roles.'.$u->role) }}

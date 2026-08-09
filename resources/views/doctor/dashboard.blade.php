@@ -164,7 +164,7 @@
                                     : [],
                             ];
                         @endphp
-                        <div class="flex items-center justify-between gap-4 rounded-2xl neu-pressed px-5 py-4">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-2xl neu-pressed px-5 py-4">
                             <div class="flex items-center gap-4">
                                 <span class="w-14 h-11 rounded-2xl neu-icon bg-ttu-cream flex items-center justify-center shrink-0 font-display font-extrabold text-xs text-ttu-red">
                                     {{ sprintf('%d:%02d', $b->booking_hour, $b->booking_minute) }}
@@ -175,7 +175,7 @@
                                 </div>
                             </div>
 
-                            <div class="flex items-center gap-3">
+                            <div class="flex flex-wrap items-center gap-3">
                                 <span class="text-xs font-bold px-3 py-1.5 rounded-full neu-pressed {{ $b->user->role == 'student' ? 'text-blue-600 dark:text-blue-400' : 'text-green-600 dark:text-green-400' }}">
                                     {{ $b->user->role == 'student' ? __('common.roles.student') : __('common.roles.staff') }}
                                 </span>

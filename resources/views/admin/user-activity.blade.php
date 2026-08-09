@@ -11,7 +11,7 @@
 
         @include('partials.admin-header')
 
-        <div class="flex items-center justify-between gap-4 mb-8">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
             <div>
                 <span class="inline-block text-xs font-bold tracking-widest text-ttu-red mb-1.5">{{ __('admin_activity_log.badge') }}</span>
                 <h2 class="font-display text-2xl sm:text-3xl font-extrabold">{{ $targetUser->name }}</h2>

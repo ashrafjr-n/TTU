@@ -109,6 +109,32 @@
                     </svg>
                 </button>
 
+                {{-- زر القائمة (موبايل فقط) --}}
+                <div class="relative md:hidden">
+                    <button type="button" id="mobile-nav-toggle" title="{{ __('common.header.menu') }}" aria-label="{{ __('common.header.menu') }}"
+                            class="neu-icon-btn w-10 h-10 flex items-center justify-center rounded-full bg-ttu-cream">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-ttu-black" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5M3.75 17.25h16.5" />
+                        </svg>
+                    </button>
+
+                    <div id="mobile-nav-panel"
+                         class="hidden absolute top-full start-0 mt-3 w-48 rounded-2xl neu-raised-white p-2 z-50">
+                        <a href="{{ route('home') }}"
+                           class="neu-icon-btn w-full flex items-center px-3.5 py-2.5 rounded-xl transition text-sm font-semibold text-ttu-black">
+                            {{ __('common.nav.home') }}
+                        </a>
+                        @auth
+                            @if (auth()->user()->isStudent() || auth()->user()->isStaff())
+                                <a href="{{ route('contact') }}"
+                                   class="neu-icon-btn w-full flex items-center px-3.5 py-2.5 rounded-xl transition text-sm font-semibold text-ttu-black mt-2">
+                                    {{ __('common.nav.contact') }}
+                                </a>
+                            @endif
+                        @endauth
+                    </div>
+                </div>
+
             </div>
 
             <nav class="hidden md:flex items-center gap-8 text-sm font-semibold">
@@ -219,6 +245,20 @@
     });
 </script>
 @endauth
+
+<script>
+    document.addEventListener('click', function (e) {
+        const toggle = document.getElementById('mobile-nav-toggle');
+        const panel = document.getElementById('mobile-nav-panel');
+        if (!toggle || !panel) return;
+
+        if (toggle.contains(e.target)) {
+            panel.classList.toggle('hidden');
+        } else if (!panel.contains(e.target)) {
+            panel.classList.add('hidden');
+        }
+    });
+</script>
 
 <script>
     document.addEventListener('click', function (e) {

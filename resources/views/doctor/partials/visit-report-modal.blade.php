@@ -14,7 +14,7 @@
     {{-- الخلفية --}}
     <div class="absolute inset-0" x-on:click="show = false"></div>
 
-    <div class="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-[2rem] neu-raised-white p-8"
+    <div class="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-[2rem] neu-raised-white p-5 sm:p-8"
          x-show="show"
          x-transition:enter="ease-out duration-200"
          x-transition:enter-start="opacity-0 scale-95"
@@ -42,7 +42,7 @@
         </template>
 
         {{-- بيانات المريض (قراءة فقط) --}}
-        <div class="grid grid-cols-2 gap-3 mb-6">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
             <div class="rounded-xl neu-pressed px-4 py-3">
                 <p class="text-[11px] text-ttu-gray mb-1">{{ __('doctor.report_modal.patient_name') }}</p>
                 <p class="text-sm font-bold text-ttu-black" x-text="patientName"></p>
@@ -109,7 +109,7 @@
                 <div class="space-y-3">
                     <template x-for="(row, index) in medRows" :key="row.uid">
                         <div class="flex gap-3 items-start rounded-xl neu-pressed p-3">
-                            <div class="flex-1 relative">
+                            <div class="flex-1 min-w-0 relative">
                                 <input type="text" x-model="row.search"
                                        x-on:focus="row.open = true"
                                        x-on:input="row.open = true; row.medicationId = null"

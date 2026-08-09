@@ -18,6 +18,7 @@ return [
         'reply_sent' => 'تم إرسال الرد',
         'toggle_language' => 'تبديل اللغة',
         'dark_mode' => 'الوضع الليلي',
+        'menu' => 'القائمة',
     ],
 
     'buttons' => [

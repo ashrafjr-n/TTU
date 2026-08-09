@@ -18,6 +18,7 @@ return [
         'reply_sent' => 'Reply sent',
         'toggle_language' => 'Switch language',
         'dark_mode' => 'Dark mode',
+        'menu' => 'Menu',
     ],
 
     'buttons' => [

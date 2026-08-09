@@ -10,7 +10,7 @@
 
     <div class="max-w-4xl mx-auto px-6 py-16 lg:py-20">
 
-        <div class="flex items-center justify-between gap-4 mb-10">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-10">
             <div>
                 <span class="inline-block text-xs font-bold tracking-widest text-ttu-red mb-1.5">{{ __('medications.eyebrow') }}</span>
                 <h2 class="font-display text-2xl sm:text-3xl font-extrabold">{{ __('medications.heading') }}</h2>
