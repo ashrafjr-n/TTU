@@ -4,6 +4,11 @@ return [
 
     'app_title' => 'TTU Clinic',
 
+    'seo' => [
+        'site_name' => 'Tafila Technical University Clinic',
+        'description' => 'The online clinic of Tafila Technical University: book an appointment, follow your visit reports and prescribed medications, and contact the clinic doctor.',
+    ],
+
     'nav' => [
         'home' => 'Home',
         'contact' => 'Contact',

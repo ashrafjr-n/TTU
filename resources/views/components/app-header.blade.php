@@ -148,14 +148,6 @@
                            class="neu-icon-btn w-full flex items-center px-3.5 py-2.5 rounded-xl transition text-sm font-semibold text-ttu-black">
                             {{ __('common.nav.home') }}
                         </a>
-                        @auth
-                            @if (auth()->user()->isStudent() || auth()->user()->isStaff())
-                                <a href="{{ route('contact') }}"
-                                   class="neu-icon-btn w-full flex items-center px-3.5 py-2.5 rounded-xl transition text-sm font-semibold text-ttu-black mt-2">
-                                    {{ __('common.nav.contact') }}
-                                </a>
-                            @endif
-                        @endauth
                     </div>
                 </div>
 
@@ -167,11 +159,6 @@
                    class="{{ $navLinkClass }} {{ $transparent && request()->routeIs('home') ? 'nav-link-active' : '' }}">
                     {{ __('common.nav.home') }}
                 </a>
-                @auth
-                    @if (auth()->user()->isStudent() || auth()->user()->isStaff())
-                        <a href="{{ route('contact') }}" class="{{ $navLinkClass }}">{{ __('common.nav.contact') }}</a>
-                    @endif
-                @endauth
             </nav>
 
         </div>

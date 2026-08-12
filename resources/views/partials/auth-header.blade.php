@@ -124,14 +124,6 @@
                            class="neu-icon-btn w-full flex items-center px-3.5 py-2.5 rounded-xl transition text-sm font-semibold text-ttu-black">
                             {{ __('common.nav.home') }}
                         </a>
-                        @auth
-                            @if (auth()->user()->isStudent() || auth()->user()->isStaff())
-                                <a href="{{ route('contact') }}"
-                                   class="neu-icon-btn w-full flex items-center px-3.5 py-2.5 rounded-xl transition text-sm font-semibold text-ttu-black mt-2">
-                                    {{ __('common.nav.contact') }}
-                                </a>
-                            @endif
-                        @endauth
                     </div>
                 </div>
 
@@ -139,11 +131,6 @@
 
             <nav class="hidden md:flex items-center gap-8 text-sm font-semibold">
                 <a href="{{ route('home') }}" class="nav-link-dark">{{ __('common.nav.home') }}</a>
-                @auth
-                    @if (auth()->user()->isStudent() || auth()->user()->isStaff())
-                        <a href="{{ route('contact') }}" class="nav-link-dark">{{ __('common.nav.contact') }}</a>
-                    @endif
-                @endauth
             </nav>
 
         </div>

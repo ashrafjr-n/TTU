@@ -238,6 +238,31 @@ button,
 .loading-dot-2 { animation-delay: .18s; }
 .loading-dot-3 { animation-delay: .36s; }
 
+/* ===== شاشة الترحيب — دخول متدرّج للعناصر ثم إخفاء ناعم بالكامل ===== */
+@keyframes splash-rise {
+    from { opacity: 0; transform: translateY(16px) scale(.97); }
+    to   { opacity: 1; transform: none; }
+}
+.splash-screen {
+    opacity: 1;
+    transition: opacity .7s ease, transform .7s ease;
+}
+.splash-screen.is-hiding {
+    opacity: 0;
+    transform: scale(1.03);
+}
+.splash-rise { animation: splash-rise .8s cubic-bezier(.22, 1, .36, 1) both; }
+.splash-rise-2 { animation-delay: .12s; }
+.splash-rise-3 { animation-delay: .22s; }
+.splash-rise-4 { animation-delay: .34s; }
+
+@media (prefers-reduced-motion: reduce) {
+    .splash-rise { animation: none; }
+    .loading-dot { animation: none; }
+    .splash-screen { transition: opacity .3s ease; }
+    .splash-screen.is-hiding { transform: none; }
+}
+
 
 /* ===== أزرار أيقونات الهيدر — نيومورفيزم على خلفية بيضاء ===== */
 .neu-icon-btn {
@@ -300,13 +325,4 @@ button,
 }
 @media (prefers-reduced-motion: reduce) {
     .neu-fab { transition: none !important; }
-}
-
-/* بطاقة اللوجو — خلفية فاتحة عشان يبين اللوجو الأحمر بوضوح فوق الهيدر الأحمر */
-.logo-badge {
-    background: linear-gradient(160deg, #FFFFFF, var(--color-ttu-cream) 130%);
-    box-shadow: 4px 4px 10px rgba(0, 0, 0, .18), -3px -3px 8px rgba(255, 255, 255, .1);
-}
-.dark .logo-badge {
-    background: linear-gradient(160deg, var(--color-ttu-white), var(--color-ttu-cream) 130%);
 }
