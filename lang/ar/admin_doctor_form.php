@@ -17,7 +17,7 @@ return [
 
     'name_label' => 'الاسم الكامل',
     'identifier_label' => 'الرقم الوظيفي',
-    'identifier_placeholder' => 'مثال: 000',
+    'identifier_placeholder' => 'مثال: 111',
     'password_label' => 'كلمة المرور',
     'password_confirmation_label' => 'تأكيد كلمة المرور',
     'working_days_label' => 'أيام العمل الأسبوعية',

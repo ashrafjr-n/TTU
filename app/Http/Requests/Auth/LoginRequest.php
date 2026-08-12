@@ -47,6 +47,13 @@ class LoginRequest extends FormRequest
 
         // البريد يُطبَّع لحالة أحرف صغيرة دائمًا (يطابق كيفية تخزينه بقاعدة
         // البيانات) بدل الاعتماد على collation قاعدة البيانات، الذي يختلف بين البيئات.
+        //
+        // مطابقة identifier هنا نصية صرفة (لا رقمية) طالما عمود identifier
+        // فعليًا varchar بقاعدة البيانات (يفرضه migration
+        // force_identifier_to_varchar_on_users_table) — "000" و"0000" لا
+        // يتساويان أبدًا كسلسلتي نص، بعكس ما يحصل لو كان العمود integer
+        // (كلاهما يُقتطَع لنفس القيمة 0؛ هذا كان السبب الجذري لخلل تصادم
+        // المعرّفات المُصلَح بذلك الـmigration).
         $email = filter_var($login, FILTER_VALIDATE_EMAIL)
             ? Str::lower($login)
             : optional(User::where('identifier', $login)->first())->email;
