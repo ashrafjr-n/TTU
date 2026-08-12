@@ -12,7 +12,18 @@ return [
         'heading_role' => 'Log in as :role',
         'role_student' => 'Student',
         'role_staff' => 'Staff',
+        'role_doctor' => 'Doctor',
+        'role_admin' => 'Admin',
+
+        // Generic wording — shown when landing on /login with no account type
         'login_field' => 'University or staff ID number',
+
+        // Per-role wording, driven by the home page card the user came from
+        'login_field_student' => 'University ID number',
+        'login_field_staff' => 'Staff ID number',
+        'login_field_doctor' => "Doctor's staff ID number",
+        'login_field_admin' => 'Email address',
+
         'password' => 'Password',
         'remember' => 'Remember me',
         'submit' => 'Log In',

@@ -170,7 +170,7 @@
 
             {{-- دكتور --}}
             @php $locked = $currentRole && $currentRole !== 'doctor'; @endphp
-            <a @if (!$locked) href="{{ route('login') }}" @endif
+            <a @if (!$locked) href="{{ route('login', ['role' => 'doctor']) }}" @endif
                @if ($locked) aria-disabled="true" tabindex="-1" @endif
                @class([
                    'group relative flex flex-col overflow-hidden p-8 pt-10 rounded-[2.5rem] neu-raised-white',
@@ -200,7 +200,7 @@
 
             {{-- مدير --}}
             @php $locked = $currentRole && $currentRole !== 'admin'; @endphp
-            <a @if (!$locked) href="{{ route('login') }}" @endif
+            <a @if (!$locked) href="{{ route('login', ['role' => 'admin']) }}" @endif
                @if ($locked) aria-disabled="true" tabindex="-1" @endif
                @class([
                    'group relative flex flex-col overflow-hidden p-8 pt-10 rounded-[2.5rem] neu-raised-white',

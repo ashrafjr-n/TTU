@@ -26,12 +26,27 @@ class EntryFlowTest extends TestCase
         $response->assertDontSee('تغيير النوع');
     }
 
-    public function test_login_page_ignores_invalid_role_query_value(): void
+    /**
+     * الأدوار الأربعة كلها صارت مقبولة (كل بطاقة بالرئيسية تمرر دورها) —
+     * المرفوض هو ما لا يطابق أيًا منها فقط.
+     */
+    public function test_login_page_ignores_unknown_role_query_value(): void
     {
-        $response = $this->get('/login?role=doctor');
+        $response = $this->get('/login?role=hacker');
 
         $response->assertStatus(200);
         $response->assertDontSee('تغيير النوع');
+    }
+
+    public function test_login_page_shows_the_badge_for_doctor_and_admin_too(): void
+    {
+        $this->get('/login?role=doctor')
+            ->assertStatus(200)
+            ->assertSee('تسجيل دخول الطبيب');
+
+        $this->get('/login?role=admin')
+            ->assertStatus(200)
+            ->assertSee('تسجيل دخول المدير');
     }
 
     public function test_failed_login_redirects_back_with_role_preserved(): void

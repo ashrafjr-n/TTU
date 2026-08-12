@@ -7,8 +7,24 @@
 @include('partials.auth-header')
 
 @php
-    $roleLabels = ['student' => __('auth_forms.login.role_student'), 'staff' => __('auth_forms.login.role_staff')];
-    $roleIcons = ['student' => '🎓', 'staff' => '💼'];
+    $roleLabels = [
+        'student' => __('auth_forms.login.role_student'),
+        'staff' => __('auth_forms.login.role_staff'),
+        'doctor' => __('auth_forms.login.role_doctor'),
+        'admin' => __('auth_forms.login.role_admin'),
+    ];
+    $roleIcons = ['student' => '🎓', 'staff' => '💼', 'doctor' => '🩺', 'admin' => '🛡️'];
+
+    // اسم حقل الدخول يتبع البطاقة التي جاء منها المستخدم: رقم جامعي للطالب،
+    // وظيفي للموظف والطبيب، وبريد إلكتروني للمدير. الدخول المباشر على /login
+    // بلا معامل (Bookmark مثلًا) يبقى على الصياغة العامة القديمة.
+    $loginFieldLabel = $role
+        ? __('auth_forms.login.login_field_'.$role)
+        : __('auth_forms.login.login_field');
+
+    // الحقل نفسه يبقى نصيًا لأن الآلية مشتركة (LoginRequest يقبل الاثنين) —
+    // نلمّح للمتصفح فقط بنوع التعبئة المتوقعة.
+    $loginAutocomplete = $role === 'admin' ? 'email' : 'username';
 @endphp
 
 <div class="min-h-screen flex flex-col items-center justify-center px-4 py-14 bg-ttu-cream">
@@ -70,9 +86,10 @@
 
             <div>
                 <label class="block text-sm font-medium text-ttu-black mb-1.5">
-                    {{ __('auth_forms.login.login_field') }}
+                    {{ $loginFieldLabel }}
                 </label>
                 <input type="text" name="login" value="{{ old('login') }}" required autofocus
+                       autocomplete="{{ $loginAutocomplete }}"
                        class="w-full px-4 py-2.5 rounded-xl neu-pressed bg-ttu-cream border-0 focus:ring-2 focus:ring-ttu-red/30 outline-none transition">
             </div>
 

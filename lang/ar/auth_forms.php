@@ -12,7 +12,18 @@ return [
         'heading_role' => 'تسجيل دخول :role',
         'role_student' => 'الطالب',
         'role_staff' => 'الموظف',
+        'role_doctor' => 'الطبيب',
+        'role_admin' => 'المدير',
+
+        // الصياغة العامة — تظهر عند الدخول المباشر على /login بلا نوع حساب
         'login_field' => 'الرقم الجامعي أو الوظيفي',
+
+        // صياغة حقل الدخول حسب البطاقة التي جاء منها المستخدم
+        'login_field_student' => 'الرقم الجامعي',
+        'login_field_staff' => 'الرقم الوظيفي',
+        'login_field_doctor' => 'الرقم الوظيفي للطبيب',
+        'login_field_admin' => 'البريد الإلكتروني',
+
         'password' => 'كلمة المرور',
         'remember' => 'تذكرني',
         'submit' => 'تسجيل الدخول',
