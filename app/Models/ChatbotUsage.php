@@ -16,9 +16,15 @@ class ChatbotUsage extends Model
 
     protected $fillable = ['usage_date', 'requests_count'];
 
-    protected function casts(): array
+    /**
+     * usage_date يبقى بلا cast تاريخ عن قصد: مع الـcast يكتب Eloquent القيمة
+     * بصيغة 'Y-m-d H:i:s'، فتُخزَّن في SQLite (بيئة الاختبارات) كنص بجزء وقت
+     * لا يطابق مقارنة 'Y-m-d'، بينما تقصّه Postgres لعمود date. التعامل معه
+     * كسلسلة 'Y-m-d' في الطرفين يجعل السلوك واحدًا في البيئتين.
+     */
+    public static function dateKey(): string
     {
-        return ['usage_date' => 'date'];
+        return today()->toDateString();
     }
 
     /**
@@ -26,7 +32,7 @@ class ChatbotUsage extends Model
      */
     public static function usedToday(): int
     {
-        return (int) (self::where('usage_date', today()->toDateString())->value('requests_count') ?? 0);
+        return (int) (self::where('usage_date', self::dateKey())->value('requests_count') ?? 0);
     }
 
     /**
@@ -44,7 +50,7 @@ class ChatbotUsage extends Model
         }
 
         return DB::transaction(function () use ($dailyLimit) {
-            $date = today()->toDateString();
+            $date = self::dateKey();
 
             // القفل يمنع طلبين متزامنين من قراءة نفس العدّاد ثم زيادته معًا،
             // فيتجاوز الاستهلاك الفعلي السقف بمقدار عدد الطلبات المتزامنة.

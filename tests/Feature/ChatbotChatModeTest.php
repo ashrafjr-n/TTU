@@ -3,8 +3,8 @@
 namespace Tests\Feature;
 
 use App\Models\ChatbotUsage;
-use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Facades\Http;
 use Tests\TestCase;
 
@@ -92,7 +92,7 @@ class ChatbotChatModeTest extends TestCase
     {
         Http::fake();
 
-        ChatbotUsage::create(['usage_date' => today()->toDateString(), 'requests_count' => 3]);
+        ChatbotUsage::create(['usage_date' => ChatbotUsage::dateKey(), 'requests_count' => 3]);
 
         $response = $this->ask();
 

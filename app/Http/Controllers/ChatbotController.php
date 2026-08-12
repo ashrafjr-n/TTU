@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Services\ChatbotService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 
 /**
  * نقطة النهاية الوحيدة لوضع "محادثة" في ويدجت الدعم. باقي الويدجت (الطبقات
@@ -17,10 +18,18 @@ class ChatbotController extends Controller
 {
     public function message(Request $request, ChatbotService $chatbot): JsonResponse
     {
-        $validated = $request->validate([
+        // تحقق يدوي بدل $request->validate() عن قصد: إعدادات الاستثناءات
+        // بالتطبيق (shouldRenderJsonWhen على api/* فقط) تحوّل فشل التحقق إلى
+        // إعادة توجيه 302 لأي مسار خارج api، وهذا المسار يُستدعى بـfetch
+        // ويحتاج ردًا JSON دائمًا.
+        $validator = Validator::make($request->all(), [
             'message' => 'required|string|max:500',
         ]);
 
-        return response()->json($chatbot->reply($validated['message']));
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
+
+        return response()->json($chatbot->reply((string) $validator->validated()['message']));
     }
 }
