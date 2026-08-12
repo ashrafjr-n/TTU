@@ -26,23 +26,33 @@ class DoctorController extends Controller
         $doctorId = Auth::id();
         $assignedDaysOfWeek = DoctorDayAssignment::where('doctor_id', $doctorId)->pluck('day_of_week');
 
+        $weekDates = Booking::currentWeekDates();
+        $assignedDates = collect($weekDates)
+            ->filter(fn (Carbon $date) => $assignedDaysOfWeek->contains($date->dayOfWeek))
+            ->values();
+
+        // استعلام واحد لكل حجوزات الأسبوع (مفهرس بمدى التاريخ) بدل استعلام
+        // منفصل لكل يوم مُعيَّن — يومان مُعيَّنان يعنيان استعلامين بدل واحد،
+        // وقد تصل الأيام المُعيَّنة لخمسة (أحد–خميس). whereBetween (لا
+        // whereIn) عمدًا: عمود booking_date قد يُخزَّن بصيغة تتضمن وقتًا
+        // ("Y-m-d H:i:s") حسب قاعدة البيانات، فمطابقة whereIn الحرفية على
+        // "Y-m-d" فقط تفشل بصمت — مقارنة المدى تبقى صحيحة لأن الترتيب
+        // النصي يطابق الترتيب الزمني (نفس الأسلوب المستخدم أصلًا بمخطط لوحة
+        // المدير الأسبوعي). أيام الأسبوع غير المُعيَّنة لهذا الدكتور تُجلَب
+        // ضمن هذا المدى أيضًا لكنها تُهمَل لاحقًا (لا تُستخدم إلا حجوزات
+        // $assignedDates)، فتكلفتها إهمال بيانات محمَّلة أصلًا، لا استعلام إضافي.
+        $bookingsByDate = Booking::with(['user', 'visitReport.medications'])
+            ->whereBetween('booking_date', [$weekDates[0]->toDateString(), $weekDates[6]->toDateString()])
+            ->where('status', 'confirmed')
+            ->orderBy('booking_hour')
+            ->orderBy('booking_minute')
+            ->get()
+            ->groupBy(fn (Booking $booking) => $booking->booking_date->toDateString());
+
         $days = [];
         $defaultIndex = 0;
 
-        foreach (Booking::currentWeekDates() as $date) {
-            if (!$assignedDaysOfWeek->contains($date->dayOfWeek)) {
-                continue;
-            }
-
-            $dayBookings = Booking::with(['user', 'visitReport.medications'])
-                ->whereDate('booking_date', $date->toDateString())
-                ->where('status', 'confirmed')
-                ->orderBy('booking_hour')
-                ->orderBy('booking_minute')
-                ->get();
-
-            $index = count($days);
-
+        foreach ($assignedDates as $index => $date) {
             if ($date->isToday()) {
                 $defaultIndex = $index;
             }
@@ -52,7 +62,7 @@ class DoctorController extends Controller
                 'date' => $date->toDateString(),
                 'label' => Booking::weekDayLabel($date),
                 'is_today' => $date->isToday(),
-                'bookings' => $dayBookings,
+                'bookings' => $bookingsByDate->get($date->toDateString(), collect()),
             ];
         }
 

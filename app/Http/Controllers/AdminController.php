@@ -73,8 +73,10 @@ class AdminController extends Controller
             ->groupBy('booking_hour')
             ->pluck('c', 'booking_hour');
 
+        // count(DISTINCT ...) على مستوى قاعدة البيانات مباشرة، بدل جلب كل
+        // قيم booking_date المميّزة كصفوف ثم عدّها بـPHP
         $distinctDays = max(
-            Booking::where('status', 'confirmed')->groupBy('booking_date')->pluck('booking_date')->count(),
+            Booking::where('status', 'confirmed')->distinct()->count('booking_date'),
             1
         );
 
@@ -353,6 +355,13 @@ class AdminController extends Controller
     {
         $medication->update(['is_active' => !$medication->is_active]);
 
+        ActivityLog::record(
+            Auth::id(),
+            $medication->is_active ? 'medication_activated' : 'medication_deactivated',
+            $medication->is_active ? 'activity_log.medication_activated' : 'activity_log.medication_deactivated',
+            ['name' => $medication->name]
+        );
+
         return back()->with('success', $medication->is_active
             ? __('admin_dashboard.flash.medication_activated', ['name' => $medication->name])
             : __('admin_dashboard.flash.medication_deactivated', ['name' => $medication->name]));
@@ -446,7 +455,7 @@ class AdminController extends Controller
                 'day_of_week' => $dayOfWeek,
                 'day_name' => __('common.days')[$dayOfWeek],
                 'doctor' => $doctor,
-                'mismatch' => $doctor && !in_array($dayOfWeek, $doctor->doctorSchedule->working_days ?? [], true),
+                'mismatch' => $doctor && !in_array($dayOfWeek, $doctor->doctorSchedule?->working_days ?? [], true),
             ];
         });
 

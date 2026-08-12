@@ -11,6 +11,8 @@ return [
     'medication_added' => 'Added medication: :name',
     'medication_edited' => 'Edited medication details: :name',
     'medication_restocked' => 'Added :amount to the stock of ":name"',
+    'medication_activated' => 'Activated medication: :name',
+    'medication_deactivated' => 'Deactivated medication: :name',
 
     'doctor_check_in' => 'Automatic check-in on login',
     'doctor_check_out' => 'Checked out',

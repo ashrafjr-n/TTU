@@ -139,7 +139,7 @@
             <div class="space-y-4">
                 @foreach ($doctors as $doctor)
                     @php
-                        $workingDays = $doctor->doctorSchedule->working_days ?? [];
+                        $workingDays = $doctor->doctorSchedule?->working_days ?? [];
                     @endphp
                     <div class="rounded-2xl neu-pressed px-5 py-4 flex flex-col lg:flex-row lg:items-center gap-4">
 

@@ -8,7 +8,7 @@
 
 @php
     $dayLabels = __('common.days');
-    $currentDays = $doctor->doctorSchedule->working_days ?? [];
+    $currentDays = $doctor->doctorSchedule?->working_days ?? [];
     $selectedDays = collect(old('working_days', $currentDays))->map(fn ($d) => (int) $d)->all();
 @endphp
 

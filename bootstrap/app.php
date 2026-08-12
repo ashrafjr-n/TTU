@@ -29,7 +29,7 @@ return Application::configure(basePath: dirname(__DIR__))
         // لأي دكتور سجّل حضوره ولم يسجّل انصرافه
         $schedule->command('attendance:auto-checkout')->dailyAt('16:00');
 
-        // تذكير بالمواعيد التي تقترب خلال ساعة تقريبًا
+        // تذكير بالمواعيد التي تقترب خلال ساعة تقريبًا، وأخرى خلال 15 دقيقة تقريبًا
         $schedule->command('notifications:send-reminders')->everyFiveMinutes();
     })
     ->withExceptions(function (Exceptions $exceptions): void {

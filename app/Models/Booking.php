@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -80,12 +81,12 @@ class Booking extends Model
         return in_array($this->booking_minute, self::STAFF_MINUTES, true);
     }
 
-    public function slotStart(): \Illuminate\Support\Carbon
+    public function slotStart(): Carbon
     {
         return $this->booking_date->copy()->setTime($this->booking_hour, $this->booking_minute, 0);
     }
 
-    public function slotEnd(): \Illuminate\Support\Carbon
+    public function slotEnd(): Carbon
     {
         return $this->slotStart()->addMinutes(self::SLOT_MINUTES);
     }
@@ -128,7 +129,7 @@ class Booking extends Model
         }
 
         if ($user->isStudent() && $this->isStaffMinute()) {
-            return $this->booking_date->gte(\Illuminate\Support\Carbon::today());
+            return $this->booking_date->gte(Carbon::today());
         }
 
         return $this->isUpcoming();
@@ -148,7 +149,7 @@ class Booking extends Model
             ->where('status', 'confirmed')
             // لا حجز قبل اليوم يقدر يكون فعّالًا أصلًا (isActiveFor يرفضه دائمًا)،
             // فتقييد الاستعلام بهذا يمنع تحميل كل السجلات التاريخية للمستخدم
-            ->where('booking_date', '>=', \Illuminate\Support\Carbon::today());
+            ->where('booking_date', '>=', Carbon::today());
 
         if ($lock) {
             $query->lockForUpdate();
@@ -201,14 +202,14 @@ class Booking extends Model
      * (بادئة بهذه السنة، أو بادئة بالسنة الماضية) ونتحقق من كليهما — بعكس
      * الفصلين الآخرين الواقعين بالكامل ضمن سنة ميلادية واحدة.
      */
-    public static function semesterFor(\Carbon\Carbon $date): ?array
+    public static function semesterFor(Carbon $date): ?array
     {
         $date = $date->copy()->startOfDay();
         $year = $date->year;
 
         $semester1Candidates = [
-            [\Illuminate\Support\Carbon::create($year, 10, 8)->startOfDay(), \Illuminate\Support\Carbon::create($year + 1, 1, 15)->endOfDay()],
-            [\Illuminate\Support\Carbon::create($year - 1, 10, 8)->startOfDay(), \Illuminate\Support\Carbon::create($year, 1, 15)->endOfDay()],
+            [Carbon::create($year, 10, 8)->startOfDay(), Carbon::create($year + 1, 1, 15)->endOfDay()],
+            [Carbon::create($year - 1, 10, 8)->startOfDay(), Carbon::create($year, 1, 15)->endOfDay()],
         ];
 
         foreach ($semester1Candidates as [$start, $end]) {
@@ -217,12 +218,12 @@ class Booking extends Model
             }
         }
 
-        $semester2 = [\Illuminate\Support\Carbon::create($year, 2, 17)->startOfDay(), \Illuminate\Support\Carbon::create($year, 6, 15)->endOfDay()];
+        $semester2 = [Carbon::create($year, 2, 17)->startOfDay(), Carbon::create($year, 6, 15)->endOfDay()];
         if ($date->between($semester2[0], $semester2[1])) {
             return ['key' => 'semester_2', 'start' => $semester2[0], 'end' => $semester2[1]];
         }
 
-        $summer = [\Illuminate\Support\Carbon::create($year, 7, 11)->startOfDay(), \Illuminate\Support\Carbon::create($year, 9, 20)->endOfDay()];
+        $summer = [Carbon::create($year, 7, 11)->startOfDay(), Carbon::create($year, 9, 20)->endOfDay()];
         if ($date->between($summer[0], $summer[1])) {
             return ['key' => 'summer', 'start' => $summer[0], 'end' => $summer[1]];
         }
@@ -247,7 +248,7 @@ class Booking extends Model
      * تواريخ خارج الفصول الثلاثة (بين فصلين) بلا حد فصلي إطلاقًا — راجع
      * semesterFor().
      */
-    public static function hasReachedSemesterLimit(User $user, \Carbon\Carbon $date): bool
+    public static function hasReachedSemesterLimit(User $user, Carbon $date): bool
     {
         $semester = self::semesterFor($date);
 
@@ -268,7 +269,7 @@ class Booking extends Model
         $dates = [];
 
         for ($i = 0; $i < self::BOOKING_WINDOW_DAYS; $i++) {
-            $dates[] = \Illuminate\Support\Carbon::today()->addDays($i);
+            $dates[] = Carbon::today()->addDays($i);
         }
 
         return $dates;
@@ -277,7 +278,7 @@ class Booking extends Model
     /**
      * تسمية اليوم المعروضة فوق تبويبه بصفحة الحجز (مثال: "اليوم — 4 أغسطس").
      */
-    public static function dayLabel(int $index, \Carbon\Carbon $date): string
+    public static function dayLabel(int $index, Carbon $date): string
     {
         $prefix = match ($index) {
             0 => __('booking.day.today'),
@@ -303,7 +304,7 @@ class Booking extends Model
      */
     public static function currentWeekDates(): array
     {
-        $weekStart = \Illuminate\Support\Carbon::today()->startOfWeek(\Illuminate\Support\Carbon::SATURDAY);
+        $weekStart = Carbon::today()->startOfWeek(Carbon::SATURDAY);
 
         $dates = [];
         for ($i = 0; $i < 7; $i++) {
@@ -320,7 +321,7 @@ class Booking extends Model
      * هذه تحتاج توضيح "أي يوم بالأسبوع هذا" لأن العرض يشمل أيامًا ماضية
      * وقادمة معًا.
      */
-    public static function weekDayLabel(\Carbon\Carbon $date): string
+    public static function weekDayLabel(Carbon $date): string
     {
         $dayName = __('common.days')[$date->dayOfWeek];
         $label = $dayName.' — '.$date->translatedFormat('j F');

@@ -11,6 +11,8 @@ return [
     'medication_added' => 'إضافة دواء: :name',
     'medication_edited' => 'تعديل بيانات دواء: :name',
     'medication_restocked' => 'إضافة :amount إلى مخزون ":name"',
+    'medication_activated' => 'تفعيل دواء: :name',
+    'medication_deactivated' => 'تعطيل دواء: :name',
 
     'doctor_check_in' => 'تسجيل حضور تلقائي عند الدخول',
     'doctor_check_out' => 'تسجيل انصراف',

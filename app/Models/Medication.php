@@ -5,7 +5,6 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Medication extends Model
 {
@@ -44,14 +43,6 @@ class Medication extends Model
         return Attribute::make(
             get: fn () => app()->getLocale() === 'ar' ? $this->name_ar : $this->name_en,
         );
-    }
-
-    public function visitReports(): BelongsToMany
-    {
-        return $this->belongsToMany(VisitReport::class, 'visit_report_medications')
-            ->using(VisitReportMedication::class)
-            ->withPivot('quantity')
-            ->withTimestamps();
     }
 
     public function isLowStock(): bool
