@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\ActivityLog;
 use App\Models\Booking;
 use App\Models\DoctorAttendance;
+use App\Models\DoctorDayAssignment;
 use App\Models\Medication;
 use App\Models\VisitReport;
 use App\Notifications\BookingCancelledByClinic;
@@ -14,13 +15,25 @@ use Illuminate\Support\Facades\Auth;
 class DoctorController extends Controller
 {
     /**
-     * عرض لوحة الدكتور — بنفس نافذة الأيام الثلاثة (اليوم + يومين قادمين)
-     * المتاحة للطلاب/الموظفين بصفحة الحجز، بدل تاريخ واحد يُختار عبر حقل حر.
+     * عرض لوحة الدكتور — الأسبوع الجاري كاملًا (سبت→جمعة، راجع
+     * Booking::currentWeekDates)، مقتصرًا على الأيام المُعيَّنة لهذا الدكتور
+     * تحديدًا (DoctorDayAssignment) لا كل أيام الأسبوع. يشمل أيامًا ماضية
+     * ضمن الأسبوع (مثلًا الأحد لو اليوم الأربعاء) لا القادمة فقط — بعكس
+     * صفحة الحجز (نافذة 3 أيام قادمة) التي تبقى كما هي.
      */
     public function index()
     {
+        $doctorId = Auth::id();
+        $assignedDaysOfWeek = DoctorDayAssignment::where('doctor_id', $doctorId)->pluck('day_of_week');
+
         $days = [];
-        foreach (Booking::bookableDates() as $index => $date) {
+        $defaultIndex = 0;
+
+        foreach (Booking::currentWeekDates() as $date) {
+            if (!$assignedDaysOfWeek->contains($date->dayOfWeek)) {
+                continue;
+            }
+
             $dayBookings = Booking::with(['user', 'visitReport.medications'])
                 ->whereDate('booking_date', $date->toDateString())
                 ->where('status', 'confirmed')
@@ -28,10 +41,17 @@ class DoctorController extends Controller
                 ->orderBy('booking_minute')
                 ->get();
 
+            $index = count($days);
+
+            if ($date->isToday()) {
+                $defaultIndex = $index;
+            }
+
             $days[] = [
                 'index' => $index,
                 'date' => $date->toDateString(),
-                'label' => Booking::dayLabel($index, $date),
+                'label' => Booking::weekDayLabel($date),
+                'is_today' => $date->isToday(),
                 'bookings' => $dayBookings,
             ];
         }
@@ -50,9 +70,12 @@ class DoctorController extends Controller
             ->whereDate('date', Carbon::today())
             ->first();
 
+        $todayEntry = collect($days)->firstWhere('is_today', true);
+
         return view('doctor.dashboard', [
             'days' => $days,
-            'todayBookingsCount' => $days[0]['bookings']->count(),
+            'defaultDayIndex' => $defaultIndex,
+            'todayBookingsCount' => $todayEntry ? $todayEntry['bookings']->count() : 0,
             'medications' => $medications,
             'todayAttendance' => $todayAttendance,
         ]);
@@ -62,7 +85,7 @@ class DoctorController extends Controller
      * يُلحق بكل حجز معروض تاريخ زيارات صاحبه السابقة (باستثناء تقرير هذا
      * الحجز نفسه)، جاهزًا كمصفوفة لمودال التقرير — مرة واحدة هنا بدل حساب
      * نفس الشيء مرتين بالعرض (بطاقات الحجوزات + إعادة فتح المودال بعد خطأ
-     * تحقّق)، وبدل استعلام منفصل لكل حجز (N+1) على 3 أيام من الحجوزات.
+     * تحقّق)، وبدل استعلام منفصل لكل حجز (N+1) على أيام الدكتور المعروضة.
      */
     private function attachPatientHistory(array $days): void
     {
@@ -121,7 +144,9 @@ class DoctorController extends Controller
      * إلغاء حجز مؤكد (من جدول الدكتور).
      *
      * الفاعل هنا الدكتور لا المريض، لذلك: نتحقق أولًا أن الحجز ما زال مؤكدًا
-     * (كي لا يُلغى حجز ملغى مسبقًا فيُرسَل إشعار مكرر للمريض)، نسجّل الحدث في
+     * (كي لا يُلغى حجز ملغى مسبقًا فيُرسَل إشعار مكرر للمريض)، ثم أن يوم هذا
+     * الحجز مُعيَّن لهذا الدكتور تحديدًا (403 غير ذلك — لا يقدر دكتور يلغي
+     * حجزًا بيوم دكتور آخر حتى لو عرف رقم الحجز بالرابط)، نسجّل الحدث في
      * سجل النشاط تحت حساب الدكتور مع ذكر اسم المريض، ونُشعر المريض بالإلغاء —
      * وإلا لن يعرف أن موعده أُلغي وقد يحضر للعيادة.
      */
@@ -130,6 +155,12 @@ class DoctorController extends Controller
         if ($booking->status !== 'confirmed') {
             return back()->with('error', __('doctor.bookings_table.not_cancellable'));
         }
+
+        abort_unless(
+            DoctorDayAssignment::doctorIdForDate($booking->booking_date) === Auth::id(),
+            403,
+            __('doctor.errors.not_your_day')
+        );
 
         $booking->update(['status' => 'cancelled']);
 

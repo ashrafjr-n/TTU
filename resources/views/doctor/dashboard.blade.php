@@ -118,19 +118,29 @@
                 <h3 class="font-display text-lg font-bold">{{ __('doctor.bookings_table.heading') }}</h3>
             </div>
 
-            {{-- ============ تبويبات الأيام (اليوم / غدًا / بعد الغد) ============ --}}
+            {{-- ============ تبويبات أيام الأسبوع الجاري المُعيَّنة لهذا الدكتور ============ --}}
+            @if (empty($days))
+                <div class="text-center py-10">
+                    <div class="w-16 h-16 rounded-full neu-pressed flex items-center justify-center mx-auto mb-4">
+                        <svg class="w-7 h-7 text-ttu-gray" fill="none" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
+                        </svg>
+                    </div>
+                    <p class="text-sm text-ttu-gray max-w-sm mx-auto">{{ __('doctor.no_assigned_days') }}</p>
+                </div>
+            @else
             <div class="flex flex-wrap gap-2.5 mb-6" role="tablist" aria-label="{{ __('doctor.bookings_table.choose_day') }}">
                 @foreach ($days as $day)
                     <button type="button"
                             role="tab"
                             id="doctor-day-tab-{{ $day['index'] }}"
                             data-day="{{ $day['index'] }}"
-                            aria-selected="{{ $day['index'] === 0 ? 'true' : 'false' }}"
+                            aria-selected="{{ $day['index'] === $defaultDayIndex ? 'true' : 'false' }}"
                             onclick="selectDoctorDay({{ $day['index'] }})"
                             @class([
                                 'doctor-day-tab rounded-2xl px-5 py-3 text-sm font-bold whitespace-nowrap transition-colors',
-                                'neu-pressed text-ttu-red' => $day['index'] === 0,
-                                'neu-icon-btn bg-ttu-cream text-ttu-black' => $day['index'] !== 0,
+                                'neu-pressed text-ttu-red' => $day['index'] === $defaultDayIndex,
+                                'neu-icon-btn bg-ttu-cream text-ttu-black' => $day['index'] !== $defaultDayIndex,
                             ])>
                         {{ $day['label'] }}
                     </button>
@@ -138,7 +148,7 @@
             </div>
 
             @foreach ($days as $day)
-                <div id="doctor-day-panel-{{ $day['index'] }}" class="doctor-day-panel space-y-3 {{ $day['index'] === 0 ? '' : 'hidden' }}">
+                <div id="doctor-day-panel-{{ $day['index'] }}" class="doctor-day-panel space-y-3 {{ $day['index'] === $defaultDayIndex ? '' : 'hidden' }}">
                     @forelse ($day['bookings'] as $b)
                         @php
                             $existingReport = $b->visitReport;
@@ -222,6 +232,7 @@
                     @endforelse
                 </div>
             @endforeach
+            @endif
         </div>
 
     </div>
@@ -248,8 +259,8 @@
 @include('doctor.partials.visit-report-modal', ['medications' => $medications])
 
 @php
-    // نبحث بكل الأيام الثلاثة المعروضة (بدل يوم واحد) لأن الحجز المُعاد فتحه
-    // بعد خطأ تحقّق قد يخص غدًا أو بعد الغد لا اليوم فقط.
+    // نبحث بكل أيام الأسبوع المعروضة (بدل يوم واحد) لأن الحجز المُعاد فتحه
+    // بعد خطأ تحقّق قد يخص أي يوم مُعيَّن للدكتور ضمن الأسبوع، لا اليوم فقط.
     $reopenDayIndex = null;
     $reopenBooking = null;
     if (old('booking_id')) {

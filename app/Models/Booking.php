@@ -259,9 +259,9 @@ class Booking extends Model
     }
 
     /**
-     * الأيام الثلاثة القابلة للحجز/العرض: اليوم + يومين قادمين — مشتركة بين
-     * صفحة الحجز (BookingController) ولوحة الدكتور (DoctorController)، كي
-     * تبقى نافذة "الأيام المعروضة" واحدة في كل مكان تظهر فيه.
+     * الأيام الثلاثة القابلة للحجز/العرض: اليوم + يومين قادمين — نافذة
+     * BookingController (صفحة الحجز) حصرًا. لوحة الدكتور صارت أسبوعية كاملة
+     * (راجع currentWeekDates أدناه)، لا 3 أيام.
      */
     public static function bookableDates(): array
     {
@@ -275,8 +275,7 @@ class Booking extends Model
     }
 
     /**
-     * تسمية اليوم المعروضة فوق تبويبه (مثال: "اليوم — 4 أغسطس") — مشتركة بين
-     * صفحة الحجز ولوحة الدكتور (راجع bookableDates أعلاه لنفس السبب).
+     * تسمية اليوم المعروضة فوق تبويبه بصفحة الحجز (مثال: "اليوم — 4 أغسطس").
      */
     public static function dayLabel(int $index, \Carbon\Carbon $date): string
     {
@@ -287,5 +286,45 @@ class Booking extends Model
         };
 
         return $prefix.' — '.$date->translatedFormat('j F');
+    }
+
+    /**
+     * أيام "الأسبوع الحالي" السبعة كاملة (سبت→جمعة)، تبدأ من سبت هذا
+     * الأسبوع بصرف النظر عن اليوم الفعلي الحالي — تُستخدم بلوحة الدكتور
+     * (DoctorController) لعرض كل حجوزات أيامه المُعيَّنة (ماضية وقادمة) ضمن
+     * الأسبوع الجاري، لا نافذة 3 أيام كصفحة الحجز.
+     *
+     * بداية الأسبوع سبت (لا الأحد المعتاد) لأنها أول يوم بعد إغلاق العيادة
+     * الأسبوعي (خميس آخر يوم عمل، فالجمعة والسبت عطلة) — فالأسبوع "يتصفّر"
+     * فعليًا مع افتتاح العيادة يوم الأحد التالي، والسبت هو أنسب حد فاصل بلا
+     * لبس. startOfWeek(Carbon::SATURDAY) نفس الأسلوب المستخدم أصلًا بمخطط
+     * لوحة المدير الأسبوعي (AdminController::index — startOfWeek(SUNDAY)),
+     * بدل حساب الفرق يدويًا.
+     */
+    public static function currentWeekDates(): array
+    {
+        $weekStart = \Illuminate\Support\Carbon::today()->startOfWeek(\Illuminate\Support\Carbon::SATURDAY);
+
+        $dates = [];
+        for ($i = 0; $i < 7; $i++) {
+            $dates[] = $weekStart->copy()->addDays($i);
+        }
+
+        return $dates;
+    }
+
+    /**
+     * تسمية يوم بلوحة الدكتور الأسبوعية: اسم اليوم + تاريخه (مثال: "الأحد —
+     * 10 أغسطس")، مع لاحقة "(اليوم)" لو كان هو اليوم الفعلي — بعكس تسمية
+     * صفحة الحجز (dayLabel) التي تفترض دائمًا يومًا ضمن نافذة صغيرة قادمة،
+     * هذه تحتاج توضيح "أي يوم بالأسبوع هذا" لأن العرض يشمل أيامًا ماضية
+     * وقادمة معًا.
+     */
+    public static function weekDayLabel(\Carbon\Carbon $date): string
+    {
+        $dayName = __('common.days')[$date->dayOfWeek];
+        $label = $dayName.' — '.$date->translatedFormat('j F');
+
+        return $date->isToday() ? $label.' ('.__('booking.day.today').')' : $label;
     }
 }

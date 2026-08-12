@@ -8,6 +8,8 @@ return [
         'medications' => 'الأدوية',
         'attendance' => 'حضور الأطباء',
         'activity_log' => 'سجل النشاط',
+        'day_assignments' => 'توزيع الأيام',
+        'booking_history' => 'سجل الحجوزات',
         'add_doctor' => '+ إضافة طبيب',
     ],
 

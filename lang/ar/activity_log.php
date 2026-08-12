@@ -22,4 +22,6 @@ return [
     'visit_report_created' => 'إنشاء تقرير زيارة للمريض :patient',
     'visit_report_edited' => 'تعديل تقرير زيارة للمريض :patient',
 
+    'day_assignment_updated' => 'تعيين يوم :day للطبيب ":doctor"',
+
 ];

@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\Booking;
+use App\Models\DoctorDayAssignment;
 use App\Models\Medication;
 use App\Models\User;
 use App\Models\VisitReport;
@@ -13,6 +14,11 @@ use Tests\TestCase;
 /**
  * تاريخ زيارات المريض السابقة (قراءة فقط) يظهر بجانب فورم التقرير — يساعد
  * الدكتور يعرف حالة المريض السابقة قبل ما يكتب تقرير اليوم.
+ *
+ * "اليوم" هنا أحد ثابت (راجع today()) والدكتور الفاعل مُعيَّن لكل أيام
+ * الأسبوع الخمسة (أحد–خميس) — لوحته الآن تعرض الأسبوع الجاري كاملًا (ماضيًا
+ * وقادمًا)، لا نافذة 3 أيام، فتغطية الأسبوع كله تبسّط اختبارات "زيارة سابقة
+ * قبل أيام" بلا تعيين يوم بيوم.
  */
 class DoctorPatientHistoryTest extends TestCase
 {
@@ -24,9 +30,21 @@ class DoctorPatientHistoryTest extends TestCase
         parent::tearDown();
     }
 
+    /** أحد ثابت — يبقى نفس اليوم بصرف النظر عن يوم تشغيل الاختبارات الفعلي */
+    private function today(): Carbon
+    {
+        return Carbon::create(2026, 8, 16);
+    }
+
     private function doctor(): User
     {
-        return User::factory()->create(['role' => 'doctor', 'identifier' => fake()->unique()->numerify('###')]);
+        $doctor = User::factory()->create(['role' => 'doctor', 'identifier' => fake()->unique()->numerify('###')]);
+
+        foreach (DoctorDayAssignment::CLINIC_DAYS as $dayOfWeek) {
+            DoctorDayAssignment::create(['day_of_week' => $dayOfWeek, 'doctor_id' => $doctor->id]);
+        }
+
+        return $doctor;
     }
 
     private function patient(): User
@@ -74,9 +92,9 @@ class DoctorPatientHistoryTest extends TestCase
 
     public function test_a_first_time_patient_has_no_history(): void
     {
-        Carbon::setTestNow(Carbon::today()->setTime(8, 0));
+        Carbon::setTestNow($this->today()->copy()->setTime(8, 0));
         $patient = $this->patient();
-        $booking = $this->bookingAt($patient, Carbon::today());
+        $booking = $this->bookingAt($patient, $this->today());
 
         $response = $this->actingAs($this->doctor())->get(route('dashboard.doctor'));
 
@@ -90,20 +108,22 @@ class DoctorPatientHistoryTest extends TestCase
 
     public function test_a_returning_patients_prior_visit_shows_in_history(): void
     {
-        Carbon::setTestNow(Carbon::today()->setTime(8, 0));
+        Carbon::setTestNow($this->today()->copy()->setTime(8, 0));
         $patient = $this->patient();
         $doctor = $this->doctor();
 
         $panadol = Medication::create(['name_ar' => 'بانادول', 'name_en' => 'Panadol', 'stock_quantity' => 50, 'low_stock_threshold' => 10]);
 
-        $pastBooking = $this->bookingAt($patient, Carbon::today()->subDays(3));
+        // ثلاثة أيام قبل — يبقى ضمن نفس الأسبوع (سبت→جمعة) طالما "اليوم"
+        // أحد؛ لا يعبر لأسبوع سابق فيختفي من نافذة العرض.
+        $pastBooking = $this->bookingAt($patient, $this->today()->copy()->subDays(3));
         $pastReport = $this->reportFor($pastBooking, $doctor, [
             'condition' => 'صداع',
             'diagnosis' => 'إجهاد',
         ]);
         $pastReport->medications()->attach($panadol->id, ['quantity' => 2]);
 
-        $todayBooking = $this->bookingAt($patient, Carbon::today());
+        $todayBooking = $this->bookingAt($patient, $this->today());
 
         $response = $this->actingAs($doctor)->get(route('dashboard.doctor'));
 
@@ -122,11 +142,11 @@ class DoctorPatientHistoryTest extends TestCase
 
     public function test_a_bookings_own_report_is_not_listed_in_its_own_history(): void
     {
-        Carbon::setTestNow(Carbon::today()->setTime(9, 0));
+        Carbon::setTestNow($this->today()->copy()->setTime(9, 0));
         $patient = $this->patient();
         $doctor = $this->doctor();
 
-        $booking = $this->bookingAt($patient, Carbon::today());
+        $booking = $this->bookingAt($patient, $this->today());
         $this->reportFor($booking, $doctor);
 
         $response = $this->actingAs($doctor)->get(route('dashboard.doctor'));
@@ -141,17 +161,17 @@ class DoctorPatientHistoryTest extends TestCase
 
     public function test_history_is_sorted_most_recent_visit_first(): void
     {
-        Carbon::setTestNow(Carbon::today()->setTime(8, 0));
+        Carbon::setTestNow($this->today()->copy()->setTime(8, 0));
         $patient = $this->patient();
         $doctor = $this->doctor();
 
-        $oldest = $this->bookingAt($patient, Carbon::today()->subDays(10));
+        $oldest = $this->bookingAt($patient, $this->today());
         $this->reportFor($oldest, $doctor, ['condition' => 'الأقدم']);
 
-        $newer = $this->bookingAt($patient, Carbon::today()->subDays(2));
+        $newer = $this->bookingAt($patient, $this->today()->copy()->addDays(2));
         $this->reportFor($newer, $doctor, ['condition' => 'الأحدث']);
 
-        $todayBooking = $this->bookingAt($patient, Carbon::today());
+        $todayBooking = $this->bookingAt($patient, $this->today()->copy()->addDays(4));
 
         $response = $this->actingAs($doctor)->get(route('dashboard.doctor'));
 
@@ -169,15 +189,15 @@ class DoctorPatientHistoryTest extends TestCase
 
     public function test_history_only_includes_this_patients_own_visits(): void
     {
-        Carbon::setTestNow(Carbon::today()->setTime(8, 0));
+        Carbon::setTestNow($this->today()->copy()->setTime(8, 0));
         $doctor = $this->doctor();
 
         $otherPatient = $this->patient();
-        $otherBooking = $this->bookingAt($otherPatient, Carbon::today()->subDay());
+        $otherBooking = $this->bookingAt($otherPatient, $this->today()->copy()->addDay());
         $this->reportFor($otherBooking, $doctor, ['condition' => 'مريض آخر']);
 
         $patient = $this->patient();
-        $todayBooking = $this->bookingAt($patient, Carbon::today());
+        $todayBooking = $this->bookingAt($patient, $this->today());
 
         $response = $this->actingAs($doctor)->get(route('dashboard.doctor'));
 

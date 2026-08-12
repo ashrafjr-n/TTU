@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\ActivityLog;
 use App\Models\Booking;
+use App\Models\DoctorDayAssignment;
 use App\Models\Medication;
 use App\Models\VisitReport;
 use App\Models\VisitReportMedication;
@@ -23,6 +24,15 @@ class VisitReportController extends Controller
         if ($booking->status !== 'confirmed') {
             return back()->with('error', __('doctor.report_modal.not_confirmed'));
         }
+
+        // لا يقدر دكتور يرفق/يعدّل تقريرًا لحجز بيوم مُعيَّن لدكتور آخر —
+        // حتى لو عرف رقم الحجز مباشرة (الرابط ليس محميًا بغياب doctor_id
+        // بجدول bookings أصلًا، فهذا الفحص هو الحارس الوحيد).
+        abort_unless(
+            DoctorDayAssignment::doctorIdForDate($booking->booking_date) === Auth::id(),
+            403,
+            __('doctor.errors.not_your_day')
+        );
 
         if (!$booking->hasStarted()) {
             return back()->with('error', __('doctor.report_modal.not_started_yet'));

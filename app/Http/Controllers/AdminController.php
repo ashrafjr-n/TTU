@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\ActivityLog;
 use App\Models\Booking;
 use App\Models\DoctorAttendance;
+use App\Models\DoctorDayAssignment;
 use App\Models\DoctorSchedule;
 use App\Models\Medication;
 use App\Models\User;
@@ -423,5 +424,107 @@ class AdminController extends Controller
             ->paginate(20);
 
         return view('admin.activity-log', compact('logs'));
+    }
+
+    /**
+     * صفحة "توزيع الأيام على الأطباء" — 5 صفوف ثابتة (أحد–خميس)، كل صف
+     * يعرض الطبيب المُعيَّن حاليًا (إن وُجد) + فورم إعادة تعيين، بالإضافة
+     * لتنبيه لو كان اليوم المعيَّن لا يقع ضمن working_days الطبيب نفسه —
+     * تناقض ممكن (المديران منفصلان عمدًا، راجع migration الجدول) لكنه
+     * يستحق تنبيهًا مرئيًا بدل تجاهله بصمت.
+     */
+    public function dayAssignments()
+    {
+        $assignments = DoctorDayAssignment::with('doctor.doctorSchedule')->get()->keyBy('day_of_week');
+        $doctors = User::where('role', 'doctor')->orderBy('name')->get();
+
+        $rows = collect(DoctorDayAssignment::CLINIC_DAYS)->map(function (int $dayOfWeek) use ($assignments) {
+            $assignment = $assignments->get($dayOfWeek);
+            $doctor = $assignment?->doctor;
+
+            return [
+                'day_of_week' => $dayOfWeek,
+                'day_name' => __('common.days')[$dayOfWeek],
+                'doctor' => $doctor,
+                'mismatch' => $doctor && !in_array($dayOfWeek, $doctor->doctorSchedule->working_days ?? [], true),
+            ];
+        });
+
+        return view('admin.day-assignments', ['rows' => $rows, 'doctors' => $doctors]);
+    }
+
+    /**
+     * إعادة تعيين يوم واحد لطبيب — day_of_week فريد (unique) على الجدول،
+     * فـupdateOrCreate هنا يستبدل التعيين القديم لنفس اليوم مباشرة.
+     */
+    public function updateDayAssignment(Request $request)
+    {
+        $validated = $request->validate([
+            'day_of_week' => ['required', 'integer', Rule::in(DoctorDayAssignment::CLINIC_DAYS)],
+            'doctor_id' => ['required', 'integer', Rule::exists('users', 'id')],
+        ]);
+
+        $doctor = User::findOrFail($validated['doctor_id']);
+        abort_unless($doctor->isDoctor(), 422);
+
+        DoctorDayAssignment::updateOrCreate(
+            ['day_of_week' => $validated['day_of_week']],
+            ['doctor_id' => $doctor->id],
+        );
+
+        ActivityLog::record(Auth::id(), 'day_assignment_updated', 'activity_log.day_assignment_updated', [
+            'day' => __('common.days')[$validated['day_of_week']],
+            'doctor' => $doctor->name,
+        ]);
+
+        return back()->with('success', __('admin_day_assignments.flash.updated', [
+            'day' => __('common.days')[$validated['day_of_week']],
+            'doctor' => $doctor->name,
+        ]));
+    }
+
+    /**
+     * السجل التاريخي الكامل للحجوزات — كل الحجوزات على الإطلاق (أي دكتور،
+     * أي تاريخ، مؤكدة أو ملغاة)، غير مقيَّد بتوزيع الأيام على الأطباء إطلاقًا
+     * (ذاك التوزيع خاص بلوحات الأطباء فقط). لا حاجة لجدول منفصل يُزامَن مع
+     * bookings — الإلغاء بالتطبيق دائمًا "ناعم" (status فقط، لا حذف صف فعلي)
+     * فجدول bookings نفسه هو أصلًا السجل التاريخي الكامل والموثوق.
+     */
+    public function bookingHistory(Request $request)
+    {
+        $validated = $request->validate([
+            'from' => 'nullable|date',
+            'to' => 'nullable|date',
+            'status' => ['nullable', Rule::in(['confirmed', 'cancelled'])],
+            'search' => 'nullable|string|max:255',
+        ]);
+
+        $query = Booking::with('user')
+            ->orderByDesc('booking_date')
+            ->orderByDesc('booking_hour')
+            ->orderByDesc('booking_minute');
+
+        if (!empty($validated['from'])) {
+            $query->whereDate('booking_date', '>=', $validated['from']);
+        }
+
+        if (!empty($validated['to'])) {
+            $query->whereDate('booking_date', '<=', $validated['to']);
+        }
+
+        if (!empty($validated['status'])) {
+            $query->where('status', $validated['status']);
+        }
+
+        if (!empty($validated['search'])) {
+            $search = $validated['search'];
+            $query->whereHas('user', function ($q) use ($search) {
+                $q->whereLike('name', "%{$search}%")->orWhereLike('identifier', "%{$search}%");
+            });
+        }
+
+        $bookings = $query->paginate(20)->withQueryString();
+
+        return view('admin.booking-history', ['bookings' => $bookings, 'filters' => $validated]);
     }
 }

@@ -22,4 +22,6 @@ return [
     'visit_report_created' => 'Created a visit report for patient :patient',
     'visit_report_edited' => 'Edited a visit report for patient :patient',
 
+    'day_assignment_updated' => 'Assigned :day to doctor ":doctor"',
+
 ];

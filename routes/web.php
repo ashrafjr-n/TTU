@@ -77,6 +77,9 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::post('/medications/{medication}/toggle', [AdminController::class, 'toggleMedicationStatus'])->name('medications.toggle');
     Route::get('/attendance', [AdminController::class, 'attendance'])->name('attendance');
     Route::get('/activity-log', [AdminController::class, 'activityLog'])->name('activity-log');
+    Route::get('/day-assignments', [AdminController::class, 'dayAssignments'])->name('day-assignments');
+    Route::post('/day-assignments', [AdminController::class, 'updateDayAssignment'])->name('day-assignments.update');
+    Route::get('/booking-history', [AdminController::class, 'bookingHistory'])->name('booking-history');
 });
 
 require __DIR__.'/auth.php';

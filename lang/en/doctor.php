@@ -5,6 +5,11 @@ return [
     'title' => 'Doctor Dashboard',
     'badge' => 'Doctor Dashboard',
     'today_bookings' => "Today's bookings",
+    'no_assigned_days' => 'You have no day assigned to you this week. Contact the administration to review the day assignments.',
+
+    'errors' => [
+        'not_your_day' => 'This booking falls on a day assigned to another doctor.',
+    ],
 
     'attendance' => [
         'heading' => "Today's attendance",

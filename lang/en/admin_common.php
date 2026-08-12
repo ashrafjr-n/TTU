@@ -8,6 +8,8 @@ return [
         'medications' => 'Medications',
         'attendance' => 'Doctor attendance',
         'activity_log' => 'Activity log',
+        'day_assignments' => 'Day assignments',
+        'booking_history' => 'Booking history',
         'add_doctor' => '+ Add doctor',
     ],
 
