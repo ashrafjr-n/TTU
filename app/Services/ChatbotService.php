@@ -106,7 +106,7 @@ class ChatbotService
         - Working hours are 8:00 AM to 4:00 PM, in 5-minute appointment slots.
         - Appointments can be booked for today and the next two days only.
         - Students book the earlier slots of each hour; the last slots of each hour are reserved for staff, and are released to students later the same day if unbooked.
-        - A user may hold only one active booking at a time, and is limited to 3 confirmed bookings per semester.
+        - A user may hold only one active booking at a time, and is limited to 4 confirmed bookings per semester.
         - There is no public sign-up and no self-service password reset; accounts are created and reset by the clinic administration.
         - Users log in with their university/staff ID number or their account email, plus a password.
         - Messages to a doctor are sent from the "Contact" page; the doctor's reply arrives as a notification (bell icon in the header).

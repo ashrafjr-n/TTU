@@ -87,7 +87,7 @@ class BookingSemesterLimitTest extends TestCase
     }
 
     // ------------------------------------------------------------------
-    // الحد الفصلي (3 حجوزات مؤكدة كحد أقصى)
+    // الحد الفصلي (4 حجوزات مؤكدة كحد أقصى)
     // ------------------------------------------------------------------
 
     public function test_booking_within_the_limit_succeeds(): void
@@ -104,9 +104,13 @@ class BookingSemesterLimitTest extends TestCase
         $this->assertSame(3, Booking::where('user_id', $user->id)->where('status', 'confirmed')->count());
     }
 
-    public function test_fourth_booking_in_a_semester_is_blocked(): void
+    /**
+     * الحجز الرابع هو آخر حجز مسموح بالفصل بعد رفع الحد من 3 إلى 4 — يجب أن
+     * ينجح، وهو ما يحرس ضد عودة الحد القديم بصمت.
+     */
+    public function test_fourth_booking_in_a_semester_is_allowed(): void
     {
-        Carbon::setTestNow(Carbon::create(2026, 11, 16, 8, 0));
+        Carbon::setTestNow(Carbon::create(2026, 11, 15, 8, 0));
         $user = $this->student();
 
         $this->pastConfirmedBooking($user, '2026-10-10');
@@ -115,12 +119,28 @@ class BookingSemesterLimitTest extends TestCase
 
         $response = $this->actingAs($user)->post(route('booking.store'), ['hour' => 9, 'minute' => 0]);
 
+        $response->assertSessionHas('success');
+        $this->assertSame(4, Booking::where('user_id', $user->id)->where('status', 'confirmed')->count());
+    }
+
+    public function test_fifth_booking_in_a_semester_is_blocked(): void
+    {
+        Carbon::setTestNow(Carbon::create(2026, 11, 16, 8, 0));
+        $user = $this->student();
+
+        $this->pastConfirmedBooking($user, '2026-10-10');
+        $this->pastConfirmedBooking($user, '2026-10-15');
+        $this->pastConfirmedBooking($user, '2026-10-20');
+        $this->pastConfirmedBooking($user, '2026-10-25');
+
+        $response = $this->actingAs($user)->post(route('booking.store'), ['hour' => 9, 'minute' => 0]);
+
         $response->assertSessionHas('error');
         $this->assertSame(
             __('booking.errors.semester_limit_reached'),
             session('error'),
         );
-        $this->assertSame(3, Booking::where('user_id', $user->id)->where('status', 'confirmed')->count());
+        $this->assertSame(4, Booking::where('user_id', $user->id)->where('status', 'confirmed')->count());
         $this->assertDatabaseMissing('bookings', [
             'user_id' => $user->id,
             'booking_date' => Carbon::today()->toDateString(),
@@ -137,6 +157,7 @@ class BookingSemesterLimitTest extends TestCase
         $this->pastConfirmedBooking($user, '2026-10-10');
         $this->pastConfirmedBooking($user, '2026-10-15');
         $this->pastConfirmedBooking($user, '2026-10-20');
+        $this->pastConfirmedBooking($user, '2026-10-25');
 
         $response = $this->actingAs($user)->get(route('booking.index'));
 
@@ -162,6 +183,7 @@ class BookingSemesterLimitTest extends TestCase
         $this->pastConfirmedBooking($user, '2026-10-10');
         $this->pastConfirmedBooking($user, '2026-10-15');
         $this->pastConfirmedBooking($user, '2026-10-20');
+        $this->pastConfirmedBooking($user, '2026-10-25');
 
         $response = $this->actingAs($user)->get(route('booking.index'));
 
@@ -190,19 +212,20 @@ class BookingSemesterLimitTest extends TestCase
 
         $this->pastConfirmedBooking($user, '2026-10-10');
         $this->pastConfirmedBooking($user, '2026-10-15');
-        $third = $this->pastConfirmedBooking($user, '2026-10-20');
+        $this->pastConfirmedBooking($user, '2026-10-20');
+        $fourth = $this->pastConfirmedBooking($user, '2026-10-25');
 
-        // بدون إلغاء، الحجز الرابع محظور
+        // بدون إلغاء، الحجز الخامس محظور
         $blocked = $this->actingAs($user)->post(route('booking.store'), ['hour' => 9, 'minute' => 0]);
         $blocked->assertSessionHas('error');
 
-        // إلغاء واحد من الثلاثة يُحرر خانة فورًا — الملغى لا يُحتسب أصلًا
-        $this->actingAs($user)->delete(route('booking.destroy', $third));
+        // إلغاء واحد من الأربعة يُحرر خانة فورًا — الملغى لا يُحتسب أصلًا
+        $this->actingAs($user)->delete(route('booking.destroy', $fourth));
 
         $allowed = $this->actingAs($user)->post(route('booking.store'), ['hour' => 9, 'minute' => 0]);
         $allowed->assertSessionHas('success');
 
-        $this->assertSame(3, Booking::where('user_id', $user->id)->where('status', 'confirmed')->count());
+        $this->assertSame(4, Booking::where('user_id', $user->id)->where('status', 'confirmed')->count());
         $this->assertSame(1, Booking::where('user_id', $user->id)->where('status', 'cancelled')->count());
     }
 
@@ -210,10 +233,11 @@ class BookingSemesterLimitTest extends TestCase
     {
         $user = $this->student();
 
-        // ثلاثة حجوزات مؤكدة بالفصل الأول (أكتوبر 2026)
+        // أربعة حجوزات مؤكدة بالفصل الأول (أكتوبر 2026) — الحد كاملًا
         $this->pastConfirmedBooking($user, '2026-10-10');
         $this->pastConfirmedBooking($user, '2026-10-15');
         $this->pastConfirmedBooking($user, '2026-10-20');
+        $this->pastConfirmedBooking($user, '2026-10-25');
 
         // محاولة حجز بالفصل الثاني (مارس 2027) — فصل مختلف تمامًا
         Carbon::setTestNow(Carbon::create(2027, 3, 1, 8, 0));
@@ -221,7 +245,7 @@ class BookingSemesterLimitTest extends TestCase
         $response = $this->actingAs($user)->post(route('booking.store'), ['hour' => 9, 'minute' => 0]);
 
         $response->assertSessionHas('success');
-        $this->assertSame(4, Booking::where('user_id', $user->id)->where('status', 'confirmed')->count());
+        $this->assertSame(5, Booking::where('user_id', $user->id)->where('status', 'confirmed')->count());
     }
 
     public function test_booking_outside_any_semester_is_not_limited(): void
@@ -241,7 +265,7 @@ class BookingSemesterLimitTest extends TestCase
         $response->assertSessionHas('success');
     }
 
-    public function test_staff_member_is_also_limited_to_three_bookings_per_semester(): void
+    public function test_staff_member_is_also_limited_to_four_bookings_per_semester(): void
     {
         Carbon::setTestNow(Carbon::create(2026, 11, 16, 8, 0));
         $user = $this->staff();
@@ -249,11 +273,12 @@ class BookingSemesterLimitTest extends TestCase
         $this->pastConfirmedBooking($user, '2026-10-10', 9, 45);
         $this->pastConfirmedBooking($user, '2026-10-15', 9, 50);
         $this->pastConfirmedBooking($user, '2026-10-20', 9, 55);
+        $this->pastConfirmedBooking($user, '2026-10-25', 9, 45);
 
         $response = $this->actingAs($user)->post(route('booking.store'), ['hour' => 10, 'minute' => 45]);
 
         $response->assertSessionHas('error');
         $this->assertSame(__('booking.errors.semester_limit_reached'), session('error'));
-        $this->assertSame(3, Booking::where('user_id', $user->id)->where('status', 'confirmed')->count());
+        $this->assertSame(4, Booking::where('user_id', $user->id)->where('status', 'confirmed')->count());
     }
 }

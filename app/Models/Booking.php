@@ -29,7 +29,7 @@ class Booking extends Model
     const PRICE = 0.25;
 
     /** الحد الأقصى للحجوزات المؤكدة (غير الملغاة) لكل مستخدم بالفصل الواحد */
-    const SEMESTER_BOOKING_LIMIT = 3;
+    const SEMESTER_BOOKING_LIMIT = 4;
 
     protected $fillable = [
         'user_id',
@@ -233,7 +233,7 @@ class Booking extends Model
 
     /**
      * عدد حجوزات المستخدم المؤكدة (غير الملغاة) بتاريخ ضمن حدود فصل معيّن —
-     * الحجز الملغى لا يُحتسب إطلاقًا، فإلغاؤه يُحرر خانة من الثلاث فورًا.
+     * الحجز الملغى لا يُحتسب إطلاقًا، فإلغاؤه يُحرر خانة من الأربع فورًا.
      */
     public static function confirmedCountInSemester(User $user, array $semester): int
     {

@@ -48,12 +48,12 @@ return [
 
             'short' => 'Log in, then open “Book your appointment” from your dashboard. Pick one of the three available days — today, tomorrow, or the day after — choose an hour between 8:00 AM and 4:00 PM, then pick a free 5-minute slot and confirm it.',
 
-            'detailed' => 'The booking page only ever shows the current booking window: today and the next two days. Clinic hours run from 8:00 AM to 4:00 PM, split into 5-minute slots — students book the slots in the earlier part of each hour, and the last slots of every hour are reserved for staff. You can hold only one active booking at a time, so if you already have one you will be asked to cancel it before booking again, and each person is limited to 3 confirmed bookings per semester. Once confirmed, the appointment appears on your dashboard and you get a reminder notification before it starts.',
+            'detailed' => 'The booking page only ever shows the current booking window: today and the next two days. Clinic hours run from 8:00 AM to 4:00 PM, split into 5-minute slots — students book the slots in the earlier part of each hour, and the last slots of every hour are reserved for staff. You can hold only one active booking at a time, so if you already have one you will be asked to cancel it before booking again, and each person is limited to 4 confirmed bookings per semester. Once confirmed, the appointment appears on your dashboard and you get a reminder notification before it starts.',
 
             'followups' => [
                 [
                     'question' => 'Can I cancel or change my appointment?',
-                    'answer' => 'Yes. Open your dashboard or the booking page and cancel the current appointment — cancelling is what frees you to book a different time, since only one active booking is allowed at a time. You can cancel only your own booking, and only while it is still confirmed: an appointment whose time has already passed can no longer be cancelled. Cancelled bookings do not count toward your limit of 3 per semester.',
+                    'answer' => 'Yes. Open your dashboard or the booking page and cancel the current appointment — cancelling is what frees you to book a different time, since only one active booking is allowed at a time. You can cancel only your own booking, and only while it is still confirmed: an appointment whose time has already passed can no longer be cancelled. Cancelled bookings do not count toward your limit of 4 per semester.',
                 ],
                 [
                     'question' => 'Why is a time slot unavailable?',
