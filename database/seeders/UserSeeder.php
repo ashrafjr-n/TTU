@@ -4,19 +4,64 @@ namespace Database\Seeders;
 
 use App\Models\User;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use RuntimeException;
 
 class UserSeeder extends Seeder
 {
+    /**
+     * بادئة المعرّفات المؤقتة المستخدمة أثناء "مرحلة الإيقاف المؤقت" (park)
+     * داخل معاملة الزرع. لا تطابق أي مخطط حقيقي (المعرّفات الحقيقية أرقام
+     * بحتة) ولا تبقى بقاعدة البيانات بعد انتهاء المعاملة.
+     */
+    private const PARK_PREFIX = 'seed-park:';
+
+    /**
+     * طول المعرّف المطلوب لكل دور — يتحقق منه assertIdentifier() على كل صف.
+     */
+    private const DIGITS_PER_ROLE = ['student' => 8, 'staff' => 4, 'doctor' => 3];
+
     public function run(): void
     {
-        // لا يوجد تسجيل ذاتي — كل حساب لازم يُزرع جاهزًا هنا مباشرة، وإلا ما
-        // في طريقة لصاحبه يدخل.
-        //
-        // طول الرقم لكل دور: طالب 8 خانات، موظف 4 خانات، دكتور 3 خانات —
-        // يتحقق منها assertIdentifier() أدناه على كل صف قبل الزرع، وأي رقمين
-        // متطابقين بكل القائمة (بصرف النظر عن الدور) يوقفان التشغيل فورًا،
-        // بدل اكتشاف تصادم لاحقًا عبر قيد unique بقاعدة البيانات فقط.
+        $accounts = self::accounts();
+
+        $this->assertSeedListIsConsistent($accounts);
+
+        // معاملة واحدة تلفّ الزرع كله: قبلها كان أي فشل بمنتصف القائمة يترك
+        // جزءًا من الحسابات مزروعًا بالمخطط الجديد وجزءًا بالقديم (حالة
+        // نصفية لا يمكن لأحد الدخول منها بثقة). الآن إمّا تنجح القائمة
+        // كاملة أو لا يتغيّر شيء.
+        DB::transaction(function () use ($accounts) {
+            $this->assertNoForeignIdentifierHolders($accounts);
+            $this->parkExistingSeededIdentifiers($accounts);
+
+            foreach ($accounts as $account) {
+                // المطابقة بالبريد: هو المُعرِّف المستقر لـ"هذا هو نفس الحساب
+                // المزروع" — بعكس identifier الذي تغيّر مخططه أكثر من مرة.
+                User::updateOrCreate(
+                    ['email' => $account['email']],
+                    [
+                        'name' => $account['name'],
+                        'password' => Hash::make('password'),
+                        'role' => $account['role'],
+                        'identifier' => $account['identifier'],
+                    ],
+                );
+            }
+        });
+    }
+
+    /**
+     * الحسابات المزروعة الثابتة — لا يوجد تسجيل ذاتي، فكل حساب لازم يُزرع
+     * جاهزًا هنا وإلا ما في طريقة لصاحبه يدخل.
+     *
+     * طول الرقم لكل دور: طالب 8 خانات، موظف 4، دكتور 3.
+     *
+     * @return list<array{email:string, name:string, role:string, identifier:string}>
+     */
+    public static function accounts(): array
+    {
         $students = [
             ['identifier' => '00000000', 'name' => 'أحمد خالد',    'email' => 'student@ttu.edu.jo'],
             ['identifier' => '11111111', 'name' => 'سارة عبدالله', 'email' => 'student-2@ttu.edu.jo'],
@@ -53,103 +98,137 @@ class UserSeeder extends Seeder
             ['identifier' => '333', 'name' => 'د. خالد ناصر',   'email' => 'doctor-3@ttu.edu.jo'],
         ];
 
-        $this->assertNoDuplicateIdentifiers([
-            ...array_column($students, 'identifier'),
-            ...array_column($staffMembers, 'identifier'),
-            ...array_column($doctors, 'identifier'),
-        ]);
+        $accounts = [];
 
-        // updateOrCreate (لا firstOrCreate) لكل الأدوار الثلاثة عمدًا — هذه
-        // حسابات تجريبية ثابتة (بريدها هو مفتاح المطابقة)، لا بيانات مستخدمين
-        // حقيقيين، فإعادة ضبط identifier على كل تشغيل يُصحح تلقائيًا أي قيمة
-        // فاسدة بقيت من خلل تصادم المعرّفات القديم (راجع migration
-        // force_identifier_to_varchar_on_users_table) بدل تركها عالقة على أي
-        // بيئة سبق زرعها قبل هذا التصحيح.
         foreach ($students as $student) {
-            $this->assertIdentifier($student['identifier'], 8, 'student');
-
-            User::updateOrCreate(
-                ['email' => $student['email']],
-                [
-                    'name' => $student['name'],
-                    'password' => Hash::make('password'),
-                    'role' => 'student',
-                    'identifier' => $student['identifier'],
-                ],
-            );
+            $accounts[] = [...$student, 'role' => 'student'];
         }
 
         foreach ($staffMembers as $staff) {
-            $this->assertIdentifier($staff['identifier'], 4, 'staff');
-
-            User::updateOrCreate(
-                ['email' => $staff['email']],
-                [
-                    'name' => $staff['name'],
-                    'password' => Hash::make('password'),
-                    'role' => 'staff',
-                    'identifier' => $staff['identifier'],
-                ],
-            );
+            $accounts[] = [...$staff, 'role' => 'staff'];
         }
-
-        // حساب المدير الثابت — لا يوجد تسجيل عام لهذا الدور، ويدخل ببريده لا
-        // برقم معرّف (identifier هنا مجرد قيمة تُرضي قيد unique، غير مستخدمة
-        // فعليًا بتسجيل الدخول).
-        User::updateOrCreate(
-            ['email' => 'admin@ttu.edu.jo'],
-            [
-                'name' => 'إدارة عيادة TTU',
-                'password' => Hash::make('password'),
-                'role' => 'admin',
-                'identifier' => 'admin@ttu.edu.jo',
-            ],
-        );
 
         foreach ($doctors as $doctor) {
-            $this->assertIdentifier($doctor['identifier'], 3, 'doctor');
+            $accounts[] = [...$doctor, 'role' => 'doctor'];
+        }
 
-            User::updateOrCreate(
-                ['email' => $doctor['email']],
-                [
-                    'name' => $doctor['name'],
-                    'password' => Hash::make('password'),
-                    'role' => 'doctor',
-                    'identifier' => $doctor['identifier'],
-                ],
-            );
+        // حساب المدير الثابت — يدخل ببريده لا برقم معرّف (identifier هنا مجرد
+        // قيمة تُرضي قيد unique، غير مستخدمة فعليًا بتسجيل الدخول)، فهو
+        // مستثنى من قاعدة "أرقام فقط" المطبَّقة على بقية الأدوار.
+        $accounts[] = [
+            'identifier' => 'admin@ttu.edu.jo',
+            'name' => 'إدارة عيادة TTU',
+            'email' => 'admin@ttu.edu.jo',
+            'role' => 'admin',
+        ];
+
+        return $accounts;
+    }
+
+    /**
+     * ينقل معرّفات كل الصفوف المزروعة الموجودة مسبقًا إلى قيم مؤقتة فريدة قبل
+     * كتابة القيم النهائية.
+     *
+     * هذه هي النقطة الجوهرية بكل هذا الملف: مفتاح المطابقة (البريد) كان سليمًا
+     * أصلًا، والانهيار الذي كان يحصل على Render سببه أن المخطط الجديد يعيد
+     * *توزيع* نفس مجموعة المعرّفات على صفوف أخرى — student@ يأخذ 00000000
+     * الذي كان بحوزة student-6@، وdoctor-1@ يأخذ 111 الذي كان بحوزة
+     * doctor-2@، وهكذا. تحديث صف تلو الآخر يعني أن القيمة الجديدة لا تزال
+     * محجوزة لصف لم يأتِ دوره بعد، فيرفضها قيد unique فورًا. إفراغ كل
+     * المعرّفات أولًا يجعل الإسناد اللاحق غير معتمد على الترتيب إطلاقًا،
+     * فيغطي أي تبديل أو دوران مهما كان شكله، اليوم أو بأي مخطط قادم.
+     *
+     * القيمة المؤقتة مشتقّة من معرّف الصف نفسه (id) فهي فريدة بالضرورة، ولا
+     * تبقى بعد انتهاء المعاملة.
+     *
+     * @param  list<array{email:string, name:string, role:string, identifier:string}>  $accounts
+     */
+    private function parkExistingSeededIdentifiers(array $accounts): void
+    {
+        $existing = User::whereIn('email', array_column($accounts, 'email'))
+            ->pluck('id');
+
+        foreach ($existing as $id) {
+            User::whereKey($id)->update(['identifier' => self::PARK_PREFIX.$id]);
         }
     }
 
     /**
-     * يتحقق أن معرّف الدخول رقمي بحت وبعدد الخانات المتوقع تمامًا لدوره —
-     * نفس القاعدة المفروضة على إدخال أرقام الأطباء عبر لوحة الإدارة
-     * (AdminController::storeDoctor/updateDoctor)، مطبَّقة هنا أيضًا على
-     * بيانات الزرع الثابتة كي لا يفلت خطأ كتابة (خانة ناقصة، حرف غير رقمي)
-     * إلى قاعدة البيانات بصمت.
+     * يرفض التشغيل لو كان أحد المعرّفات المزروعة بحوزة حساب *غير* مزروع
+     * (بريده ليس من قائمة الزرع) — مثل طبيب أنشأته الإدارة يدويًا بنفس الرقم.
+     *
+     * الخيار المتعمَّد هنا هو التوقف بخطأ واضح لا "تصحيح" صامت: سحب الرقم من
+     * حساب حقيقي يعني قطع تسجيل دخوله دون أن يدري أحد. الرسالة تسمّي الصف
+     * المتعارض بالضبط (id/بريد/رقم) ليحلّه إنسان، بدل خطأ قيد خام من
+     * Postgres بمنتصف النشر لا يقول أي صف السبب.
+     *
+     * @param  list<array{email:string, name:string, role:string, identifier:string}>  $accounts
      */
-    private function assertIdentifier(string $identifier, int $expectedDigits, string $role): void
+    private function assertNoForeignIdentifierHolders(array $accounts): void
     {
-        if (! preg_match("/^\d{{$expectedDigits}}$/", $identifier)) {
-            throw new \InvalidArgumentException(
-                "Seeded {$role} identifier \"{$identifier}\" must be exactly {$expectedDigits} numeric digits."
-            );
+        $conflicts = User::whereIn('identifier', array_column($accounts, 'identifier'))
+            ->whereNotIn('email', array_column($accounts, 'email'))
+            ->orderBy('id')
+            ->get(['id', 'name', 'email', 'identifier']);
+
+        if ($conflicts->isEmpty()) {
+            return;
         }
+
+        $details = $conflicts
+            ->map(fn (User $user) => sprintf(
+                '  - user #%d <%s> (%s) holds identifier "%s"',
+                $user->id,
+                $user->email,
+                $user->name,
+                $user->identifier,
+            ))
+            ->implode(PHP_EOL);
+
+        throw new RuntimeException(
+            'UserSeeder cannot assign its identifiers: the following non-seeded account(s) already hold them.'.PHP_EOL
+            .$details.PHP_EOL
+            .'Nothing was written (the whole seed runs in one transaction). Give those accounts a different '
+            .'identifier — or delete them if they are stale — and run the seeder again.'
+        );
     }
 
     /**
-     * يمنع تصادم المعرّفات بين أي حسابين مزروعين (بصرف النظر عن الدور) قبل
-     * محاولة الزرع أصلًا — بدل الاعتماد فقط على قيد unique بقاعدة البيانات،
-     * الذي كان سيُفشل التشغيل جزئيًا (بعض الحسابات تُزرع، البقية تفشل) بدل
-     * رفض القائمة كاملة بخطأ واضح.
+     * فحوص على قائمة الزرع نفسها قبل لمس قاعدة البيانات: طول/نوع كل معرّف
+     * حسب دوره، ولا تكرار بالمعرّفات ولا بالبُرد. اكتشاف خطأ كتابة هنا أوضح
+     * بكثير من اكتشافه لاحقًا كخطأ قيد فريد بقاعدة البيانات.
+     *
+     * @param  list<array{email:string, name:string, role:string, identifier:string}>  $accounts
      */
-    private function assertNoDuplicateIdentifiers(array $identifiers): void
+    private function assertSeedListIsConsistent(array $accounts): void
     {
-        $duplicates = array_keys(array_filter(array_count_values($identifiers), fn ($count) => $count > 1));
+        foreach ($accounts as $account) {
+            $digits = self::DIGITS_PER_ROLE[$account['role']] ?? null;
+
+            if ($digits !== null && ! preg_match("/^\d{{$digits}}$/", $account['identifier'])) {
+                throw new RuntimeException(sprintf(
+                    'Seeded %s identifier "%s" must be exactly %d numeric digits.',
+                    $account['role'],
+                    $account['identifier'],
+                    $digits,
+                ));
+            }
+        }
+
+        $this->assertNoDuplicates(array_column($accounts, 'identifier'), 'identifiers');
+        $this->assertNoDuplicates(array_column($accounts, 'email'), 'emails');
+    }
+
+    /**
+     * @param  list<string>  $values
+     */
+    private function assertNoDuplicates(array $values, string $label): void
+    {
+        $duplicates = array_keys(array_filter(array_count_values($values), fn ($count) => $count > 1));
 
         if ($duplicates !== []) {
-            throw new \InvalidArgumentException(
-                'Duplicate seeded identifiers found: '.implode(', ', $duplicates)
+            throw new RuntimeException(
+                "Duplicate seeded {$label} found: ".implode(', ', $duplicates)
             );
         }
     }
