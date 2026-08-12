@@ -10,34 +10,57 @@
 
     <div class="max-w-6xl mx-auto px-6 py-16 lg:py-20">
 
-        {{-- ============ بطاقة الملف الشخصي ============ --}}
-        <div class="relative rounded-[2.5rem] neu-raised-white p-8 mb-10 flex flex-col sm:flex-row sm:items-center gap-6">
+        {{-- ============ صف الملف الشخصي + تسجيل الخروج ============
+             بطاقتان جنبًا إلى جنب. الترتيب منطقي (الملف أولًا بالـDOM) فينعكس
+             تلقائيًا: الخروج يسار الملف بالعربية ويمينه بالإنجليزية. تحت lg
+             تعودان فوق بعضهما كالسابق. --}}
+        <div class="flex flex-col lg:flex-row gap-6 mb-10">
 
-            <div class="w-20 h-20 rounded-full neu-icon bg-gradient-to-br from-ttu-black to-ttu-black dark:from-ttu-red dark:to-ttu-red-dark flex items-center justify-center shrink-0">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-9 h-9 text-white" fill="none" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M11 2v2" />
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 2v2" />
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 3H4a2 2 0 0 0-2 2v4a6 6 0 0 0 12 0V5a2 2 0 0 0-2-2h-1" />
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M8 15a6 6 0 0 0 12 0v-3" />
-                    <circle cx="20" cy="10" r="2" />
-                </svg>
-            </div>
+            {{-- ============ بطاقة الملف الشخصي ============ --}}
+            <div class="relative flex-1 rounded-[2.5rem] neu-raised-white p-8 flex flex-col sm:flex-row sm:items-center gap-6">
 
-            <div class="flex-1">
-                <span class="inline-block text-xs font-bold tracking-widest text-ttu-red mb-1.5">{{ __('doctor.badge') }}</span>
-                <h2 class="font-display text-2xl sm:text-3xl font-extrabold">
-                    {{ __('dashboard.greeting', ['name' => auth()->user()->name]) }} 👋
-                </h2>
-                <p class="mt-1 text-sm text-ttu-gray">{{ auth()->user()->email }}</p>
-            </div>
+                <div class="w-20 h-20 rounded-full neu-icon bg-gradient-to-br from-ttu-black to-ttu-black dark:from-ttu-red dark:to-ttu-red-dark flex items-center justify-center shrink-0">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-9 h-9 text-white" fill="none" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M11 2v2" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 2v2" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 3H4a2 2 0 0 0-2 2v4a6 6 0 0 0 12 0V5a2 2 0 0 0-2-2h-1" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M8 15a6 6 0 0 0 12 0v-3" />
+                        <circle cx="20" cy="10" r="2" />
+                    </svg>
+                </div>
 
-            {{-- شارات إحصائية سريعة --}}
-            <div class="flex gap-3">
-                <div class="rounded-2xl neu-pressed px-4 py-3 text-center min-w-[100px]">
-                    <p class="text-[11px] text-ttu-gray mb-1">{{ __('doctor.today_bookings') }}</p>
-                    <p class="text-sm font-bold text-ttu-black">{{ $todayBookingsCount }}</p>
+                <div class="flex-1">
+                    <span class="inline-block text-xs font-bold tracking-widest text-ttu-red mb-1.5">{{ __('doctor.badge') }}</span>
+                    <h2 class="font-display text-2xl sm:text-3xl font-extrabold">
+                        {{ __('dashboard.greeting', ['name' => auth()->user()->name]) }} 👋
+                    </h2>
+                    <p class="mt-1 text-sm text-ttu-gray">{{ auth()->user()->email }}</p>
+                </div>
+
+                {{-- شارات إحصائية سريعة --}}
+                <div class="flex gap-3">
+                    <div class="rounded-2xl neu-pressed px-4 py-3 text-center min-w-[100px]">
+                        <p class="text-[11px] text-ttu-gray mb-1">{{ __('doctor.today_bookings') }}</p>
+                        <p class="text-sm font-bold text-ttu-black">{{ $todayBookingsCount }}</p>
+                    </div>
                 </div>
             </div>
+
+            {{-- تسجيل الخروج --}}
+            <form method="POST" action="{{ route('logout') }}" class="lg:w-64 shrink-0">
+                @csrf
+                <button type="submit"
+                        class="group relative flex flex-col overflow-hidden p-7 rounded-[2rem] neu-raised-white neu-card-hover w-full h-full text-right">
+                    <div class="relative w-14 h-14 rounded-2xl neu-icon bg-ttu-cream flex items-center justify-center mb-5 group-hover:bg-ttu-red transition-colors duration-300">
+                        <svg class="neu-wiggle w-6 h-6 text-ttu-red group-hover:text-white transition-colors duration-300" fill="none" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75" />
+                        </svg>
+                    </div>
+                    <h3 class="relative font-display text-base font-bold mb-1.5">{{ __('common.buttons.logout') }}</h3>
+                    <p class="relative text-xs text-ttu-gray leading-relaxed">{{ __('common.buttons.logout_desc') }}</p>
+                </button>
+            </form>
+
         </div>
 
         {{-- ============ بطاقة الحضور ============ --}}
@@ -76,26 +99,6 @@
                     </form>
                 @endif
             </div>
-        </div>
-
-        {{-- ============ الخدمات ============ --}}
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
-
-            {{-- تسجيل الخروج --}}
-            <form method="POST" action="{{ route('logout') }}">
-                @csrf
-                <button type="submit"
-                        class="group relative flex flex-col overflow-hidden p-7 rounded-[2rem] neu-raised-white neu-card-hover w-full text-right">
-                    <div class="relative w-14 h-14 rounded-2xl neu-icon bg-ttu-cream flex items-center justify-center mb-5 group-hover:bg-ttu-red transition-colors duration-300">
-                        <svg class="neu-wiggle w-6 h-6 text-ttu-red group-hover:text-white transition-colors duration-300" fill="none" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75" />
-                        </svg>
-                    </div>
-                    <h3 class="relative font-display text-base font-bold mb-1.5">{{ __('common.buttons.logout') }}</h3>
-                    <p class="relative text-xs text-ttu-gray leading-relaxed">{{ __('common.buttons.logout_desc') }}</p>
-                </button>
-            </form>
-
         </div>
 
         {{-- رسائل النجاح/الخطأ --}}
