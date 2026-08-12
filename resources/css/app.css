@@ -286,6 +286,22 @@ button,
     color: var(--color-ttu-red);
 }
 
+/* ===== الزر الدائري العائم لويدجت الدعم — نفس لغة btn-hero (بارز ثم غاطس) ===== */
+.neu-fab {
+    box-shadow: 7px 7px 16px rgba(30, 64, 175, .45), -5px -5px 14px rgba(105, 120, 255, .3);
+    transition: transform .3s var(--neu-bounce), box-shadow .3s ease;
+}
+.neu-fab:hover {
+    box-shadow: inset 3px 3px 8px rgba(20, 40, 109, .4), inset -2px -2px 6px rgba(140, 150, 255, .25);
+}
+.neu-fab:active {
+    transform: scale(.94);
+    box-shadow: inset 4px 4px 10px rgba(20, 40, 109, .5), inset -3px -3px 8px rgba(140, 150, 255, .3);
+}
+@media (prefers-reduced-motion: reduce) {
+    .neu-fab { transition: none !important; }
+}
+
 /* بطاقة اللوجو — خلفية فاتحة عشان يبين اللوجو الأحمر بوضوح فوق الهيدر الأحمر */
 .logo-badge {
     background: linear-gradient(160deg, #FFFFFF, var(--color-ttu-cream) 130%);

@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\BookingController;
+use App\Http\Controllers\ChatbotController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DoctorController;
@@ -12,6 +13,13 @@ use App\Http\Controllers\VisitReportController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/locale/{locale}', [LocaleController::class, 'switch'])->name('locale.switch');
+
+// وضع "محادثة" في ويدجت الدعم — متاح للزوار أيضًا لأن الويدجت يظهر بكل
+// الصفحات بما فيها الرئيسية وصفحة الدخول. الحماية طبقتان: throttle لكل IP
+// هنا، وسقف يومي عام داخل ChatbotService (الحصة المجانية محدودة).
+Route::post('/chatbot/message', [ChatbotController::class, 'message'])
+    ->middleware('throttle:12,1')
+    ->name('chatbot.message');
 
 Route::middleware(['auth', 'role:doctor'])->group(function () {
     Route::get('/dashboard/doctor', [DoctorController::class, 'index'])->name('dashboard.doctor');
