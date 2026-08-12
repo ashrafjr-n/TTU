@@ -9,6 +9,7 @@ use App\Models\DoctorDayAssignment;
 use App\Models\DoctorSchedule;
 use App\Models\Medication;
 use App\Models\User;
+use Database\Seeders\UserSeeder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
@@ -181,10 +182,17 @@ class AdminController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'identifier' => ['required', 'digits:3', 'unique:'.User::class.',identifier'],
+            'identifier' => [
+                'required',
+                'digits:3',
+                Rule::notIn(self::reservedIdentifiers()),
+                'unique:'.User::class.',identifier',
+            ],
             'password' => ['required', 'confirmed', Password::defaults()],
             'working_days' => 'nullable|array',
             'working_days.*' => 'integer|min:0|max:6',
+        ], [
+            'identifier.not_in' => __('admin_doctor_form.errors.reserved_identifier'),
         ]);
 
         $doctor = User::create([
@@ -230,9 +238,19 @@ class AdminController extends Controller
 
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'identifier' => ['required', 'digits:3', Rule::unique('users', 'identifier')->ignore($doctor->id)],
+            'identifier' => [
+                'required',
+                'digits:3',
+                // الرقم الذي يحمله هذا الطبيب أصلًا مستثنى: طبيب مزروع يُعدَّل
+                // اسمه أو أيامه يجب أن يحتفظ برقمه، والممنوع فقط أن يأخذ رقم
+                // حساب مزروع آخر.
+                Rule::notIn(array_diff(self::reservedIdentifiers(), [$doctor->identifier])),
+                Rule::unique('users', 'identifier')->ignore($doctor->id),
+            ],
             'working_days' => 'nullable|array',
             'working_days.*' => 'integer|min:0|max:6',
+        ], [
+            'identifier.not_in' => __('admin_doctor_form.errors.reserved_identifier'),
         ]);
 
         $doctor->update([
@@ -261,6 +279,25 @@ class AdminController extends Controller
     private function syntheticDoctorEmail(string $identifier): string
     {
         return "doctor-{$identifier}@ttu.edu.jo";
+    }
+
+    /**
+     * المعرّفات المحجوزة لحسابات UserSeeder الثابتة.
+     *
+     * سبب وجود هذا الحارس: أطباء الإدارة يشتركون مع أطباء الزرع بنفس فضاء
+     * الأرقام (3 خانات)، فكان بإمكان الإدارة إنشاء طبيب برقم 111/222/333.
+     * وقتها يتوقف UserSeeder بالكامل — لأنه يرفض عن قصد سحب رقم من حساب
+     * غير مزروع — فتبقى الحسابات الـ27 كلها على معرّفاتها القديمة ويصبح
+     * الدخول بأي رقم يعطي المستخدم الخطأ. المنع هنا عند المصدر أنظف من
+     * محاولة إصلاح الحالة لاحقًا.
+     *
+     * المصدر هو قائمة الزرع نفسها لا نسخة مكرّرة، فأي تعديل عليها ينعكس هنا.
+     *
+     * @return list<string>
+     */
+    private static function reservedIdentifiers(): array
+    {
+        return array_column(UserSeeder::accounts(), 'identifier');
     }
 
     /**
