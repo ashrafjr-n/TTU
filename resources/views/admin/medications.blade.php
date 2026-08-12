@@ -31,8 +31,10 @@
             <h3 class="font-bold text-sm mb-4">{{ __('admin_medications.add_new') }}</h3>
             <form method="POST" action="{{ route('admin.medications.store') }}" class="flex flex-wrap gap-3">
                 @csrf
-                <input type="text" name="name" value="{{ old('name') }}" placeholder="{{ __('admin_medications.name_placeholder') }}" required
-                       class="flex-1 min-w-[200px] rounded-xl neu-pressed bg-ttu-cream border-0 px-4 py-2.5 text-sm focus:ring-2 focus:ring-ttu-red/30 outline-none">
+                <input type="text" name="name_ar" value="{{ old('name_ar') }}" placeholder="{{ __('admin_medications.name_ar_placeholder') }}" required
+                       class="flex-1 min-w-[160px] rounded-xl neu-pressed bg-ttu-cream border-0 px-4 py-2.5 text-sm focus:ring-2 focus:ring-ttu-red/30 outline-none">
+                <input type="text" name="name_en" value="{{ old('name_en') }}" placeholder="{{ __('admin_medications.name_en_placeholder') }}" required
+                       class="flex-1 min-w-[160px] rounded-xl neu-pressed bg-ttu-cream border-0 px-4 py-2.5 text-sm focus:ring-2 focus:ring-ttu-red/30 outline-none">
                 <input type="number" name="stock_quantity" value="{{ old('stock_quantity') }}" min="0" placeholder="{{ __('admin_medications.initial_stock_placeholder') }}" required
                        class="w-44 rounded-xl neu-pressed bg-ttu-cream border-0 px-4 py-2.5 text-sm focus:ring-2 focus:ring-ttu-red/30 outline-none">
                 <input type="text" name="unit" value="{{ old('unit') }}" placeholder="{{ __('admin_medications.unit_placeholder') }}"
@@ -106,8 +108,13 @@
                             @method('PUT')
                             <input type="hidden" name="medication_id" value="{{ $m->id }}">
                             <div class="flex-1 min-w-[160px]">
-                                <label class="block text-xs font-bold text-ttu-gray mb-1">{{ __('admin_medications.edit_form.name_label') }}</label>
-                                <input type="text" name="name" value="{{ old('name', $m->name) }}" required
+                                <label class="block text-xs font-bold text-ttu-gray mb-1">{{ __('admin_medications.edit_form.name_ar_label') }}</label>
+                                <input type="text" name="name_ar" value="{{ old('name_ar', $m->name_ar) }}" required
+                                       class="w-full rounded-lg border-0 bg-white dark:bg-ttu-white px-3 py-2 text-sm focus:ring-2 focus:ring-ttu-red/30 outline-none">
+                            </div>
+                            <div class="flex-1 min-w-[160px]">
+                                <label class="block text-xs font-bold text-ttu-gray mb-1">{{ __('admin_medications.edit_form.name_en_label') }}</label>
+                                <input type="text" name="name_en" value="{{ old('name_en', $m->name_en) }}" required
                                        class="w-full rounded-lg border-0 bg-white dark:bg-ttu-white px-3 py-2 text-sm focus:ring-2 focus:ring-ttu-red/30 outline-none">
                             </div>
                             <div class="w-32">

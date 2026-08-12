@@ -4,7 +4,8 @@ return [
 
     'reminder' => [
         'title' => 'Appointment reminder',
-        'body' => 'Reminder: you have an appointment today at :time.',
+        'body' => 'Reminder: you have an appointment today at :time (in about an hour).',
+        'body_15m' => 'Reminder: your appointment at :time is in about 15 minutes.',
     ],
 
     'booking_cancelled' => [

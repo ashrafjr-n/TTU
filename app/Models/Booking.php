@@ -37,14 +37,16 @@ class Booking extends Model
         'booking_minute',
         'price',
         'status',
-        'reminded_at',
+        'reminder_1h_sent_at',
+        'reminder_15m_sent_at',
     ];
 
     protected function casts(): array
     {
         return [
             'booking_date' => 'date',
-            'reminded_at' => 'datetime',
+            'reminder_1h_sent_at' => 'datetime',
+            'reminder_15m_sent_at' => 'datetime',
         ];
     }
 

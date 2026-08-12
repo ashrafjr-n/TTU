@@ -6,7 +6,8 @@ return [
     'heading' => 'إدارة الأدوية',
 
     'add_new' => 'إضافة دواء جديد',
-    'name_placeholder' => 'اسم الدواء',
+    'name_ar_placeholder' => 'اسم الدواء بالعربية',
+    'name_en_placeholder' => 'اسم الدواء بالإنجليزية',
     'initial_stock_placeholder' => 'الكمية الابتدائية',
     'unit_placeholder' => 'الوحدة (شريط، علبة...)',
     'threshold_placeholder' => 'حد التنبيه',
@@ -28,7 +29,8 @@ return [
     ],
 
     'edit_form' => [
-        'name_label' => 'الاسم',
+        'name_ar_label' => 'الاسم بالعربية',
+        'name_en_label' => 'الاسم بالإنجليزية',
         'unit_label' => 'الوحدة',
         'threshold_label' => 'حد التنبيه',
         'save' => 'حفظ',

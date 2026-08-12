@@ -150,7 +150,7 @@ class TimezoneBehaviorTest extends TestCase
 
         $booking->refresh();
         $farBooking->refresh();
-        $this->assertNotNull($booking->reminded_at);
-        $this->assertNull($farBooking->reminded_at);
+        $this->assertNotNull($booking->reminder_1h_sent_at);
+        $this->assertNull($farBooking->reminder_1h_sent_at);
     }
 }

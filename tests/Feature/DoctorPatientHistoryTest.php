@@ -94,7 +94,7 @@ class DoctorPatientHistoryTest extends TestCase
         $patient = $this->patient();
         $doctor = $this->doctor();
 
-        $panadol = Medication::create(['name' => 'بانادول', 'stock_quantity' => 50, 'low_stock_threshold' => 10]);
+        $panadol = Medication::create(['name_ar' => 'بانادول', 'name_en' => 'Panadol', 'stock_quantity' => 50, 'low_stock_threshold' => 10]);
 
         $pastBooking = $this->bookingAt($patient, Carbon::today()->subDays(3));
         $pastReport = $this->reportFor($pastBooking, $doctor, [

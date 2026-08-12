@@ -53,7 +53,7 @@ class AdminLocalizationTest extends TestCase
     public function test_admin_medications_page_switches_language(): void
     {
         $admin = $this->admin();
-        Medication::create(['name' => 'Panadol', 'stock_quantity' => 5, 'low_stock_threshold' => 10]);
+        Medication::create(['name_ar' => 'بنادول', 'name_en' => 'Panadol', 'stock_quantity' => 5, 'low_stock_threshold' => 10]);
 
         $ar = $this->actingAs($admin)->get(route('admin.medications'));
         $ar->assertOk();

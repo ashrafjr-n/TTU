@@ -77,8 +77,8 @@ class MyMedicationsTest extends TestCase
         $booking = $this->bookingFor($student, Carbon::today(), 9);
         $report = $this->reportFor($booking, $doctor);
 
-        $panadol = Medication::create(['name' => 'بنادول', 'stock_quantity' => 100, 'low_stock_threshold' => 10, 'is_active' => true]);
-        $amoxicillin = Medication::create(['name' => 'أموكسيسيلين', 'stock_quantity' => 100, 'low_stock_threshold' => 10, 'is_active' => true]);
+        $panadol = Medication::create(['name_ar' => 'بنادول', 'name_en' => 'Panadol', 'stock_quantity' => 100, 'low_stock_threshold' => 10, 'is_active' => true]);
+        $amoxicillin = Medication::create(['name_ar' => 'أموكسيسيلين', 'name_en' => 'Amoxicillin', 'stock_quantity' => 100, 'low_stock_threshold' => 10, 'is_active' => true]);
 
         $report->medications()->attach([
             $panadol->id => ['quantity' => 2],
@@ -116,7 +116,7 @@ class MyMedicationsTest extends TestCase
         $report = $this->reportFor($booking, $doctor);
 
         $medications = collect(range(1, 3))->map(
-            fn ($i) => Medication::create(['name' => "دواء {$i}", 'stock_quantity' => 50, 'low_stock_threshold' => 5, 'is_active' => true])
+            fn ($i) => Medication::create(['name_ar' => "دواء {$i}", 'name_en' => "Medication {$i}", 'stock_quantity' => 50, 'low_stock_threshold' => 5, 'is_active' => true])
         );
 
         $report->medications()->attach($medications->pluck('id')->mapWithKeys(fn ($id) => [$id => ['quantity' => 5]]));

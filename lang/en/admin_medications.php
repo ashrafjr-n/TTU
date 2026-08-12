@@ -6,7 +6,8 @@ return [
     'heading' => 'Manage Medications',
 
     'add_new' => 'Add a new medication',
-    'name_placeholder' => 'Medication name',
+    'name_ar_placeholder' => 'Medication name (Arabic)',
+    'name_en_placeholder' => 'Medication name (English)',
     'initial_stock_placeholder' => 'Initial stock',
     'unit_placeholder' => 'Unit (pack, box...)',
     'threshold_placeholder' => 'Low-stock threshold',
@@ -28,7 +29,8 @@ return [
     ],
 
     'edit_form' => [
-        'name_label' => 'Name',
+        'name_ar_label' => 'Name (Arabic)',
+        'name_en_label' => 'Name (English)',
         'unit_label' => 'Unit',
         'threshold_label' => 'Low-stock threshold',
         'save' => 'Save',

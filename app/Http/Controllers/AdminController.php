@@ -274,38 +274,41 @@ class AdminController extends Controller
      */
     public function medications()
     {
-        $medications = Medication::orderBy('name')->paginate(15);
+        $medications = Medication::orderBy('name_ar')->paginate(15);
 
         return view('admin.medications', compact('medications'));
     }
 
     /**
-     * إضافة دواء جديد للكتالوج
+     * إضافة دواء جديد للكتالوج — الاسمان (عربي/إنجليزي) مطلوبان معًا كي
+     * يبقى الدواء معروضًا بشكل صحيح بأي لغة يتصفح بها أي مستخدم لاحقًا.
      */
     public function storeMedication(Request $request)
     {
         $validated = $request->validate([
-            'name' => 'required|string|max:255|unique:medications,name',
+            'name_ar' => 'required|string|max:255|unique:medications,name_ar',
+            'name_en' => 'required|string|max:255|unique:medications,name_en',
             'stock_quantity' => 'required|integer|min:0',
             'unit' => 'nullable|string|max:50',
             'low_stock_threshold' => 'required|integer|min:0',
         ]);
 
-        Medication::create($validated);
+        $medication = Medication::create($validated);
 
-        ActivityLog::record(Auth::id(), 'medication_added', 'activity_log.medication_added', ['name' => $validated['name']]);
+        ActivityLog::record(Auth::id(), 'medication_added', 'activity_log.medication_added', ['name' => $medication->name]);
 
         return back()->with('success', __('admin_dashboard.flash.medication_added'));
     }
 
     /**
-     * تعديل بيانات دواء (الاسم/الوحدة/حد التنبيه) — لا يغيّر الكمية،
+     * تعديل بيانات دواء (الاسمين/الوحدة/حد التنبيه) — لا يغيّر الكمية،
      * فذلك مسؤولية "إضافة كمية" حصرًا
      */
     public function updateMedication(Request $request, Medication $medication)
     {
         $validated = $request->validate([
-            'name' => ['required', 'string', 'max:255', Rule::unique('medications', 'name')->ignore($medication->id)],
+            'name_ar' => ['required', 'string', 'max:255', Rule::unique('medications', 'name_ar')->ignore($medication->id)],
+            'name_en' => ['required', 'string', 'max:255', Rule::unique('medications', 'name_en')->ignore($medication->id)],
             'unit' => 'nullable|string|max:50',
             'low_stock_threshold' => 'required|integer|min:0',
         ]);

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -14,7 +15,8 @@ class Medication extends Model
     const PRICE_PER_ITEM = 0.20;
 
     protected $fillable = [
-        'name',
+        'name_ar',
+        'name_en',
         'stock_quantity',
         'low_stock_threshold',
         'unit',
@@ -28,6 +30,20 @@ class Medication extends Model
             'low_stock_threshold' => 'integer',
             'is_active' => 'boolean',
         ];
+    }
+
+    /**
+     * الاسم المعروض بلغة الواجهة الحالية — سمة افتراضية (لا عمود فعلي بقاعدة
+     * البيانات) كي تبقى كل الأماكن التي تعرض/تُضمّن اسم الدواء ($m->name —
+     * القوائم، مودال وصف الأدوية، الإشعارات، سجل النشاط) تعمل بلا أي تعديل،
+     * وتُترجَم تلقائيًا حسب لغة كل طلب (نفس فكرة renderedDescription على
+     * ActivityLog: النص يُشتق من الحالة الحالية عند القراءة، لا يُخزَّن جاهزًا).
+     */
+    protected function name(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => app()->getLocale() === 'ar' ? $this->name_ar : $this->name_en,
+        );
     }
 
     public function visitReports(): BelongsToMany

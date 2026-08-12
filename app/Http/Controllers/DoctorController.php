@@ -38,7 +38,13 @@ class DoctorController extends Controller
 
         $this->attachPatientHistory($days);
 
-        $medications = Medication::where('is_active', true)->orderBy('name')->get(['id', 'name', 'unit', 'stock_quantity']);
+        // name_ar/name_en (لا name) لازم تكون ضمن الأعمدة المحمَّلة صراحة —
+        // اختصار الأعمدة هنا يعني أن سمة name المشتقة (Medication::name())
+        // ستبقى null لو غابا، رغم أن name نفسها ليست عمودًا فعليًا فيقدر
+        // المرء ينساها بسهولة عند تعديل هذا الاستعلام مستقبلًا.
+        $medications = Medication::where('is_active', true)
+            ->orderBy('name_ar')
+            ->get(['id', 'name_ar', 'name_en', 'unit', 'stock_quantity']);
 
         $todayAttendance = DoctorAttendance::where('doctor_id', Auth::id())
             ->whereDate('date', Carbon::today())
