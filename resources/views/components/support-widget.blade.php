@@ -47,8 +47,10 @@
             </button>
         </div>
 
-        {{-- سجل الرسائل --}}
-        <div id="support-widget-messages" class="max-h-[19rem] overflow-y-auto space-y-2.5 pt-1 pe-1" aria-live="polite"></div>
+        {{-- سجل الرسائل — min-h يضمن ارتفاعًا معقولًا للوحة حتى بفقاعة
+             الترحيب وحدها (وإلا بدت اللوحة قصيرة مضغوطة لحظة الفتح)،
+             وpy يفتح فسحة فوق أول رسالة وتحتها معًا --}}
+        <div id="support-widget-messages" class="min-h-[8.5rem] max-h-[19rem] overflow-y-auto space-y-2.5 py-4 pe-1" aria-live="polite"></div>
 
         {{-- أزرار الخيارات (الطبقات الثابتة) — شبكة عمودين بدل عمود واحد،
              فتُقرأ كأزرار رد سريع بمحادثة حقيقية لا كقائمة رأسية. عقد
@@ -84,6 +86,29 @@
     {{-- المقاس من CSS لا من أصناف Tailwind: الحالة المغلقة 7rem (أنيميشن
          بارز وحده)، والمفتوحة/البديلة 3.5rem كما كانت — يُبدَّل الصنف
          support-fab--compact من setOpen()/showFallback(). --}}
+    {{--
+        فقاعة التلميح — تظهر فوق الأيقونة بالحالة المغلقة وحدها، بدورة
+        متكررة: 3 ثوانٍ ظاهرة ثم ثانيتان مخفية، ما دام الويدجت مغلقًا.
+        تتوقف تمامًا عند الفتح (مع اختفاء أنيميشن Lottie نفسه) وتستأنف عند
+        الإغلاق — راجع startPeek()/stopPeek().
+
+        aria-hidden: عنصر زخرفي متكرر، والزر نفسه يحمل اسمًا وصفيًا أصلًا،
+        فإعلانه كل ثلاث ثوانٍ على قارئ الشاشة إزعاج بلا فائدة.
+
+        bottom-full على حاوية الويدجت لا على الزر: الزر المغلق 7rem لكن رسم
+        الروبوت يكاد يملأ ارتفاعه، فالقياس من أعلى الحاوية يبقي الفقاعة فوق
+        رأسه لا فوق حافة صندوق غير مرئية.
+    --}}
+    <div id="support-widget-peek"
+         class="support-peek support-peek--off absolute bottom-full right-0 mb-2 w-max max-w-[min(14rem,calc(100vw-4rem))] rounded-2xl neu-raised-white px-4 py-2.5 text-xs font-bold text-ttu-black"
+         aria-hidden="true">
+        {{ __('chatbot.widget.peek') }}
+
+        {{-- ذيل الفقاعة — مربع مُدار بنفس تدرّج البطاقة، يوهم بامتدادها نحو
+             الأيقونة. z سالب كي يمر خلف جسم الفقاعة فلا يظهر خط فاصل. --}}
+        <span class="support-peek-tail" aria-hidden="true"></span>
+    </div>
+
     {{-- الأيقونتان متراكبتان (absolute inset-0) لا متتاليتين: التبديل بينهما
          تلاشٍ متقاطع بـopacity/scale لا بـhidden، فلو بقيتا في التدفق لدفعت
          كلٌّ منهما الأخرى جانبًا. --}}
@@ -141,10 +166,40 @@
         const chatBack = document.getElementById('support-widget-chat-back');
         const iconOpen = document.getElementById('support-widget-icon-open');
         const iconClose = document.getElementById('support-widget-icon-close');
+        const peek = document.getElementById('support-widget-peek');
 
         if (!widget || !panel) return;
 
         let started = false;
+
+        // ----- فقاعة التلميح: 3 ثوانٍ ظاهرة ثم ثانيتان مخفية، بالتناوب -----
+        // مؤقّت واحد فقط بأي لحظة (peekTimer)، فاستدعاء startPeek مرتين لا
+        // يُشغّل دورتين متوازيتين تتصارعان على نفس العنصر.
+        const PEEK_VISIBLE_MS = 3000;
+        const PEEK_HIDDEN_MS = 2000;
+        let peekTimer = null;
+
+        function peekShow() {
+            peek.classList.remove('support-peek--off');
+            peekTimer = setTimeout(peekHide, PEEK_VISIBLE_MS);
+        }
+
+        function peekHide() {
+            peek.classList.add('support-peek--off');
+            peekTimer = setTimeout(peekShow, PEEK_HIDDEN_MS);
+        }
+
+        function startPeek() {
+            if (!peek || peekTimer) return;
+            peekShow();
+        }
+
+        function stopPeek() {
+            if (!peek) return;
+            clearTimeout(peekTimer);
+            peekTimer = null;
+            peek.classList.add('support-peek--off');
+        }
 
         function scrollToLatest() {
             messages.scrollTop = messages.scrollHeight;
@@ -258,6 +313,14 @@
             // البديلة (أيقونة 24px داخل دائرة 112px كانت ستبدو ضائعة).
             toggle.classList.toggle('support-fab--compact', open || usingFallback);
 
+            // الفقاعة رفيقة الحالة المغلقة: تختفي مع أنيميشن Lottie لحظة
+            // الفتح وتتوقف دورتها تمامًا، وتستأنف من أولها عند الإغلاق.
+            if (open) {
+                stopPeek();
+            } else {
+                startPeek();
+            }
+
             if (open) start();
         }
 
@@ -277,6 +340,9 @@
         document.addEventListener('keydown', function (e) {
             if (e.key === 'Escape' && !panel.classList.contains('hidden')) setOpen(false);
         });
+
+        // الويدجت يبدأ مغلقًا دائمًا، فدورة الفقاعة تنطلق مع الصفحة
+        startPeek();
 
         chatForm.addEventListener('submit', function (e) {
             e.preventDefault();

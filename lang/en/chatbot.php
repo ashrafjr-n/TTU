@@ -23,6 +23,8 @@ return [
         'subtitle' => 'Quick answers about the clinic',
         'open' => 'Open the clinic support assistant',
         'close' => 'Close the support assistant',
+        // Tooltip bubble that fades in and out above the closed-state icon
+        'peek' => 'Hi! Need any help?',
     ],
 
     'welcome' => 'Welcome to the university clinic — how can I help you?',

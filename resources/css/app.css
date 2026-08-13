@@ -376,10 +376,49 @@ button,
     pointer-events: none;
 }
 
+/* فقاعة التلميح فوق الأيقونة المغلقة — الظهور/الاختفاء بالتلاشي لا بالقفز،
+   ومدة الانتقال (.35s) مستقلة عن دورة العرض نفسها (3 ثوانٍ ظاهرة/ثانيتان
+   مخفية) التي يديرها الجافاسكربت. visibility ضمن الانتقال كي لا تبقى
+   الفقاعة قابلة للاستقبال وهي شفافة. */
+.support-peek {
+    transition: opacity .35s ease, transform .35s var(--neu-bounce), visibility .35s;
+    pointer-events: none;
+}
+.support-peek--off {
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(.4rem) scale(.96);
+}
+
+/* ذيل الفقاعة — مربع مُدار 45° بنفس تدرّج .neu-raised-white، موضوع أسفلها
+   بحيث يشير إلى الروبوت.
+
+   right ثابتة لا inset-inline-end: حاوية الويدجت مثبّتة يمين الشاشة في
+   العربية والإنجليزية على السواء، فالخاصية المنطقية كانت تقلب الذيل إلى
+   الطرف البعيد بالعربية فيشير إلى فراغ بدل الأيقونة. والقيمة (3.1rem) هي
+   منتصف زر الـ7rem تقريبًا مقيسًا من حافة الحاوية اليمنى، إذ تتحاذى حافة
+   الفقاعة اليمنى مع حافة الزر اليمنى. */
+.support-peek-tail {
+    position: absolute;
+    bottom: -.3rem;
+    right: 3.1rem;
+    width: .75rem;
+    height: .75rem;
+    transform: rotate(45deg);
+    border-radius: .125rem;
+    background: linear-gradient(160deg, #FFFFFF, var(--color-ttu-cream) 130%);
+    z-index: -1;
+}
+.dark .support-peek-tail {
+    background: linear-gradient(160deg, var(--color-ttu-white), var(--color-ttu-cream) 130%);
+}
+
 @media (prefers-reduced-motion: reduce) {
     .support-fab { transition: none !important; }
     .support-fab:hover, .support-fab:active { transform: none; }
     .support-fab-icon { transition: none !important; }
+    .support-peek { transition: none !important; }
+    .support-peek--off { transform: none; }
 }
 
 /* لوحة Lottie نفسها 952×784، والروبوت يشغل 308×398 وحدة من وسطها فقط (أقل
