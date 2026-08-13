@@ -82,8 +82,10 @@
             class="support-fab rounded-full text-white flex items-center justify-center ms-auto">
 
         <span id="support-widget-icon-open" class="block w-full h-full">
-            {{-- حاوية الأنيميشن — بلا خلفية، يملؤها Lottie كـSVG شفاف --}}
-            <span id="support-widget-lottie" class="block w-full h-full" aria-hidden="true"></span>
+            {{-- حاوية الأنيميشن — بلا خلفية، يملؤها Lottie كـSVG شفاف.
+                 التكبير على هذه الحاوية لا على الـsvg بداخلها، لأن Lottie
+                 تكتب transform سطريًا على الـsvg فيتغلّب على أي قاعدة CSS. --}}
+            <span id="support-widget-lottie" class="support-widget-lottie-mount block w-full h-full" aria-hidden="true"></span>
 
             {{-- بديل يظهر فقط لو تعذّر تحميل مكتبة Lottie من الـCDN، حتى لا
                  يبقى الزر فارغًا بلا أي أيقونة --}}
@@ -236,6 +238,11 @@
             toggle.classList.toggle('bg-ttu-red-dark', open);
             toggle.classList.toggle('bg-ttu-red', !open && usingFallback);
 
+            // المقاس الكبير للحالة المغلقة وحدها (أنيميشن Lottie البارز)؛
+            // المفتوحة تعود لدائرة 56px كما كانت تمامًا، وكذلك حالة الأيقونة
+            // البديلة (أيقونة 24px داخل دائرة 112px كانت ستبدو ضائعة).
+            toggle.classList.toggle('support-fab--compact', open || usingFallback);
+
             if (open) start();
         }
 
@@ -317,8 +324,9 @@
 
             fallback.classList.remove('hidden');
 
-            // الأيقونة البديلة بيضاء، فتحتاج خلفية الزر السابقة لتبقى مرئية
-            toggle.classList.add('neu-fab', 'bg-ttu-red');
+            // الأيقونة البديلة بيضاء، فتحتاج خلفية الزر السابقة لتبقى مرئية —
+            // وبمقاس الدائرة الأصلي (56px) لا المقاس الكبير المخصص للأنيميشن
+            toggle.classList.add('neu-fab', 'bg-ttu-red', 'support-fab--compact');
         }
 
         function initLottie() {
