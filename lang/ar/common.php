@@ -25,10 +25,6 @@ return [
 
     'buttons' => [
         'back_to_dashboard' => 'رجوع للوحة',
-        'back' => 'رجوع',
-        'save' => 'حفظ',
-        'cancel' => 'إلغاء',
-        'confirm' => 'تأكيد',
         'logout' => 'تسجيل الخروج',
         'logout_desc' => 'الخروج من حسابك بأمان',
     ],

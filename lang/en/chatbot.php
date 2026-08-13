@@ -39,7 +39,6 @@ return [
         'intro' => "You're now in live chat. Ask me anything about the clinic — booking, logging in, working hours, contacting the clinic administration, or your medications.",
         'placeholder' => 'Type your question…',
         'send' => 'Send',
-        'typing' => 'Typing…',
         'unavailable' => "Live chat isn't available right now. You can still use the quick topics — booking, logging in, or contacting the clinic administration — or reach the clinic through the Contact page.",
     ],
 

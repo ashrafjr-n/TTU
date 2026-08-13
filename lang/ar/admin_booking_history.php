@@ -22,11 +22,6 @@ return [
     ],
 
     'table' => [
-        'date' => 'التاريخ',
-        'time' => 'الوقت',
-        'user' => 'المستخدم',
-        'role' => 'الدور',
-        'status' => 'الحالة',
         'status_confirmed' => 'مؤكد',
         'status_cancelled' => 'ملغى',
     ],

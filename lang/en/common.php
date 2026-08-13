@@ -25,10 +25,6 @@ return [
 
     'buttons' => [
         'back_to_dashboard' => 'Back to dashboard',
-        'back' => 'Back',
-        'save' => 'Save',
-        'cancel' => 'Cancel',
-        'confirm' => 'Confirm',
         'logout' => 'Log out',
         'logout_desc' => 'Sign out of your account safely',
     ],

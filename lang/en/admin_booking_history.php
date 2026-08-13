@@ -22,11 +22,6 @@ return [
     ],
 
     'table' => [
-        'date' => 'Date',
-        'time' => 'Time',
-        'user' => 'User',
-        'role' => 'Role',
-        'status' => 'Status',
         'status_confirmed' => 'Confirmed',
         'status_cancelled' => 'Cancelled',
     ],
