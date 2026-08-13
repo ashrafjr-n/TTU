@@ -20,6 +20,13 @@ use Illuminate\Validation\Rules\Password;
 class AdminController extends Controller
 {
     /**
+     * عدد الأسابيع الأخيرة المعروضة بفلتر سجل الحجوزات (سبت→جمعة لكلٍّ منها).
+     * عشرة أسابيع تغطي فصلًا جزئيًا تقريبًا وتُبقي القائمة قصيرة، كما تُبقي
+     * صيغة الجمع العربية بسيطة ("قبل 3–9 أسابيع") بلا حالة 11+ الشاذة.
+     */
+    const HISTORY_WEEKS = 10;
+
+    /**
      * لوحة المدير الرئيسية — نظرة عامة
      */
     public function index()
@@ -539,9 +546,9 @@ class AdminController extends Controller
     public function bookingHistory(Request $request)
     {
         $validated = $request->validate([
-            'from' => 'nullable|date',
-            'to' => 'nullable|date',
-            'status' => ['nullable', Rule::in(['confirmed', 'cancelled'])],
+            // إزاحة الأسبوع للخلف: 0 = هذا الأسبوع … (self::HISTORY_WEEKS - 1)
+            // = أقدم أسبوع معروض بالقائمة. غيابها يعني "كل الأسابيع".
+            'week' => 'nullable|integer|min:0|max:'.(self::HISTORY_WEEKS - 1),
             'search' => 'nullable|string|max:255',
         ]);
 
@@ -550,16 +557,17 @@ class AdminController extends Controller
             ->orderByDesc('booking_hour')
             ->orderByDesc('booking_minute');
 
-        if (!empty($validated['from'])) {
-            $query->whereDate('booking_date', '>=', $validated['from']);
-        }
+        // ملاحظة: المقارنة بـ null لا بـempty() — الأسبوع الحالي قيمته 0،
+        // وempty(0) تساوي true فكانت ستُسقط الفلتر بصمت.
+        $week = $validated['week'] ?? null;
 
-        if (!empty($validated['to'])) {
-            $query->whereDate('booking_date', '<=', $validated['to']);
-        }
+        if ($week !== null) {
+            [$start, $end] = Booking::weekRange((int) $week);
 
-        if (!empty($validated['status'])) {
-            $query->where('status', $validated['status']);
+            // whereDate على الحدَّين: عمود booking_date من نوع datetime، فمقارنة
+            // نصية مباشرة بـ'Y-m-d' كانت ستُسقط اليوم الأخير (‎00:00:00 > التاريخ).
+            $query->whereDate('booking_date', '>=', $start->toDateString())
+                ->whereDate('booking_date', '<=', $end->toDateString());
         }
 
         if (!empty($validated['search'])) {
@@ -571,6 +579,40 @@ class AdminController extends Controller
 
         $bookings = $query->paginate(20)->withQueryString();
 
-        return view('admin.booking-history', ['bookings' => $bookings, 'filters' => $validated]);
+        return view('admin.booking-history', [
+            'bookings' => $bookings,
+            'filters' => $validated,
+            'weekOptions' => $this->historyWeekOptions(),
+            'selectedWeek' => $week === null ? null : (int) $week,
+            'hasFilters' => $week !== null || !empty($validated['search']),
+        ]);
+    }
+
+    /**
+     * خيارات فلتر الأسابيع بسجل الحجوزات — أحدث HISTORY_WEEKS أسبوعًا، لكل
+     * منها تسمية بشرية ("هذا الأسبوع"/"الأسبوع الماضي"/…) مذيَّلة بمدى
+     * تواريخها الفعلي (سبت → جمعة) كي يعرف المدير ما الذي يختاره بالضبط.
+     *
+     * @return list<array{value: int, label: string}>
+     */
+    private function historyWeekOptions(): array
+    {
+        return collect(range(0, self::HISTORY_WEEKS - 1))
+            ->map(function (int $weeksAgo) {
+                [$start, $end] = Booking::weekRange($weeksAgo);
+
+                $name = match ($weeksAgo) {
+                    0 => __('admin_booking_history.filters.week_current'),
+                    1 => __('admin_booking_history.filters.week_last'),
+                    2 => __('admin_booking_history.filters.week_two_ago'),
+                    default => __('admin_booking_history.filters.week_n_ago', ['count' => $weeksAgo]),
+                };
+
+                return [
+                    'value' => $weeksAgo,
+                    'label' => $name.' ('.$start->translatedFormat('j F').' – '.$end->translatedFormat('j F').')',
+                ];
+            })
+            ->all();
     }
 }

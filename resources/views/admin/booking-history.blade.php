@@ -18,22 +18,14 @@
 
         {{-- فلترة --}}
         <form method="GET" action="{{ route('admin.booking-history') }}" class="flex flex-wrap gap-3 mb-6 items-end">
-            <div>
-                <label class="block text-[11px] font-bold text-ttu-gray mb-1">{{ __('admin_booking_history.filters.from_label') }}</label>
-                <input type="date" name="from" value="{{ $filters['from'] ?? '' }}"
-                       class="rounded-xl neu-pressed bg-ttu-cream border-0 px-4 py-2.5 text-sm outline-none">
-            </div>
-            <div>
-                <label class="block text-[11px] font-bold text-ttu-gray mb-1">{{ __('admin_booking_history.filters.to_label') }}</label>
-                <input type="date" name="to" value="{{ $filters['to'] ?? '' }}"
-                       class="rounded-xl neu-pressed bg-ttu-cream border-0 px-4 py-2.5 text-sm outline-none">
-            </div>
-            <div>
-                <label class="block text-[11px] font-bold text-ttu-gray mb-1">{{ __('admin_booking_history.filters.status_label') }}</label>
-                <select name="status" class="rounded-xl neu-pressed bg-ttu-cream border-0 px-4 py-2.5 text-sm outline-none">
-                    <option value="">{{ __('admin_booking_history.filters.status_all') }}</option>
-                    <option value="confirmed" {{ ($filters['status'] ?? '') === 'confirmed' ? 'selected' : '' }}>{{ __('admin_booking_history.table.status_confirmed') }}</option>
-                    <option value="cancelled" {{ ($filters['status'] ?? '') === 'cancelled' ? 'selected' : '' }}>{{ __('admin_booking_history.table.status_cancelled') }}</option>
+            {{-- فلتر الأسبوع — أسابيع كاملة (سبت→جمعة) بدل مدى تواريخ حر --}}
+            <div class="min-w-[240px]">
+                <label class="block text-[11px] font-bold text-ttu-gray mb-1">{{ __('admin_booking_history.filters.week_label') }}</label>
+                <select name="week" class="w-full rounded-xl neu-pressed bg-ttu-cream border-0 px-4 py-2.5 text-sm outline-none">
+                    <option value="">{{ __('admin_booking_history.filters.week_all') }}</option>
+                    @foreach ($weekOptions as $option)
+                        <option value="{{ $option['value'] }}" @selected($selectedWeek === $option['value'])>{{ $option['label'] }}</option>
+                    @endforeach
                 </select>
             </div>
             <div class="flex-1 min-w-[220px]">
@@ -44,7 +36,9 @@
             <button type="submit" class="neu-icon-btn bg-ttu-cream text-ttu-black text-sm font-bold px-6 py-2.5 rounded-xl">
                 {{ __('admin_booking_history.filters.apply') }}
             </button>
-            @if (array_filter($filters ?? []))
+            {{-- $hasFilters بدل array_filter: قيمة "هذا الأسبوع" هي 0 وكانت
+                 array_filter ستعتبرها فارغة فيختفي زر إلغاء التصفية --}}
+            @if ($hasFilters)
                 <a href="{{ route('admin.booking-history') }}" class="neu-icon-btn bg-ttu-cream text-ttu-red text-sm font-bold px-6 py-2.5 rounded-xl">
                     {{ __('admin_booking_history.filters.clear') }}
                 </a>

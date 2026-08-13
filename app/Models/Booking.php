@@ -371,6 +371,21 @@ class Booking extends Model
     }
 
     /**
+     * حدود أسبوع كامل (سبت → جمعة) بإزاحة عدد أسابيع للخلف: 0 = هذا الأسبوع،
+     * 1 = الأسبوع الماضي، وهكذا — نفس عُرف السبت المستخدم بـcurrentWeekDates
+     * وbookableDates ولوحة الدكتور، فكل ما بالتطبيق يقصد بـ"الأسبوع" الشيء
+     * ذاته. يُستخدم بفلتر أسابيع سجل الحجوزات بلوحة الإدارة.
+     *
+     * @return array{0: Carbon, 1: Carbon} [بداية السبت، نهاية الجمعة]
+     */
+    public static function weekRange(int $weeksAgo): array
+    {
+        $start = Carbon::today()->startOfWeek(Carbon::SATURDAY)->subWeeks($weeksAgo);
+
+        return [$start, $start->copy()->addDays(6)];
+    }
+
+    /**
      * تسمية يوم بلوحة الدكتور الأسبوعية: اسم اليوم + تاريخه (مثال: "الأحد —
      * 10 أغسطس")، مع لاحقة "(اليوم)" لو كان هو اليوم الفعلي — بعكس تسمية
      * صفحة الحجز (dayLabel) التي تفترض دائمًا يومًا ضمن نافذة صغيرة قادمة،
