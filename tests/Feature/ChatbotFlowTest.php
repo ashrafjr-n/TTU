@@ -24,7 +24,7 @@ class ChatbotFlowTest extends TestCase
         $this->assertSame([
             ChatbotFlow::topicNode('booking'),
             ChatbotFlow::topicNode('login'),
-            ChatbotFlow::topicNode('contact_doctor'),
+            ChatbotFlow::topicNode('contact_clinic'),
             ChatbotFlow::CHAT,
         ], array_column($menu['options'], 'target'));
 

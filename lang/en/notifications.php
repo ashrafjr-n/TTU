@@ -19,12 +19,14 @@ return [
         'body_no_meds' => 'Your visit report is ready. Condition: :condition. No medications were prescribed.',
     ],
 
-    'doctor_message' => [
+    'admin_message' => [
         'title' => 'Message from :name',
     ],
 
-    'message_reply' => [
-        'title' => 'Reply from :name',
+    // The reply notification never carries the reply text — clicking it opens the message panel
+    'clinic_reply' => [
+        'title' => 'You have a reply from the clinic administration',
+        'body' => 'Click to view the reply.',
     ],
 
 ];

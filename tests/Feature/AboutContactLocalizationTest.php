@@ -27,16 +27,16 @@ class AboutContactLocalizationTest extends TestCase
     public function test_contact_page_switches_language(): void
     {
         $student = User::factory()->create(['role' => 'student', 'identifier' => fake()->unique()->numerify('########')]);
-        $doctor = User::factory()->create(['role' => 'doctor', 'identifier' => fake()->unique()->numerify('########')]);
 
         $ar = $this->actingAs($student)->get(route('contact'));
         $ar->assertOk();
         $ar->assertSee('نسعد بتواصلك معنا');
-        $ar->assertSee($doctor->name);
+        $ar->assertSee('رسالتك ستُرسل إلى إدارة العيادة.');
 
         $en = $this->actingAs($student)->withSession(['locale' => 'en'])->get(route('contact'));
         $en->assertOk();
         $en->assertSee("We'd love to hear from you");
+        $en->assertSee('Your message will be sent to the clinic administration.');
         $en->assertDontSee('نسعد بتواصلك معنا');
     }
 }

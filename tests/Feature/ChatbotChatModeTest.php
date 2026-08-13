@@ -189,7 +189,7 @@ class ChatbotChatModeTest extends TestCase
 
         $response->assertOk();
         $response->assertJson([
-            'reply' => "Live chat isn't available right now. You can still use the quick topics — booking, logging in, or contacting a doctor — or reach the clinic through the Contact page.",
+            'reply' => "Live chat isn't available right now. You can still use the quick topics — booking, logging in, or contacting the clinic administration — or reach the clinic through the Contact page.",
             'fallback' => true,
         ]);
     }

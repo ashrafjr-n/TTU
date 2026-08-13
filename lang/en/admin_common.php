@@ -10,6 +10,7 @@ return [
         'activity_log' => 'Activity log',
         'day_assignments' => 'Day assignments',
         'booking_history' => 'Booking history',
+        'messages' => 'Contact messages',
         'add_doctor' => '+ Add doctor',
     ],
 

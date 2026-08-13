@@ -76,7 +76,7 @@ class SupportWidgetRenderTest extends TestCase
 
         $response->assertOk();
 
-        foreach (['booking', 'login', 'contact_doctor'] as $topic) {
+        foreach (['booking', 'login', 'contact_clinic'] as $topic) {
             $response->assertSee($this->asPrinted(__("chatbot.topics.{$topic}.label")), false);
             $response->assertSee($this->asPrinted(__("chatbot.topics.{$topic}.short")), false);
             $response->assertSee($this->asPrinted(__("chatbot.topics.{$topic}.detailed")), false);

@@ -34,11 +34,11 @@ return [
     ],
 
     'chat' => [
-        'intro' => "You're now in live chat. Ask me anything about the clinic — booking, logging in, working hours, contacting a doctor, or your medications.",
+        'intro' => "You're now in live chat. Ask me anything about the clinic — booking, logging in, working hours, contacting the clinic administration, or your medications.",
         'placeholder' => 'Type your question…',
         'send' => 'Send',
         'typing' => 'Typing…',
-        'unavailable' => "Live chat isn't available right now. You can still use the quick topics — booking, logging in, or contacting a doctor — or reach the clinic through the Contact page.",
+        'unavailable' => "Live chat isn't available right now. You can still use the quick topics — booking, logging in, or contacting the clinic administration — or reach the clinic through the Contact page.",
     ],
 
     'topics' => [
@@ -81,17 +81,17 @@ return [
             ],
         ],
 
-        'contact_doctor' => [
-            'label' => 'How do I contact a doctor?',
+        'contact_clinic' => [
+            'label' => 'How do I contact the clinic?',
 
-            'short' => 'Open “Contact” from the top menu, pick the doctor you want from the list, write your message and send it. The doctor receives it as a notification, and their reply comes back to you in the bell icon in the header.',
+            'short' => 'Open “Contact” from the top menu, write your message and send it. Every message goes to the clinic administration — there is no doctor to pick — and their reply comes back to you in the bell icon in the header.',
 
-            'detailed' => 'The Contact page is available to students and staff once signed in. Your name is filled in from your account automatically, so you only choose a doctor and type your message, up to 2000 characters. Sending it delivers the message to that doctor as a notification; the doctor can reply directly from their own notifications panel, and the reply arrives back to you the same way — open the bell icon in the header to read it. For anything urgent, come to the clinic in person during working hours, 8:00 AM to 4:00 PM, rather than waiting for a reply.',
+            'detailed' => 'The Contact page is available to students and staff once signed in. Your name is filled in from your account automatically and the recipient is fixed: the clinic administration. All you do is type your message, up to 700 characters, with a counter under the field showing how much you have left. Sending it delivers the message to the administration as a notification; they read it and reply from the inbox on their dashboard. You then get a notification telling you a reply has arrived — without the reply text appearing in the notifications list — and clicking it opens the full reply in a panel on the page itself. For anything urgent, come to the clinic in person during working hours, 8:00 AM to 4:00 PM, rather than waiting for a reply.',
 
             'followups' => [
                 [
-                    'question' => "Where do I see the doctor's reply?",
-                    'answer' => "Replies arrive as notifications. Click the bell icon in the header to open your notifications panel and the doctor's reply will be listed there; unread ones are marked with a dot, and the icon shows a counter. Opening a notification marks it as read, and you can also mark everything as read at once from the top of the panel.",
+                    'question' => "Where do I see the administration's reply?",
+                    'answer' => 'Replies arrive as notifications. Click the bell icon in the header to open your notifications panel and you will see a notification saying you have a reply from the clinic administration — without the reply text itself. Click it and a panel opens on the page showing your original message and the reply, with a “Reply” button that takes you back to the Contact page if you want to continue. Unread ones are marked with a dot and the icon shows a counter, and you can mark everything as read from the top of the panel.',
                 ],
                 [
                     'question' => 'Where do I find my prescriptions and visit reports?',

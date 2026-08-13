@@ -28,7 +28,6 @@ Route::middleware(['auth', 'role:doctor'])->group(function () {
     // الحضور يُسجَّل تلقائيًا عند الدخول (RecordDoctorAttendanceOnLogin) —
     // الانصراف فقط يحتاج إجراءً يدويًا
     Route::post('/doctor/attendance/check-out', [DoctorController::class, 'checkOut'])->name('doctor.attendance.checkout');
-    Route::post('/messages/{message}/reply', [MessageController::class, 'reply'])->name('messages.reply');
 });
 
 // الصفحة الرئيسية - اختيار الدور
@@ -88,6 +87,9 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::get('/day-assignments', [AdminController::class, 'dayAssignments'])->name('day-assignments');
     Route::post('/day-assignments', [AdminController::class, 'updateDayAssignment'])->name('day-assignments.update');
     Route::get('/booking-history', [AdminController::class, 'bookingHistory'])->name('booking-history');
+    // صندوق وارد رسائل "تواصل" — كل رسائل الطلاب/الموظفين الموجَّهة للإدارة
+    Route::get('/messages', [AdminController::class, 'messages'])->name('messages');
+    Route::post('/messages/{message}/reply', [MessageController::class, 'reply'])->name('messages.reply');
 });
 
 require __DIR__.'/auth.php';

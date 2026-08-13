@@ -98,7 +98,7 @@ class ChatbotService
         - booking, cancelling or changing a clinic appointment
         - logging in and account problems
         - clinic working hours and clinic rules
-        - contacting a doctor through the site and where replies appear
+        - contacting the clinic administration through the site and where replies appear
         - visit reports, prescriptions and general medication questions
         - how to reach the clinic
 
@@ -109,7 +109,7 @@ class ChatbotService
         - A user may hold only one active booking at a time, and is limited to 4 confirmed bookings per semester.
         - There is no public sign-up and no self-service password reset; accounts are created and reset by the clinic administration.
         - Users log in with their university/staff ID number or their account email, plus a password.
-        - Messages to a doctor are sent from the "Contact" page; the doctor's reply arrives as a notification (bell icon in the header).
+        - Messages are sent from the "Contact" page and always go to the clinic administration (there is no doctor to choose), with a 700-character limit; the administration's reply arrives as a notification (bell icon in the header) that says a reply is waiting without showing its text, and clicking it opens the reply in a panel on the page.
         - Visit reports and prescribed medications appear under "My Medications".
 
         Hard rules:

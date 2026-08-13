@@ -7,10 +7,11 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Notification;
 
 /**
- * رسالة من طالب/موظف لدكتور عبر فورم "تواصل" — تظهر في جرس إشعارات الدكتور
- * مع اسم المرسل ونص الرسالة، ويقدر يرد عليها مباشرة من نفس لوحة الإشعارات.
+ * رسالة من طالب/موظف لإدارة العيادة عبر فورم "تواصل" — تظهر في جرس إشعارات
+ * المدير مع اسم المرسل ومقتطف النص، والضغط عليها يفتح صندوق وارد الرسائل
+ * بلوحة الإدارة حيث يمكن قراءتها كاملة والرد عليها.
  */
-class DoctorMessageReceived extends Notification
+class AdminMessageReceived extends Notification
 {
     use Queueable;
 
@@ -26,12 +27,12 @@ class DoctorMessageReceived extends Notification
     public function toDatabase(object $notifiable): array
     {
         return [
-            'type' => 'doctor_message',
-            'title_key' => 'notifications.doctor_message.title',
+            'type' => 'admin_message',
+            'title_key' => 'notifications.admin_message.title',
             'title_params' => ['name' => $this->message->sender->name],
             // نص الرسالة كتبه المستخدم مباشرة، فلا يُترجَم
             'body' => $this->message->body,
-            'url' => null,
+            'url' => route('admin.messages'),
             'message_id' => $this->message->id,
             'sender_name' => $this->message->sender->name,
         ];

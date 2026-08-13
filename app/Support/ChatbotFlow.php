@@ -26,7 +26,7 @@ class ChatbotFlow
     public const CHAT = 'chat';
 
     /** المواضيع الثلاثة — المفاتيح نفسها المستخدمة في ملفات lang. */
-    public const TOPICS = ['booking', 'login', 'contact_doctor'];
+    public const TOPICS = ['booking', 'login', 'contact_clinic'];
 
     /**
      * @return array<string, array{layer:int, message:string, options:list<array{label:string, target:string}>}>

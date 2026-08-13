@@ -27,6 +27,10 @@
        class="neu-icon-btn px-5 py-2.5 rounded-xl text-sm font-bold {{ request()->routeIs('admin.booking-history') ? '!bg-ttu-red !text-white' : 'bg-ttu-cream text-ttu-black' }}">
         {{ __('admin_common.nav.booking_history') }}
     </a>
+    <a href="{{ route('admin.messages') }}"
+       class="neu-icon-btn px-5 py-2.5 rounded-xl text-sm font-bold {{ request()->routeIs('admin.messages') ? '!bg-ttu-red !text-white' : 'bg-ttu-cream text-ttu-black' }}">
+        {{ __('admin_common.nav.messages') }}
+    </a>
     <a href="{{ route('admin.doctors.create') }}"
        class="neu-icon-btn px-5 py-2.5 rounded-xl text-sm font-bold {{ request()->routeIs('admin.doctors.create') ? '!bg-ttu-red !text-white' : 'bg-ttu-cream text-ttu-black' }}">
         {{ __('admin_common.nav.add_doctor') }}

@@ -8,6 +8,7 @@ use App\Models\DoctorAttendance;
 use App\Models\DoctorDayAssignment;
 use App\Models\DoctorSchedule;
 use App\Models\Medication;
+use App\Models\Message;
 use App\Models\User;
 use Database\Seeders\UserSeeder;
 use Illuminate\Http\Request;
@@ -585,6 +586,28 @@ class AdminController extends Controller
             'weekOptions' => $this->historyWeekOptions(),
             'selectedWeek' => $week === null ? null : (int) $week,
             'hasFilters' => $week !== null || !empty($validated['search']),
+        ]);
+    }
+
+    /**
+     * صندوق وارد رسائل "تواصل" — رسائل الطلاب والموظفين الموجَّهة للإدارة.
+     *
+     * تُعرض الرسائل الجذرية فقط (parent_message_id فارغ) ومعها ردودها
+     * كسلسلة تحتها، لا كصفوف منفصلة بالقائمة. الشرط على دور المستقبِل لا
+     * على معرّفه: الرسائل تُخزَّن باسم أول حساب مدير، فربطها بحساب المدير
+     * الحالي وحده كان سيُخفي الوارد عن بقية المديرين.
+     */
+    public function messages()
+    {
+        $messages = Message::with(['sender', 'replies.sender'])
+            ->whereNull('parent_message_id')
+            ->whereHas('recipient', fn ($q) => $q->where('role', 'admin'))
+            ->latest()
+            ->paginate(20);
+
+        return view('admin.messages', [
+            'messages' => $messages,
+            'maxBodyLength' => Message::MAX_BODY_LENGTH,
         ]);
     }
 

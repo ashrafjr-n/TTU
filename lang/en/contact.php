@@ -7,7 +7,7 @@ return [
     'hero' => [
         'eyebrow' => 'Contact us',
         'heading' => "We'd love to hear from you",
-        'intro' => "You can message the doctor directly using the form below, and you'll get the reply in the same notification bell.",
+        'intro' => "Write your message in the form below and it goes straight to the clinic administration, and their reply reaches you in the same notification bell.",
     ],
 
     'info' => [
@@ -25,19 +25,22 @@ return [
         'eyebrow' => 'Message us',
         'heading' => 'Send your message',
         'name' => 'Name',
-        'doctor' => 'Doctor',
-        'choose_doctor' => 'Choose a doctor',
+        'recipient' => 'Recipient',
+        'recipient_value' => 'Clinic administration',
+        'recipient_notice' => 'Your message will be sent to the clinic administration.',
         'message' => 'Your message',
+        'counter' => ':count / :max characters',
+        'counter_limit' => 'You have reached the :max character limit.',
         'submit' => 'Send message',
     ],
 
     'errors' => [
-        'doctor_required' => 'Please choose a doctor.',
         'message_required' => 'Please write your message.',
+        'message_max' => 'Your message must not exceed :max characters.',
     ],
 
     'flash' => [
-        'sent_success' => 'Your message was sent to the doctor successfully.',
+        'sent_success' => 'Your message was sent to the clinic administration successfully.',
     ],
 
 ];

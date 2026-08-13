@@ -99,6 +99,13 @@
                 </div>
             @endif
 
+            {{-- المستقبِل ثابت: إدارة العيادة. لا اختيار للطبيب هنا — والتنبيه
+                 أعلى الفورم يقولها صراحةً كي يعرف المُرسِل من سيقرأ رسالته. --}}
+            <div class="max-w-xl mx-auto flex items-center gap-3 rounded-2xl neu-pressed px-5 py-3.5 mb-6">
+                <i data-lucide="shield-check" class="w-5 h-5 text-ttu-red shrink-0" stroke-width="1.6"></i>
+                <p class="text-sm font-bold text-ttu-black">{{ __('contact.form.recipient_notice') }}</p>
+            </div>
+
             <form method="POST" action="{{ route('contact.store') }}" class="max-w-xl mx-auto space-y-4">
                 @csrf
 
@@ -109,20 +116,26 @@
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium text-ttu-black mb-1.5">{{ __('contact.form.doctor') }}</label>
-                    <select name="doctor_id" required
-                            class="w-full px-4 py-2.5 rounded-xl neu-pressed bg-ttu-cream border-0 focus:ring-2 focus:ring-ttu-red/30 outline-none">
-                        <option value="" disabled {{ old('doctor_id') ? '' : 'selected' }}>{{ __('contact.form.choose_doctor') }}</option>
-                        @foreach ($doctors as $doctor)
-                            <option value="{{ $doctor->id }}" @selected(old('doctor_id') == $doctor->id)>{{ $doctor->name }}</option>
-                        @endforeach
-                    </select>
+                    <label class="block text-sm font-medium text-ttu-black mb-1.5">{{ __('contact.form.recipient') }}</label>
+                    <input type="text" value="{{ __('contact.form.recipient_value') }}" disabled
+                           class="w-full px-4 py-2.5 rounded-xl neu-pressed bg-ttu-cream border-0 text-ttu-gray outline-none cursor-not-allowed">
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium text-ttu-black mb-1.5">{{ __('contact.form.message') }}</label>
-                    <textarea name="message" rows="5" required
+                    <label class="block text-sm font-medium text-ttu-black mb-1.5" for="contact-message">{{ __('contact.form.message') }}</label>
+                    <textarea id="contact-message" name="message" rows="5" required
+                              maxlength="{{ $maxBodyLength }}"
                               class="w-full px-4 py-2.5 rounded-xl neu-pressed bg-ttu-cream border-0 focus:ring-2 focus:ring-ttu-red/30 outline-none resize-none">{{ old('message') }}</textarea>
+
+                    {{-- عدّاد الحروف — مشدود لنفس سقف الخادم (Message::MAX_BODY_LENGTH) --}}
+                    <div class="flex items-center justify-between gap-3 mt-1.5">
+                        <p id="contact-message-limit" class="hidden text-[11px] font-bold text-ttu-red">
+                            {{ __('contact.form.counter_limit', ['max' => $maxBodyLength]) }}
+                        </p>
+                        <p id="contact-message-counter" class="text-[11px] text-ttu-gray/70 ms-auto">
+                            {{ __('contact.form.counter', ['count' => mb_strlen(old('message', '')), 'max' => $maxBodyLength]) }}
+                        </p>
+                    </div>
                 </div>
 
                 <button type="submit" class="w-full btn-hero justify-center">
@@ -149,6 +162,32 @@
 <script src="https://unpkg.com/lucide@latest"></script>
 <script>
     lucide.createIcons();
+</script>
+
+<script>
+    // عدّاد حروف الرسالة — maxlength يمنع التجاوز أصلًا، والعدّاد يجعل
+    // الحد مرئيًا، والتنبيه الأحمر يظهر فقط عند بلوغه. الخادم يتحقق من
+    // نفس الرقم بأي حال (قاعدة max في ContactController).
+    (function () {
+        const input = document.getElementById('contact-message');
+        const counter = document.getElementById('contact-message-counter');
+        const limitNote = document.getElementById('contact-message-limit');
+        if (!input || !counter) return;
+
+        const max = parseInt(input.getAttribute('maxlength'), 10);
+        const template = @json(__('contact.form.counter', ['count' => '__COUNT__', 'max' => '__MAX__']));
+
+        function render() {
+            const length = input.value.length;
+            counter.textContent = template.replace('__COUNT__', length).replace('__MAX__', max);
+            counter.classList.toggle('text-ttu-red', length >= max);
+            counter.classList.toggle('font-bold', length >= max);
+            if (limitNote) limitNote.classList.toggle('hidden', length < max);
+        }
+
+        input.addEventListener('input', render);
+        render();
+    })();
 </script>
 
 @endsection
