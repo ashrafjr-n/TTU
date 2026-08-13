@@ -73,10 +73,13 @@
         • مفتوح: نفس أيقونة الإغلاق (X) كما هي، وتُضاف خلفية الزر وظله
           بدرجة أغمق قليلًا (ttu-red-dark) — الأصناف تُبدَّل من setOpen().
     --}}
+    {{-- المقاس من CSS لا من أصناف Tailwind: الحالة المغلقة 7rem (أنيميشن
+         بارز وحده)، والمفتوحة/البديلة 3.5rem كما كانت — يُبدَّل الصنف
+         support-fab--compact من setOpen()/showFallback(). --}}
     <button type="button" id="support-widget-toggle"
             title="{{ __('chatbot.widget.open') }}" aria-label="{{ __('chatbot.widget.open') }}"
             aria-expanded="false" aria-controls="support-widget-panel"
-            class="support-fab w-14 h-14 rounded-full text-white flex items-center justify-center ms-auto">
+            class="support-fab rounded-full text-white flex items-center justify-center ms-auto">
 
         <span id="support-widget-icon-open" class="block w-full h-full">
             {{-- حاوية الأنيميشن — بلا خلفية، يملؤها Lottie كـSVG شفاف --}}

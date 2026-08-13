@@ -338,7 +338,21 @@ button,
 .support-fab {
     /* بلا background هنا عمدًا: الزر شفاف افتراضيًا (لا صنف خلفية بالحالة
        المغلقة)، وتحديده هنا كان سيتغلّب على bg-ttu-red-dark بالحالة المفتوحة. */
-    transition: transform .3s var(--neu-bounce), background-color .3s ease, box-shadow .3s ease;
+
+    /* الحالة المغلقة: 112px — ضِعف المقاس السابق (56px) بالضبط، فالأنيميشن
+       بداخله يتضاعف معه لأنه يملأ الحاوية نسبيًا. المقاس هنا لا بصمة له
+       بصريًا (الحالة المغلقة شفافة تمامًا)، لكنه مساحة النقر الفعلية —
+       وتكبيره يجعلها تطابق الأنيميشن الظاهر بدل أن تكون أصغر منه بكثير. */
+    width: 7rem;
+    height: 7rem;
+    transition: transform .3s var(--neu-bounce), background-color .3s ease, box-shadow .3s ease, width .3s ease, height .3s ease;
+}
+
+/* الحالة المفتوحة (وحالة الأيقونة البديلة): الدائرة تعود لمقاسها الأصلي
+   تمامًا 56px، فأيقونة X وخلفيتها الأغمق تبقيان كما كانتا بلا أي تغيير. */
+.support-fab--compact {
+    width: 3.5rem;
+    height: 3.5rem;
 }
 .support-fab:hover { transform: scale(1.06); }
 .support-fab:active { transform: scale(.94); }
