@@ -16,7 +16,9 @@
     </div>
 
     {{-- ============ الهيرو ============ --}}
-    <section class="relative pt-32 lg:pt-40 pb-16 px-6 text-center overflow-hidden">
+    {{-- المسافة العلوية هنا أقل من بقية الصفحات لأن صف زر "العودة" أعلاه
+         (pt-8 + ارتفاع الزر) يضيف فراغًا سبقها — فالمجموع يطابق about --}}
+    <section class="relative pt-14 lg:pt-20 pb-16 px-6 text-center overflow-hidden">
 
         <div class="absolute inset-0 m-auto w-96 h-96 rounded-full bg-ttu-red/5 blur-3xl pointer-events-none"></div>
 
