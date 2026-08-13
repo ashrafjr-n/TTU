@@ -312,6 +312,30 @@ button,
 }
 
 /* ===== الزر الدائري العائم لويدجت الدعم — نفس لغة btn-hero (بارز ثم غاطس) ===== */
+/* زر ويدجت الدعم — الحركة عند اللمس/التمرير مستقلة عن الظل، لأن الحالة
+   المغلقة صارت بلا خلفية ولا ظل (أنيميشن Lottie شفاف وحده). neu-fab يُضاف
+   فوقه بالحالة المفتوحة فقط، فيعود شكل الزر الدائري كما كان. */
+.support-fab {
+    /* بلا background هنا عمدًا: الزر شفاف افتراضيًا (لا صنف خلفية بالحالة
+       المغلقة)، وتحديده هنا كان سيتغلّب على bg-ttu-red-dark بالحالة المفتوحة. */
+    transition: transform .3s var(--neu-bounce), background-color .3s ease, box-shadow .3s ease;
+}
+.support-fab:hover { transform: scale(1.06); }
+.support-fab:active { transform: scale(.94); }
+@media (prefers-reduced-motion: reduce) {
+    .support-fab { transition: none !important; }
+    .support-fab:hover, .support-fab:active { transform: none; }
+}
+
+/* لوحة Lottie نفسها 952×784، والروبوت يشغل جزءًا صغيرًا من وسطها — فبمقاس
+   الزر (56px) يظهر ضئيلًا جدًا. التكبير هنا يعيده لحجم أيقونة الزر السابق
+   تقريبًا (≈43×52px) مع بقائه داخل حدود الشاشة بهامش مريح. */
+.support-widget-lottie-svg {
+    overflow: visible !important;
+    transform: scale(2.2);
+    transform-origin: center;
+}
+
 .neu-fab {
     box-shadow: 7px 7px 16px rgba(30, 64, 175, .45), -5px -5px 14px rgba(105, 120, 255, .3);
     transition: transform .3s var(--neu-bounce), box-shadow .3s ease;

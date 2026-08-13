@@ -67,15 +67,29 @@
 
     </div>
 
-    {{-- الزر العائم --}}
+    {{--
+        الزر العائم — حالتان بصريًا:
+        • مغلق: أنيميشن Lottie وحده بلا أي خلفية أو ظل (شفاف تمامًا).
+        • مفتوح: نفس أيقونة الإغلاق (X) كما هي، وتُضاف خلفية الزر وظله
+          بدرجة أغمق قليلًا (ttu-red-dark) — الأصناف تُبدَّل من setOpen().
+    --}}
     <button type="button" id="support-widget-toggle"
             title="{{ __('chatbot.widget.open') }}" aria-label="{{ __('chatbot.widget.open') }}"
             aria-expanded="false" aria-controls="support-widget-panel"
-            class="neu-fab w-14 h-14 rounded-full bg-ttu-red text-white flex items-center justify-center ms-auto">
-        <svg id="support-widget-icon-open" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke-width="1.7" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm3.75 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm3.75 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
-            <path stroke-linecap="round" stroke-linejoin="round" d="M12 20.25c4.556 0 8.25-3.19 8.25-7.125S16.556 6 12 6s-8.25 3.19-8.25 7.125c0 1.85.816 3.535 2.153 4.8.09.653-.132 1.503-.51 2.19-.203.371.023.865.44.803a7.87 7.87 0 003.037-1.242A9.66 9.66 0 0012 20.25z" />
-        </svg>
+            class="support-fab w-14 h-14 rounded-full text-white flex items-center justify-center ms-auto">
+
+        <span id="support-widget-icon-open" class="block w-full h-full">
+            {{-- حاوية الأنيميشن — بلا خلفية، يملؤها Lottie كـSVG شفاف --}}
+            <span id="support-widget-lottie" class="block w-full h-full" aria-hidden="true"></span>
+
+            {{-- بديل يظهر فقط لو تعذّر تحميل مكتبة Lottie من الـCDN، حتى لا
+                 يبقى الزر فارغًا بلا أي أيقونة --}}
+            <svg id="support-widget-icon-fallback" class="hidden w-6 h-6 m-auto" fill="none" viewBox="0 0 24 24" stroke-width="1.7" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm3.75 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm3.75 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 20.25c4.556 0 8.25-3.19 8.25-7.125S16.556 6 12 6s-8.25 3.19-8.25 7.125c0 1.85.816 3.535 2.153 4.8.09.653-.132 1.503-.51 2.19-.203.371.023.865.44.803a7.87 7.87 0 003.037-1.242A9.66 9.66 0 0012 20.25z" />
+            </svg>
+        </span>
+
         <svg id="support-widget-icon-close" class="hidden w-6 h-6" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
         </svg>
@@ -206,6 +220,19 @@
             iconClose.classList.toggle('hidden', !open);
             toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
 
+            // الخلفية والظل للحالة المفتوحة فقط: المغلقة تعرض الأنيميشن وحده
+            // بلا أي حاوية خلفه. الدرجة هنا أغمق قليلًا من ttu-red السابقة.
+            //
+            // استثناء: لو تعذّر تحميل Lottie وظهرت الأيقونة البديلة، فهي بيضاء
+            // بلا خلفية — أي غير مرئية على الخلفية الفاتحة. عندها يعود الزر
+            // لشكله السابق تمامًا (دائرة + ظل) حتى يبقى ظاهرًا.
+            const fallback = document.getElementById('support-widget-icon-fallback');
+            const usingFallback = fallback && !fallback.classList.contains('hidden');
+
+            toggle.classList.toggle('neu-fab', open || usingFallback);
+            toggle.classList.toggle('bg-ttu-red-dark', open);
+            toggle.classList.toggle('bg-ttu-red', !open && usingFallback);
+
             if (open) start();
         }
 
@@ -263,5 +290,66 @@
                     chatInput.focus();
                 });
         });
+    })();
+</script>
+
+{{--
+    أنيميشن أيقونة الزر (Lottie) — يُحمَّل من cdnjs كما تُحمَّل بقية المكتبات
+    الخارجية بهذا المشروع. نسخة lottie_light كافية: مُصيِّر SVG فقط (وهو
+    المطلوب هنا) وحجمها أصغر من الحزمة الكاملة.
+
+    الملف نفسه محلي تحت public/animation، ويُصيَّر شفافًا بلا خلفية — لذلك
+    الحالة المغلقة للزر بلا خلفية ولا ظل، فيبدو الروبوت طائرًا بمكانه.
+
+    أي فشل بالتحميل (شبكة/حجب CDN) يُظهر أيقونة المحادثة البديلة بدل ترك
+    الزر فارغًا.
+--}}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bodymovin/5.12.2/lottie_light.min.js" defer></script>
+<script>
+    (function () {
+        function showFallback() {
+            const fallback = document.getElementById('support-widget-icon-fallback');
+            const toggle = document.getElementById('support-widget-toggle');
+            if (!fallback || !toggle) return;
+
+            fallback.classList.remove('hidden');
+
+            // الأيقونة البديلة بيضاء، فتحتاج خلفية الزر السابقة لتبقى مرئية
+            toggle.classList.add('neu-fab', 'bg-ttu-red');
+        }
+
+        function initLottie() {
+            const mount = document.getElementById('support-widget-lottie');
+            if (!mount) return;
+
+            if (typeof lottie === 'undefined') {
+                showFallback();
+                return;
+            }
+
+            try {
+                lottie.loadAnimation({
+                    container: mount,
+                    renderer: 'svg',
+                    loop: true,
+                    autoplay: true,
+                    path: '{{ asset('animation/AI-chatbot.json') }}',
+                    rendererSettings: {
+                        preserveAspectRatio: 'xMidYMid meet',
+                        // الأنيميشن نفسه بلا خلفية — نتركه شفافًا كما هو
+                        className: 'support-widget-lottie-svg',
+                    },
+                }).addEventListener('data_failed', showFallback);
+            } catch (e) {
+                showFallback();
+            }
+        }
+
+        // سكربت الـCDN مُؤجَّل (defer) فينتهي تنفيذه قبل DOMContentLoaded
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initLottie);
+        } else {
+            initLottie();
+        }
     })();
 </script>
