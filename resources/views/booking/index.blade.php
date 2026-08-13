@@ -47,7 +47,7 @@
             </div>
         @endif
 
-        @if (!$activeBooking && !$semesterLimitReached)
+        @if (!$activeBooking && !$semesterLimitReached && !$clinicClosed)
             {{-- ============ مفتاح الألوان ============ --}}
             <div class="flex flex-wrap items-center gap-4 mb-6 px-2">
                 <span class="flex items-center gap-2 text-xs text-ttu-gray">
@@ -66,7 +66,10 @@
                 @endif
             </div>
 
-            {{-- ============ تبويبات الأيام ============ --}}
+            {{-- ============ تبويبات الأيام ============
+                 عددها 1–3 حسب موقع اليوم من أسبوع العيادة (الأربعاء يومان،
+                 والخميس يوم واحد)، فالتخطيط هنا مرن (flex-wrap) ولا يفترض
+                 عددًا ثابتًا. مع يوم واحد يظهر تبويب واحد بعرضه الطبيعي. --}}
             <div class="flex flex-wrap gap-2.5 mb-7" role="tablist" aria-label="{{ __('booking.choose_day') }}">
                 @foreach ($days as $day)
                     <button type="button"
@@ -156,7 +159,7 @@
     </div>
 </div>
 
-@if (!$activeBooking && !$semesterLimitReached)
+@if (!$activeBooking && !$semesterLimitReached && !$clinicClosed)
     {{-- ============ مودال تأكيد الحجز ============ --}}
     <div id="bookModalOverlay" class="fixed inset-0 z-[100] hidden items-center justify-center bg-black/40 backdrop-blur-sm px-4">
         <div id="bookModalCard" class="w-full max-w-sm rounded-[2rem] neu-raised-white p-8 text-center scale-95 opacity-0 transition-all duration-300">
@@ -269,6 +272,9 @@
 @elseif ($activeBooking)
     {{-- ============ مودال "لديك حجز حاليًا" — يظهر مباشرة بدل قائمة الأوقات ============ --}}
     @include('booking.partials.active-booking-modal', ['activeBooking' => $activeBooking, 'autoOpen' => true])
+@elseif ($clinicClosed)
+    {{-- ============ مودال "العيادة مغلقة اليوم" (جمعة/سبت) ============ --}}
+    @include('booking.partials.clinic-closed-modal')
 @else
     {{-- ============ مودال "بلغت الحد الأقصى لحجوزات الفصل" — يظهر بدل قائمة الأوقات ============ --}}
     @include('booking.partials.semester-limit-modal')

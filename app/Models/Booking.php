@@ -15,7 +15,7 @@ class Booking extends Model
     const OPEN_HOUR = 8;
     const CLOSE_HOUR = 16;
 
-    /** عدد الأيام المعروضة/القابلة للحجز في صفحة الحجز: اليوم + يومين قادمين */
+    /** الحد الأقصى لعدد الأيام المعروضة/القابلة للحجز بصفحة الحجز (قد تقل قرب نهاية الأسبوع) */
     const BOOKING_WINDOW_DAYS = 3;
 
     /** دقائق حصة الطلاب ضمن كل ساعة (9 خانات) */
@@ -172,6 +172,24 @@ class Booking extends Model
     }
 
     /**
+     * اسم الطبيب المسؤول عن موعد هذا الحجز — يُشتق من تعيينات الأيام
+     * (DoctorDayAssignment) حسب يوم أسبوع تاريخ الحجز، لأن جدول bookings لا
+     * يحمل doctor_id إطلاقًا. يعود بنص بديل مترجم ("غير محدد") لو كان اليوم
+     * بلا تعيين، أو كان الطبيب المُعيَّن محذوفًا — بدل اسم خاطئ أو خطأ null.
+     *
+     * الأسماء المخزَّنة للأطباء تتضمن سابقة "د." أصلًا، فلا تُضاف هنا ولا في
+     * نصوص الترجمة كي لا تتكرر ("د. د. فلان").
+     */
+    public function assignedDoctorName(): string
+    {
+        $doctorId = DoctorDayAssignment::doctorIdForDate($this->booking_date);
+
+        $name = $doctorId ? User::whereKey($doctorId)->value('name') : null;
+
+        return $name ?: __('booking.active_modal.doctor_unassigned');
+    }
+
+    /**
      * بيانات حجز المستخدم "الفعّال" حاليًا (إن وُجد، أي تاريخ)، بالشكل الجاهز
      * لمودال "لديك حجز حاليًا" — تُستخدم من لوحات التحكم (لعرض المودال في
      * مكانه) ومن BookingController (بوابة /booking).
@@ -188,6 +206,7 @@ class Booking extends Model
             'id' => $booking->id,
             'time_label' => $booking->timeLabel(),
             'date_label' => $booking->booking_date->translatedFormat('d F Y'),
+            'doctor_name' => $booking->assignedDoctorName(),
         ];
     }
 
@@ -260,16 +279,53 @@ class Booking extends Model
     }
 
     /**
-     * الأيام الثلاثة القابلة للحجز/العرض: اليوم + يومين قادمين — نافذة
-     * BookingController (صفحة الحجز) حصرًا. لوحة الدكتور صارت أسبوعية كاملة
-     * (راجع currentWeekDates أدناه)، لا 3 أيام.
+     * الأيام القابلة للحجز/العرض بصفحة الحجز: أيام دوام العيادة (الأحد–الخميس)
+     * من اليوم حتى نهاية أسبوع العيادة الحالي، بحد أقصى 3 أيام — نافذة
+     * BookingController حصرًا. لوحة الدكتور أسبوعية كاملة (currentWeekDates).
+     *
+     * النافذة لا تتخطى نهاية الأسبوع ولا تعرض يومًا مغلقًا إطلاقًا، فتصير:
+     *   الأحد    → الأحد، الاثنين، الثلاثاء   (3)
+     *   الاثنين  → الاثنين، الثلاثاء، الأربعاء (3)
+     *   الثلاثاء → الثلاثاء، الأربعاء، الخميس (3)
+     *   الأربعاء → الأربعاء، الخميس           (2)
+     *   الخميس   → الخميس                     (1)
+     *   الجمعة/السبت → لا شيء                 (0)
+     *
+     * قبل هذا كانت النافذة "اليوم + يومين" تقويميًا بلا وعي بأيام العمل، فكانت
+     * تعرض الجمعة/السبت (عطلة العيادة) كأيام قابلة للحجز، وتمتد لأسبوع لاحق.
+     *
+     * حدّ الأسبوع هنا هو نفس عُرف السبت المستخدم بـcurrentWeekDates ولوحة
+     * الدكتور (startOfWeek(Carbon::SATURDAY))، فالنظامان يتفقان على معنى "هذا
+     * الأسبوع": يبدأ سبتًا وآخر أيام عمله الخميس (weekStart + 5).
+     *
+     * الجمعة/السبت يومان مغلقان أصلًا، فلا نافذة لهما إطلاقًا (مصفوفة فارغة)
+     * بدل بدء أسبوع جديد منهما — لأن الصفحة نفسها حينها على يوم مغلق،
+     * ويعرض BookingController حالة "العيادة مغلقة" بدل شبكة الأوقات.
+     *
+     * @return list<Carbon>
      */
     public static function bookableDates(): array
     {
-        $dates = [];
+        $today = Carbon::today();
 
-        for ($i = 0; $i < self::BOOKING_WINDOW_DAYS; $i++) {
-            $dates[] = Carbon::today()->addDays($i);
+        if (!in_array($today->dayOfWeek, DoctorDayAssignment::CLINIC_DAYS, true)) {
+            return [];
+        }
+
+        // آخر يوم عمل بأسبوع العيادة الحالي: السبت (بداية الأسبوع) + 5 = الخميس
+        $lastWorkingDay = $today->copy()->startOfWeek(Carbon::SATURDAY)->addDays(5);
+
+        $dates = [];
+        for ($date = $today->copy(); $date->lte($lastWorkingDay); $date->addDay()) {
+            if (count($dates) === self::BOOKING_WINDOW_DAYS) {
+                break;
+            }
+
+            // الفلتر هنا احترازي (المدى أعلاه لا يشمل جمعة/سبت أصلًا) ويجعل
+            // شرط "لا يوم مغلق ضمن النافذة" صريحًا لا ضمنيًا
+            if (in_array($date->dayOfWeek, DoctorDayAssignment::CLINIC_DAYS, true)) {
+                $dates[] = $date->copy();
+            }
         }
 
         return $dates;

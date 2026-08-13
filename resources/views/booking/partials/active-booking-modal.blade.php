@@ -31,8 +31,13 @@
 
         <h3 class="font-display text-xl font-extrabold mb-2">{{ __('booking.active_modal.heading') }}</h3>
         <p class="text-sm text-ttu-gray mb-1">{{ __('booking.active_modal.intro') }}</p>
-        <p class="text-lg font-bold text-ttu-black mb-8">
+        <p class="text-lg font-bold text-ttu-black mb-1.5">
             {{ $activeBooking['date_label'] }} — {{ __('booking.active_modal.hour_prefix') }} {{ $activeBooking['time_label'] }}
+        </p>
+
+        {{-- الطبيب المسؤول عن ذلك اليوم (من تعيينات الأيام، لا من الحجز نفسه) --}}
+        <p class="text-sm font-bold text-ttu-gray mb-8">
+            {{ __('booking.active_modal.with_doctor', ['doctor' => $activeBooking['doctor_name']]) }}
         </p>
 
         <div class="flex gap-3">

@@ -25,21 +25,36 @@ class BookingController extends Controller
                 'days' => [],
                 'activeBooking' => Booking::activeViewDataFor($user),
                 'semesterLimitReached' => false,
+                'clinicClosed' => false,
             ]);
         }
 
         $bookableDates = Booking::bookableDates();
 
-        // الحد الفصلي (4 حجوزات مؤكدة كحد أقصى) — نافذة الحجز المعروضة (اليوم
-        // + يومين قادمين) قد تعبر حدود فصلين قرب نهاية/بداية فصل، فنخفي
-        // الصفحة كليًا فقط لو كانت كل أيام النافذة محظورة فعلًا؛ لو يوم واحد
-        // منها لا يزال مسموحًا (فصل مختلف، أو فجوة بلا فصل نشط) تُعرض شبكة
-        // الأوقات كالمعتاد، ويبقى store() هو الفيصل الفعلي لكل تاريخ على حدة.
+        // العيادة مغلقة اليوم (جمعة/سبت) فلا نافذة حجز إطلاقًا. الفحص قبل فحص
+        // الحد الفصلي أدناه عمدًا: every() على مجموعة فارغة تعود true، فبدون
+        // هذا الترتيب كانت الصفحة ستعرض "بلغت الحد الأقصى للفصل" وهي رسالة
+        // خاطئة تمامًا في يوم عطلة.
+        if (empty($bookableDates)) {
+            return view('booking.index', [
+                'days' => [],
+                'activeBooking' => null,
+                'semesterLimitReached' => false,
+                'clinicClosed' => true,
+            ]);
+        }
+
+        // الحد الفصلي (4 حجوزات مؤكدة كحد أقصى) — نافذة الحجز المعروضة قد
+        // تعبر حدود فصلين قرب نهاية/بداية فصل، فنخفي الصفحة كليًا فقط لو كانت
+        // كل أيام النافذة محظورة فعلًا؛ لو يوم واحد منها لا يزال مسموحًا (فصل
+        // مختلف، أو فجوة بلا فصل نشط) تُعرض شبكة الأوقات كالمعتاد، ويبقى
+        // store() هو الفيصل الفعلي لكل تاريخ على حدة.
         if (collect($bookableDates)->every(fn (Carbon $date) => Booking::hasReachedSemesterLimit($user, $date))) {
             return view('booking.index', [
                 'days' => [],
                 'activeBooking' => null,
                 'semesterLimitReached' => true,
+                'clinicClosed' => false,
             ]);
         }
 
@@ -73,6 +88,7 @@ class BookingController extends Controller
             'days' => $days,
             'activeBooking' => null,
             'semesterLimitReached' => false,
+            'clinicClosed' => false,
         ]);
     }
 
@@ -205,6 +221,14 @@ class BookingController extends Controller
         $date = isset($validated['date'])
             ? Carbon::createFromFormat('Y-m-d', $validated['date'])->startOfDay()
             : Carbon::today();
+
+        // التاريخ المُرسل تحققت منه Rule::in أعلاه، أما التاريخ الافتراضي (طلب
+        // بلا 'date') فلا يمر بها — ولولا هذا الفحص لأمكن حجز "اليوم" في يوم
+        // عطلة (جمعة/سبت) حيث النافذة فارغة أصلًا.
+        if (!in_array($date->toDateString(), $bookableDates, true)) {
+            return back()->with('error', __('booking.errors.clinic_closed'));
+        }
+
         $hour = (int) $validated['hour'];
         $minute = (int) $validated['minute'];
         $isStaffMinute = in_array($minute, Booking::STAFF_MINUTES, true);
@@ -288,7 +312,21 @@ class BookingController extends Controller
                 ['date' => $date->toDateString(), 'time' => $this->formatHour($hour, $minute)]
             );
 
-            return redirect()->route('dashboard.'.$user->role)->with('success', __('booking.flash.booked_success'));
+            // إشعار التأكيد يُمرَّر بمفتاح 'toast' المستقل (يعرضه <x-flash-toast/>
+            // بالتخطيط العام) لا بمفتاح 'success' وحده، لأن الوجهة هنا هي لوحة
+            // المستخدم وهي لا تعرض شريط 'success' الداخلي أصلًا — فبدونه كان
+            // الحجز ينجح بلا أي تأكيد مرئي. يبقى 'success' مضبوطًا كما كان لأي
+            // صفحة تعرضه (مثل صفحة الحجز نفسها).
+            return redirect()->route('dashboard.'.$user->role)
+                ->with('success', __('booking.flash.booked_success'))
+                ->with('toast', [
+                    'type' => 'success',
+                    'title' => __('booking.toast.title'),
+                    'message' => __('booking.flash.booked_success_toast', [
+                        'date' => $date->translatedFormat('d F Y'),
+                        'time' => $this->formatHour($hour, $minute),
+                    ]),
+                ]);
         });
     }
 

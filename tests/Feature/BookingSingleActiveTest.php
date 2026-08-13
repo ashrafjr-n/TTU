@@ -18,6 +18,18 @@ class BookingSingleActiveTest extends TestCase
         parent::tearDown();
     }
 
+    /**
+     * "اليوم" مثبّت على أحد أيام دوام العيادة (الأحد 16 أغسطس 2026) بدل اليوم
+     * الفعلي: نافذة الحجز صارت محصورة بأيام الدوام (أحد–خميس) وبنهاية الأسبوع،
+     * فاختبار يعتمد على اليوم الحقيقي كان سيفشل كلما صادف تشغيله جمعة أو سبتًا
+     * (نافذة فارغة)، أو خميسًا لو حجز "غدًا". نفس التاريخ المثبّت المستخدم في
+     * DoctorCancelBookingTest/DoctorDashboardTest.
+     */
+    private function today(): Carbon
+    {
+        return Carbon::create(2026, 8, 16);
+    }
+
     private function student(): User
     {
         return User::factory()->create(['role' => 'student', 'identifier' => fake()->unique()->numerify('########')]);
@@ -25,7 +37,7 @@ class BookingSingleActiveTest extends TestCase
 
     public function test_user_cannot_hold_two_active_bookings_at_once(): void
     {
-        Carbon::setTestNow(Carbon::today()->setTime(8, 0));
+        Carbon::setTestNow($this->today()->copy()->setTime(8, 0));
         $user = $this->student();
 
         $this->actingAs($user)->post(route('booking.store'), ['hour' => 9, 'minute' => 0]);
@@ -43,11 +55,11 @@ class BookingSingleActiveTest extends TestCase
     {
         $user = $this->student();
 
-        Carbon::setTestNow(Carbon::today()->setTime(8, 0));
+        Carbon::setTestNow($this->today()->copy()->setTime(8, 0));
         $this->actingAs($user)->post(route('booking.store'), ['hour' => 9, 'minute' => 0]);
 
         // الوقت الآن تجاوز نهاية خانة 9:00 (9:05) — يجب ألا تُعتبر "فعّالة" بعد الآن
-        Carbon::setTestNow(Carbon::today()->setTime(9, 10));
+        Carbon::setTestNow($this->today()->copy()->setTime(9, 10));
         $response = $this->actingAs($user)->post(route('booking.store'), ['hour' => 10, 'minute' => 5]);
 
         $response->assertSessionHas('success');
@@ -56,7 +68,7 @@ class BookingSingleActiveTest extends TestCase
 
     public function test_cancelling_the_active_booking_allows_a_new_one(): void
     {
-        Carbon::setTestNow(Carbon::today()->setTime(8, 0));
+        Carbon::setTestNow($this->today()->copy()->setTime(8, 0));
         $user = $this->student();
 
         $this->actingAs($user)->post(route('booking.store'), ['hour' => 9, 'minute' => 0]);
@@ -70,7 +82,7 @@ class BookingSingleActiveTest extends TestCase
 
     public function test_successful_booking_redirects_to_role_dashboard(): void
     {
-        Carbon::setTestNow(Carbon::today()->setTime(8, 0));
+        Carbon::setTestNow($this->today()->copy()->setTime(8, 0));
         $user = $this->student();
 
         $response = $this->actingAs($user)->post(route('booking.store'), ['hour' => 9, 'minute' => 0]);
@@ -80,7 +92,7 @@ class BookingSingleActiveTest extends TestCase
 
     public function test_index_shows_active_booking_modal_instead_of_slot_grid(): void
     {
-        Carbon::setTestNow(Carbon::today()->setTime(8, 0));
+        Carbon::setTestNow($this->today()->copy()->setTime(8, 0));
         $user = $this->student();
         $this->actingAs($user)->post(route('booking.store'), ['hour' => 9, 'minute' => 0]);
 
@@ -94,7 +106,7 @@ class BookingSingleActiveTest extends TestCase
 
     public function test_index_shows_slot_grid_when_no_active_booking(): void
     {
-        Carbon::setTestNow(Carbon::today()->setTime(8, 0));
+        Carbon::setTestNow($this->today()->copy()->setTime(8, 0));
         $user = $this->student();
 
         $response = $this->actingAs($user)->get(route('booking.index'));
@@ -106,7 +118,7 @@ class BookingSingleActiveTest extends TestCase
 
     public function test_cancelling_from_the_active_booking_modal_redirects_to_booking_index(): void
     {
-        Carbon::setTestNow(Carbon::today()->setTime(8, 0));
+        Carbon::setTestNow($this->today()->copy()->setTime(8, 0));
         $user = $this->student();
         $this->actingAs($user)->post(route('booking.store'), ['hour' => 9, 'minute' => 0]);
         $booking = Booking::where('user_id', $user->id)->first();
@@ -126,14 +138,14 @@ class BookingSingleActiveTest extends TestCase
     {
         // 9:45 خانة موظف — تتحرر للطلاب فور مرور 9:45، ونحجزها الساعة 9:46
         // أي أن نافذتها الأصلية (تنتهي 9:50) تكاد تكون منتهية أصلًا وقت الحجز
-        Carbon::setTestNow(Carbon::today()->setTime(9, 46));
+        Carbon::setTestNow($this->today()->copy()->setTime(9, 46));
         $user = $this->student();
         $this->actingAs($user)->post(route('booking.store'), ['hour' => 9, 'minute' => 45]);
         $this->assertDatabaseHas('bookings', ['user_id' => $user->id, 'booking_hour' => 9, 'booking_minute' => 45]);
 
         // نتقدم بالوقت لما بعد نهاية النافذة الأصلية للخانة (9:50) بوقت طويل —
         // الحجز يجب أن يبقى "فعّالًا" ويمنع حجزًا جديدًا رغم ذلك
-        Carbon::setTestNow(Carbon::today()->setTime(11, 0));
+        Carbon::setTestNow($this->today()->copy()->setTime(11, 0));
 
         $response = $this->actingAs($user)->get(route('booking.index'));
         $response->assertSee('لديك حجز حاليًا');
@@ -146,12 +158,12 @@ class BookingSingleActiveTest extends TestCase
 
     public function test_cancelling_a_released_slot_booking_restores_the_slot_grid(): void
     {
-        Carbon::setTestNow(Carbon::today()->setTime(9, 46));
+        Carbon::setTestNow($this->today()->copy()->setTime(9, 46));
         $user = $this->student();
         $this->actingAs($user)->post(route('booking.store'), ['hour' => 9, 'minute' => 45]);
         $booking = Booking::where('user_id', $user->id)->first();
 
-        Carbon::setTestNow(Carbon::today()->setTime(11, 0));
+        Carbon::setTestNow($this->today()->copy()->setTime(11, 0));
 
         $cancelResponse = $this->actingAs($user)->delete(route('booking.destroy', $booking));
         $cancelResponse->assertRedirect(route('booking.index'));
@@ -165,11 +177,11 @@ class BookingSingleActiveTest extends TestCase
     {
         // الموظف يحجز خانته العادية (ليست عبر آلية التحرر) — قاعدة isUpcoming
         // الأصلية يجب أن تبقى سارية عليه (تنتهي بانتهاء نافذتها الخاصة)
-        Carbon::setTestNow(Carbon::today()->setTime(8, 0));
+        Carbon::setTestNow($this->today()->copy()->setTime(8, 0));
         $staff = User::factory()->create(['role' => 'staff', 'identifier' => fake()->unique()->numerify('####')]);
         $this->actingAs($staff)->post(route('booking.store'), ['hour' => 9, 'minute' => 45]);
 
-        Carbon::setTestNow(Carbon::today()->setTime(9, 51));
+        Carbon::setTestNow($this->today()->copy()->setTime(9, 51));
 
         $response = $this->actingAs($staff)->get(route('booking.index'));
         $response->assertDontSee('لديك حجز حاليًا');
@@ -185,7 +197,7 @@ class BookingSingleActiveTest extends TestCase
 
     public function test_a_released_slot_booking_still_blocks_a_second_booking_after_close_hour(): void
     {
-        Carbon::setTestNow(Carbon::today()->setTime(15, 46));
+        Carbon::setTestNow($this->today()->copy()->setTime(15, 46));
         $user = $this->student();
 
         $first = $this->actingAs($user)->post(route('booking.store'), ['hour' => 15, 'minute' => 45]);
@@ -193,7 +205,7 @@ class BookingSingleActiveTest extends TestCase
         $this->assertDatabaseHas('bookings', ['user_id' => $user->id, 'booking_hour' => 15, 'booking_minute' => 45, 'status' => 'confirmed']);
 
         // الوقت الآن تجاوز ساعة إغلاق العيادة (16:00) لكن ما زلنا في نفس اليوم
-        Carbon::setTestNow(Carbon::today()->setTime(16, 30));
+        Carbon::setTestNow($this->today()->copy()->setTime(16, 30));
 
         $indexResponse = $this->actingAs($user)->get(route('booking.index'));
         $indexResponse->assertSee('لديك حجز حاليًا');
@@ -203,7 +215,7 @@ class BookingSingleActiveTest extends TestCase
         // لا يوجد سبب آخر يرفضها (ليست ماضية، ليست مخصصة للموظفين) سوى بوابة
         // "حجز فعّال واحد"، فهذا يعزل الاختبار على تلك البوابة تحديدًا.
         $second = $this->actingAs($user)->post(route('booking.store'), [
-            'date' => Carbon::tomorrow()->toDateString(),
+            'date' => $this->today()->copy()->addDay()->toDateString(),
             'hour' => 9,
             'minute' => 0,
         ]);

@@ -18,6 +18,18 @@ class BookingSlotTest extends TestCase
         parent::tearDown();
     }
 
+    /**
+     * "اليوم" مثبّت على أحد أيام دوام العيادة (الأحد 16 أغسطس 2026) بدل اليوم
+     * الفعلي: نافذة الحجز صارت محصورة بأيام الدوام (أحد–خميس) وبنهاية الأسبوع،
+     * فاختبار يعتمد على اليوم الحقيقي كان سيفشل كلما صادف تشغيله جمعة أو سبتًا
+     * (نافذة فارغة)، أو خميسًا لو حجز "غدًا". نفس التاريخ المثبّت المستخدم في
+     * DoctorCancelBookingTest/DoctorDashboardTest.
+     */
+    private function today(): Carbon
+    {
+        return Carbon::create(2026, 8, 16);
+    }
+
     private function student(): User
     {
         return User::factory()->create(['role' => 'student', 'identifier' => fake()->unique()->numerify('########')]);
@@ -30,7 +42,7 @@ class BookingSlotTest extends TestCase
 
     public function test_student_can_book_a_student_slot(): void
     {
-        Carbon::setTestNow(Carbon::today()->setTime(8, 0));
+        Carbon::setTestNow($this->today()->copy()->setTime(8, 0));
 
         $response = $this->actingAs($this->student())
             ->post(route('booking.store'), ['hour' => 9, 'minute' => 0]);
@@ -41,7 +53,7 @@ class BookingSlotTest extends TestCase
 
     public function test_student_cannot_book_an_unreleased_staff_slot(): void
     {
-        Carbon::setTestNow(Carbon::today()->setTime(8, 0));
+        Carbon::setTestNow($this->today()->copy()->setTime(8, 0));
 
         $response = $this->actingAs($this->student())
             ->post(route('booking.store'), ['hour' => 9, 'minute' => 45]);
@@ -52,7 +64,7 @@ class BookingSlotTest extends TestCase
 
     public function test_student_can_book_a_staff_slot_once_its_start_time_has_passed_unbooked(): void
     {
-        Carbon::setTestNow(Carbon::today()->setTime(9, 46));
+        Carbon::setTestNow($this->today()->copy()->setTime(9, 46));
 
         $response = $this->actingAs($this->student())
             ->post(route('booking.store'), ['hour' => 9, 'minute' => 45]);
@@ -63,7 +75,7 @@ class BookingSlotTest extends TestCase
 
     public function test_staff_cannot_book_a_student_slot(): void
     {
-        Carbon::setTestNow(Carbon::today()->setTime(8, 0));
+        Carbon::setTestNow($this->today()->copy()->setTime(8, 0));
 
         $response = $this->actingAs($this->staff())
             ->post(route('booking.store'), ['hour' => 9, 'minute' => 0]);
@@ -74,7 +86,7 @@ class BookingSlotTest extends TestCase
 
     public function test_staff_can_book_their_own_slot(): void
     {
-        Carbon::setTestNow(Carbon::today()->setTime(8, 0));
+        Carbon::setTestNow($this->today()->copy()->setTime(8, 0));
 
         $response = $this->actingAs($this->staff())
             ->post(route('booking.store'), ['hour' => 9, 'minute' => 45]);
@@ -85,7 +97,7 @@ class BookingSlotTest extends TestCase
 
     public function test_double_booking_the_same_slot_is_rejected(): void
     {
-        Carbon::setTestNow(Carbon::today()->setTime(8, 0));
+        Carbon::setTestNow($this->today()->copy()->setTime(8, 0));
 
         $first = $this->student();
         $second = $this->student();
@@ -99,7 +111,7 @@ class BookingSlotTest extends TestCase
 
     public function test_cancelling_a_booking_frees_the_slot(): void
     {
-        Carbon::setTestNow(Carbon::today()->setTime(8, 0));
+        Carbon::setTestNow($this->today()->copy()->setTime(8, 0));
 
         $user = $this->student();
         $this->actingAs($user)->post(route('booking.store'), ['hour' => 9, 'minute' => 0]);
@@ -116,7 +128,7 @@ class BookingSlotTest extends TestCase
 
     public function test_already_passed_slot_cannot_be_booked(): void
     {
-        Carbon::setTestNow(Carbon::today()->setTime(10, 30));
+        Carbon::setTestNow($this->today()->copy()->setTime(10, 30));
 
         $response = $this->actingAs($this->student())
             ->post(route('booking.store'), ['hour' => 9, 'minute' => 0]);

@@ -18,6 +18,18 @@ class DashboardActiveBookingTest extends TestCase
         parent::tearDown();
     }
 
+    /**
+     * "اليوم" مثبّت على أحد أيام دوام العيادة (الأحد 16 أغسطس 2026) بدل اليوم
+     * الفعلي: نافذة الحجز صارت محصورة بأيام الدوام (أحد–خميس) وبنهاية الأسبوع،
+     * فاختبار يعتمد على اليوم الحقيقي كان سيفشل كلما صادف تشغيله جمعة أو سبتًا
+     * (نافذة فارغة)، أو خميسًا لو حجز "غدًا". نفس التاريخ المثبّت المستخدم في
+     * DoctorCancelBookingTest/DoctorDashboardTest.
+     */
+    private function today(): Carbon
+    {
+        return Carbon::create(2026, 8, 16);
+    }
+
     private function student(): User
     {
         return User::factory()->create(['role' => 'student', 'identifier' => fake()->unique()->numerify('########')]);
@@ -42,7 +54,7 @@ class DashboardActiveBookingTest extends TestCase
 
     public function test_student_dashboard_shows_blocking_modal_in_place_when_active_booking_exists(): void
     {
-        Carbon::setTestNow(Carbon::today()->setTime(8, 0));
+        Carbon::setTestNow($this->today()->copy()->setTime(8, 0));
         $user = $this->student();
         $this->actingAs($user)->post(route('booking.store'), ['hour' => 9, 'minute' => 0]);
 
@@ -58,7 +70,7 @@ class DashboardActiveBookingTest extends TestCase
 
     public function test_cancelling_from_the_dashboard_modal_redirects_to_booking_index_with_slot_picker(): void
     {
-        Carbon::setTestNow(Carbon::today()->setTime(8, 0));
+        Carbon::setTestNow($this->today()->copy()->setTime(8, 0));
         $user = $this->student();
         $this->actingAs($user)->post(route('booking.store'), ['hour' => 9, 'minute' => 0]);
         $booking = Booking::where('user_id', $user->id)->first();
@@ -79,7 +91,7 @@ class DashboardActiveBookingTest extends TestCase
 
     public function test_staff_dashboard_shows_blocking_modal_in_place_when_active_booking_exists(): void
     {
-        Carbon::setTestNow(Carbon::today()->setTime(8, 0));
+        Carbon::setTestNow($this->today()->copy()->setTime(8, 0));
         $user = $this->staff();
         $this->actingAs($user)->post(route('booking.store'), ['hour' => 9, 'minute' => 45]);
 
@@ -132,7 +144,7 @@ class DashboardActiveBookingTest extends TestCase
 
     public function test_direct_navigation_to_booking_page_still_gates_as_backstop(): void
     {
-        Carbon::setTestNow(Carbon::today()->setTime(8, 0));
+        Carbon::setTestNow($this->today()->copy()->setTime(8, 0));
         $user = $this->student();
         $this->actingAs($user)->post(route('booking.store'), ['hour' => 9, 'minute' => 0]);
 

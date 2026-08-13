@@ -5,14 +5,26 @@ namespace Tests\Feature;
 use App\Models\Booking;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Carbon;
 use Tests\TestCase;
 
 class BookingPageLocalizationTest extends TestCase
 {
     use RefreshDatabase;
 
+    protected function tearDown(): void
+    {
+        Carbon::setTestNow();
+        parent::tearDown();
+    }
+
     public function test_booking_page_switches_language(): void
     {
+        // شبكة الأوقات تظهر بأيام الدوام فقط، فيُثبَّت "اليوم" على أحد
+        // (16 أغسطس 2026) وإلا عرضت الصفحة مودال "العيادة مغلقة" كلما صادف
+        // تشغيل الاختبار جمعة أو سبتًا
+        Carbon::setTestNow(Carbon::create(2026, 8, 16, 8, 0));
+
         $student = User::factory()->create(['role' => 'student', 'identifier' => fake()->unique()->numerify('########')]);
 
         $ar = $this->actingAs($student)->get(route('booking.index'));

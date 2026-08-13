@@ -1,0 +1,273 @@
+<?php
+
+namespace Tests\Feature;
+
+use App\Models\Booking;
+use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Carbon;
+use Tests\TestCase;
+
+/**
+ * نافذة الحجز محصورة بأيام دوام العيادة (الأحد–الخميس) وبنهاية أسبوع العيادة
+ * الحالي (حدّ السبت نفسه المستخدم بـcurrentWeekDates ولوحة الدكتور)، بحد أقصى
+ * 3 أيام.
+ *
+ * قبل هذا كانت "اليوم + يومين" تقويميًا: تعرض الجمعة/السبت (عطلة) كأيام قابلة
+ * للحجز، وتمتد لأسبوع لاحق. كل يوم من أيام الأسبوع مغطى هنا صراحةً بعدد
+ * الأيام وهويتها معًا، لا بعددها وحده.
+ *
+ * التواريخ المرجعية (أغسطس 2026): 15 سبت، 16 أحد، 17 اثنين، 18 ثلاثاء،
+ * 19 أربعاء، 20 خميس، 21 جمعة.
+ */
+class BookingWindowWeekdayTest extends TestCase
+{
+    use RefreshDatabase;
+
+    protected function tearDown(): void
+    {
+        Carbon::setTestNow();
+        parent::tearDown();
+    }
+
+    private function student(): User
+    {
+        return User::factory()->create(['role' => 'student', 'identifier' => fake()->unique()->numerify('########')]);
+    }
+
+    /** @return list<string> */
+    private function windowOn(string $date): array
+    {
+        Carbon::setTestNow(Carbon::parse($date)->setTime(8, 0));
+
+        return collect(Booking::bookableDates())->map->toDateString()->all();
+    }
+
+    // ------------------------------------------------------------------
+    // كل يوم بالأسبوع: العدد والهوية معًا
+    // ------------------------------------------------------------------
+
+    public function test_sunday_offers_sunday_monday_and_tuesday(): void
+    {
+        $this->assertSame(
+            ['2026-08-16', '2026-08-17', '2026-08-18'],
+            $this->windowOn('2026-08-16')
+        );
+    }
+
+    public function test_monday_offers_monday_tuesday_and_wednesday(): void
+    {
+        $this->assertSame(
+            ['2026-08-17', '2026-08-18', '2026-08-19'],
+            $this->windowOn('2026-08-17')
+        );
+    }
+
+    public function test_tuesday_offers_tuesday_wednesday_and_thursday(): void
+    {
+        $this->assertSame(
+            ['2026-08-18', '2026-08-19', '2026-08-20'],
+            $this->windowOn('2026-08-18')
+        );
+    }
+
+    public function test_wednesday_offers_only_wednesday_and_thursday(): void
+    {
+        // لا جمعة، ولا امتداد لأسبوع لاحق — يومان فقط
+        $this->assertSame(
+            ['2026-08-19', '2026-08-20'],
+            $this->windowOn('2026-08-19')
+        );
+    }
+
+    public function test_thursday_offers_only_thursday(): void
+    {
+        // آخر يوم عمل قبل إعادة ضبط الأسبوع يوم السبت — يوم واحد
+        $this->assertSame(
+            ['2026-08-20'],
+            $this->windowOn('2026-08-20')
+        );
+    }
+
+    public function test_friday_offers_nothing(): void
+    {
+        $this->assertSame([], $this->windowOn('2026-08-21'));
+    }
+
+    public function test_saturday_offers_nothing(): void
+    {
+        // السبت بداية أسبوع العيادة لكنه يوم مغلق: لا نفتح منه نافذة تمتد
+        // إلى أحد/اثنين/ثلاثاء، فالصفحة نفسها حينها على يوم عطلة
+        $this->assertSame([], $this->windowOn('2026-08-15'));
+    }
+
+    // ------------------------------------------------------------------
+    // خصائص عامة تسري على كل الأيام
+    // ------------------------------------------------------------------
+
+    public function test_no_window_ever_contains_a_closed_day_or_crosses_the_week_boundary(): void
+    {
+        foreach (['2026-08-15', '2026-08-16', '2026-08-17', '2026-08-18', '2026-08-19', '2026-08-20', '2026-08-21'] as $day) {
+            Carbon::setTestNow(Carbon::parse($day)->setTime(8, 0));
+
+            $dates = Booking::bookableDates();
+            $lastWorkingDay = Carbon::parse($day)->startOfWeek(Carbon::SATURDAY)->addDays(5);
+
+            $this->assertLessThanOrEqual(Booking::BOOKING_WINDOW_DAYS, count($dates), "نافذة $day تجاوزت الحد الأقصى");
+
+            foreach ($dates as $date) {
+                $this->assertContains($date->dayOfWeek, [0, 1, 2, 3, 4], "نافذة $day تضم يومًا مغلقًا: {$date->toDateString()}");
+                $this->assertTrue($date->gte(Carbon::parse($day)), "نافذة $day تضم يومًا ماضيًا");
+                $this->assertTrue($date->lte($lastWorkingDay), "نافذة $day تخطّت نهاية الأسبوع");
+            }
+        }
+    }
+
+    public function test_the_window_agrees_with_the_saturday_week_convention_used_by_the_doctor_dashboard(): void
+    {
+        Carbon::setTestNow(Carbon::parse('2026-08-19')->setTime(8, 0)); // أربعاء
+
+        $weekDates = collect(Booking::currentWeekDates())->map->toDateString()->all();
+
+        // كل يوم بنافذة الحجز يقع ضمن نفس "الأسبوع" الذي تراه لوحة الدكتور
+        foreach (Booking::bookableDates() as $date) {
+            $this->assertContains($date->toDateString(), $weekDates);
+        }
+    }
+
+    // ------------------------------------------------------------------
+    // انعكاس ذلك على الصفحة و store()
+    // ------------------------------------------------------------------
+
+    public function test_the_booking_page_renders_one_day_tab_on_thursday(): void
+    {
+        Carbon::setTestNow(Carbon::parse('2026-08-20')->setTime(8, 0));
+
+        $response = $this->actingAs($this->student())->get(route('booking.index'));
+
+        $response->assertOk();
+        $response->assertSee('id="day-tab-0"', false);
+        $response->assertDontSee('id="day-tab-1"', false);
+        $response->assertDontSee('id="day-tab-2"', false);
+    }
+
+    public function test_the_booking_page_renders_two_day_tabs_on_wednesday(): void
+    {
+        Carbon::setTestNow(Carbon::parse('2026-08-19')->setTime(8, 0));
+
+        $response = $this->actingAs($this->student())->get(route('booking.index'));
+
+        $response->assertOk();
+        $response->assertSee('id="day-tab-0"', false);
+        $response->assertSee('id="day-tab-1"', false);
+        $response->assertDontSee('id="day-tab-2"', false);
+    }
+
+    public function test_the_booking_page_renders_three_day_tabs_on_sunday(): void
+    {
+        Carbon::setTestNow(Carbon::parse('2026-08-16')->setTime(8, 0));
+
+        $response = $this->actingAs($this->student())->get(route('booking.index'));
+
+        $response->assertOk();
+        $response->assertSee('id="day-tab-0"', false);
+        $response->assertSee('id="day-tab-1"', false);
+        $response->assertSee('id="day-tab-2"', false);
+    }
+
+    public function test_the_booking_page_shows_the_closed_state_on_friday(): void
+    {
+        Carbon::setTestNow(Carbon::parse('2026-08-21')->setTime(8, 0));
+
+        $response = $this->actingAs($this->student())->get(route('booking.index'));
+
+        $response->assertOk();
+        $response->assertSee('العيادة مغلقة اليوم');
+        $response->assertSee('id="clinicClosedModalOverlay"', false);
+        // ليست حالة "الحد الفصلي" — every() على نافذة فارغة تعود true، فلولا
+        // ترتيب الفحوص لظهرت رسالة خاطئة تمامًا هنا
+        $response->assertDontSee('بلغت الحد الأقصى لحجوزات هذا الفصل');
+        $response->assertDontSee('id="bookModalOverlay"', false);
+        $response->assertDontSee('id="day-tab-0"', false);
+    }
+
+    public function test_the_booking_page_shows_the_closed_state_on_saturday(): void
+    {
+        Carbon::setTestNow(Carbon::parse('2026-08-15')->setTime(8, 0));
+
+        $response = $this->actingAs($this->student())->get(route('booking.index'));
+
+        $response->assertOk();
+        $response->assertSee('العيادة مغلقة اليوم');
+        $response->assertDontSee('id="day-tab-0"', false);
+    }
+
+    public function test_the_closed_state_is_localized_in_english(): void
+    {
+        Carbon::setTestNow(Carbon::parse('2026-08-21')->setTime(8, 0));
+
+        $response = $this->actingAs($this->student())
+            ->withSession(['locale' => 'en'])
+            ->get(route('booking.index'));
+
+        $response->assertOk();
+        $response->assertSee('The clinic is closed today');
+        $response->assertDontSee('العيادة مغلقة اليوم');
+    }
+
+    public function test_store_rejects_a_booking_on_a_closed_day_even_without_an_explicit_date(): void
+    {
+        Carbon::setTestNow(Carbon::parse('2026-08-21')->setTime(8, 0)); // جمعة
+        $user = $this->student();
+
+        // بلا 'date' — يفترض المتحكّم "اليوم"، وهو يوم عطلة لا تغطيه Rule::in
+        $response = $this->actingAs($user)->post(route('booking.store'), ['hour' => 9, 'minute' => 0]);
+
+        $response->assertSessionHas('error');
+        $this->assertSame(__('booking.errors.clinic_closed'), session('error'));
+        $this->assertDatabaseCount('bookings', 0);
+    }
+
+    public function test_store_rejects_an_explicit_friday_date(): void
+    {
+        Carbon::setTestNow(Carbon::parse('2026-08-20')->setTime(8, 0)); // خميس
+        $user = $this->student();
+
+        $response = $this->actingAs($user)->post(route('booking.store'), [
+            'date' => '2026-08-21', 'hour' => 9, 'minute' => 0,
+        ]);
+
+        $response->assertSessionHasErrors('date');
+        $this->assertDatabaseCount('bookings', 0);
+    }
+
+    public function test_store_rejects_a_date_that_belongs_to_next_week(): void
+    {
+        Carbon::setTestNow(Carbon::parse('2026-08-19')->setTime(8, 0)); // أربعاء
+        $user = $this->student();
+
+        // الأحد القادم (23 أغسطس) — كان ضمن النافذة القديمة تقويميًا لو كانت
+        // 3 أيام مطلقة، وهو الآن خارجها لأنها لا تعبر حدّ الأسبوع
+        $response = $this->actingAs($user)->post(route('booking.store'), [
+            'date' => '2026-08-23', 'hour' => 9, 'minute' => 0,
+        ]);
+
+        $response->assertSessionHasErrors('date');
+        $this->assertDatabaseCount('bookings', 0);
+    }
+
+    public function test_thursday_still_allows_booking_the_single_available_day(): void
+    {
+        Carbon::setTestNow(Carbon::parse('2026-08-20')->setTime(8, 0));
+        $user = $this->student();
+
+        $response = $this->actingAs($user)->post(route('booking.store'), ['hour' => 9, 'minute' => 0]);
+
+        $response->assertSessionHas('success');
+        $this->assertDatabaseHas('bookings', [
+            'user_id' => $user->id,
+            'booking_date' => '2026-08-20 00:00:00',
+            'status' => 'confirmed',
+        ]);
+    }
+}

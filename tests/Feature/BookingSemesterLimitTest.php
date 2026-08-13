@@ -168,22 +168,27 @@ class BookingSemesterLimitTest extends TestCase
     }
 
     /**
-     * نافذة الحجز (اليوم + يومين قادمين) قد تعبر حدود فصلين قرب نهايته —
-     * لو "اليوم" محظور لكن يوم لاحق بالنافذة غير محظور (هنا: فجوة بلا فصل
-     * نشط)، يجب أن تبقى شبكة الأوقات ظاهرة بدل إخفاء الصفحة كليًا خلف مودال
-     * الحد الفصلي، لأن ذلك اليوم اللاحق قابل للحجز فعليًا عبر store().
+     * نافذة الحجز قد تعبر حدود فصلين قرب نهايته — لو "اليوم" محظور لكن يوم
+     * لاحق بالنافذة غير محظور (هنا: فجوة بلا فصل نشط)، يجب أن تبقى شبكة
+     * الأوقات ظاهرة بدل إخفاء الصفحة كليًا خلف مودال الحد الفصلي، لأن ذلك
+     * اليوم اللاحق قابل للحجز فعليًا عبر store().
+     *
+     * الحد المستخدم هنا هو نهاية الفصل الثاني (15 يونيو 2027 — ثلاثاء) لا
+     * نهاية الفصل الأول (15 يناير 2027 — جمعة): النافذة صارت محصورة بأيام
+     * الدوام حتى الخميس، فلا يمكنها أصلًا تخطّي حدٍّ يقع يوم جمعة.
      */
     public function test_index_still_shows_slot_grid_when_only_some_window_days_are_limited(): void
     {
-        // 14 يناير: آخر يومين بالفصل الأول (ينتهي 15 يناير). النافذة تمتد
-        // لـ16 يناير أيضًا — وهو فجوة بلا فصل نشط (لا حد إطلاقًا).
-        Carbon::setTestNow(Carbon::create(2027, 1, 14, 8, 0));
+        // الاثنين 14 يونيو 2027: النافذة = الاثنين 14، الثلاثاء 15 (آخر يوم
+        // بالفصل الثاني)، والأربعاء 16 — وهو فجوة بلا فصل نشط (لا حد إطلاقًا).
+        Carbon::setTestNow(Carbon::create(2027, 6, 14, 8, 0));
         $user = $this->student();
 
-        $this->pastConfirmedBooking($user, '2026-10-10');
-        $this->pastConfirmedBooking($user, '2026-10-15');
-        $this->pastConfirmedBooking($user, '2026-10-20');
-        $this->pastConfirmedBooking($user, '2026-10-25');
+        // أربعة حجوزات مؤكدة داخل الفصل الثاني (17 فبراير – 15 يونيو 2027)
+        $this->pastConfirmedBooking($user, '2027-03-01');
+        $this->pastConfirmedBooking($user, '2027-03-08');
+        $this->pastConfirmedBooking($user, '2027-03-15');
+        $this->pastConfirmedBooking($user, '2027-03-22');
 
         $response = $this->actingAs($user)->get(route('booking.index'));
 
@@ -191,16 +196,16 @@ class BookingSemesterLimitTest extends TestCase
         $response->assertSee('id="bookModalOverlay"', false);
         $response->assertDontSee('بلغت الحد الأقصى لحجوزات هذا الفصل');
 
-        // اليوم نفسه (14 يناير) لا يزال ضمن الفصل الأول المحظور فعليًا
+        // اليوم نفسه (14 يونيو) لا يزال ضمن الفصل الثاني المحظور فعليًا
         $blocked = $this->actingAs($user)->post(route('booking.store'), [
-            'date' => '2027-01-14', 'hour' => 9, 'minute' => 0,
+            'date' => '2027-06-14', 'hour' => 9, 'minute' => 0,
         ]);
         $blocked->assertSessionHas('error');
         $this->assertSame(__('booking.errors.semester_limit_reached'), session('error'));
 
-        // 16 يناير — فجوة بلا فصل نشط — يبقى قابلًا للحجز رغم الحد الفصلي
+        // 16 يونيو — فجوة بلا فصل نشط — يبقى قابلًا للحجز رغم الحد الفصلي
         $allowed = $this->actingAs($user)->post(route('booking.store'), [
-            'date' => '2027-01-16', 'hour' => 9, 'minute' => 0,
+            'date' => '2027-06-16', 'hour' => 9, 'minute' => 0,
         ]);
         $allowed->assertSessionHas('success');
     }

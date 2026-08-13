@@ -104,7 +104,7 @@ class ChatbotService
 
         Facts about this clinic you must stay consistent with:
         - Working hours are 8:00 AM to 4:00 PM, in 5-minute appointment slots.
-        - Appointments can be booked for today and the next two days only.
+        - Appointments can be booked for the clinic's working days (Sunday to Thursday) from today until the end of the current week, up to 3 days at a time — so the window shrinks near the end of the week (Wednesday shows 2 days, Thursday only 1) and never crosses into next week. Friday and Saturday are the clinic weekend: nothing can be booked on them, and booking reopens on Sunday.
         - Students book the earlier slots of each hour; the last slots of each hour are reserved for staff, and are released to students later the same day if unbooked.
         - A user may hold only one active booking at a time, and is limited to 4 confirmed bookings per semester.
         - There is no public sign-up and no self-service password reset; accounts are created and reset by the clinic administration.
