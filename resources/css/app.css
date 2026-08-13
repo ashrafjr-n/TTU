@@ -356,9 +356,30 @@ button,
 }
 .support-fab:hover { transform: scale(1.06); }
 .support-fab:active { transform: scale(.94); }
+
+/* تبديل أيقونة الزر بين الحالتين — تلاشٍ متقاطع بنفس التوقيت في الاتجاهين.
+   قبلها كان التبديل بإضافة/إزالة hidden، أي display:none: العنصر الظاهر
+   يقفز فورًا بلا أي انتقال، فبدا الانتقال من X إلى الأنيميشن (فتح ← إغلاق)
+   قفزة جافة بينما بدا الاتجاه المعاكس ناعمًا لأن الزر نفسه كان يتقلص معه.
+
+   الطبقتان فوق بعضهما (absolute inset-0) لا متتاليتين، وإلا لدفعت الأيقونة
+   المخفية — وهي ما زالت في التدفق لأن display لم يعد none — الأخرى جانبًا.
+   الإخفاء بـopacity + scale + visibility، ونفس مدة ومنحنى .support-fab
+   بالضبط فيتطابق إحساس الاتجاهين. */
+.support-fab-icon {
+    transition: opacity .3s ease, transform .3s var(--neu-bounce), visibility .3s;
+}
+.support-fab-icon--off {
+    opacity: 0;
+    visibility: hidden;
+    transform: scale(.6);
+    pointer-events: none;
+}
+
 @media (prefers-reduced-motion: reduce) {
     .support-fab { transition: none !important; }
     .support-fab:hover, .support-fab:active { transform: none; }
+    .support-fab-icon { transition: none !important; }
 }
 
 /* لوحة Lottie نفسها 952×784، والروبوت يشغل 308×398 وحدة من وسطها فقط (أقل
@@ -372,11 +393,12 @@ button,
    نحن ولا تمسها المكتبة، فالتكبير عليها يعمل فعلًا ويبقى صامدًا.
 
    المقاس المرسوم = (308 أو 398) × (مقاس الزر ÷ 952) × scale، أي بزر 112px
-   وscale(2.7): ‏≈98×126 بكسل. الحد الأعلى للـscale هنا يفرضه ارتفاع الرسم
+   وscale(2.35): ‏≈85×110 بكسل — تصغير محسوب عن 2.7 السابقة (‏≈98×126) بعد
+   أن بدت بارزة أكثر من اللازم. الحد الأعلى للـscale هنا يفرضه ارتفاع الرسم
    نفسه: الروبوت أطول من الزر المربع، فما يزيد عن ذلك يدفع قدميه إلى حافة
-   الشاشة السفلى (الويدجت على bottom-5 أي 20px) فيبدو مقصوصًا. */
+   الشاشة السفلى (الويدجت على bottom-8 أي 32px) فيبدو مقصوصًا. */
 .support-widget-lottie-mount {
-    transform: scale(2.7);
+    transform: scale(2.35);
     transform-origin: center;
 }
 

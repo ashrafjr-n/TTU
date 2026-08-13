@@ -21,14 +21,19 @@
     ];
 @endphp
 
-<div id="support-widget" class="fixed bottom-5 right-5 z-[200] print:hidden">
+{{-- المسافة عن الحافتين bottom-8/right-8 (32px) بدل 20px السابقة: الزر كان
+     يكاد يلتصق بزاوية الشاشة، فأُبعِد قليلًا عنها من الجهتين معًا. الجهة
+     تبقى يمين الشاشة ثابتة كما كانت بالعربية والإنجليزية على السواء. --}}
+<div id="support-widget" class="fixed bottom-8 right-8 z-[200] print:hidden">
 
     {{-- اللوحة — تُفتح مكانها بأسفل يمين الشاشة دون مغادرة الصفحة الحالية --}}
     <div id="support-widget-panel"
-         class="hidden absolute bottom-full right-0 mb-4 w-[22rem] max-w-[calc(100vw-2.5rem)] rounded-3xl neu-raised-white p-4"
+         class="hidden absolute bottom-full right-0 mb-4 w-[22rem] max-w-[calc(100vw-4rem)] rounded-3xl neu-raised-white p-4"
          role="dialog" aria-modal="false" aria-labelledby="support-widget-title">
 
-        <div class="flex items-start justify-between gap-3 pb-3 mb-3 border-b border-black/10 dark:border-white/10">
+        {{-- mb-5 (لا mb-3): فسحة أوسع بين ترويسة اللوحة وأول فقاعة ترحيب،
+             فلا تبدو اللوحة مزدحمة من أعلاها لحظة فتحها --}}
+        <div class="flex items-start justify-between gap-3 pb-3 mb-5 border-b border-black/10 dark:border-white/10">
             <div class="min-w-0">
                 <p id="support-widget-title" class="text-sm font-bold text-ttu-black">{{ __('chatbot.widget.title') }}</p>
                 <p class="text-[11px] text-ttu-gray mt-0.5">{{ __('chatbot.widget.subtitle') }}</p>
@@ -43,10 +48,13 @@
         </div>
 
         {{-- سجل الرسائل --}}
-        <div id="support-widget-messages" class="max-h-[19rem] overflow-y-auto space-y-2.5 pe-1" aria-live="polite"></div>
+        <div id="support-widget-messages" class="max-h-[19rem] overflow-y-auto space-y-2.5 pt-1 pe-1" aria-live="polite"></div>
 
-        {{-- أزرار الخيارات (الطبقات الثابتة) --}}
-        <div id="support-widget-options" class="mt-3 space-y-2"></div>
+        {{-- أزرار الخيارات (الطبقات الثابتة) — شبكة عمودين بدل عمود واحد،
+             فتُقرأ كأزرار رد سريع بمحادثة حقيقية لا كقائمة رأسية. عقد
+             القائمة والمواضيع لها 4 خيارات (صفّان × عمودان)، وعقد التفصيل
+             خياران (صف واحد) — فالشبكة تنضبط في الحالتين. --}}
+        <div id="support-widget-options" class="mt-3 grid grid-cols-2 gap-2"></div>
 
         {{-- وضع المحادثة الحرة --}}
         <form id="support-widget-chat" class="hidden mt-3">
@@ -76,12 +84,15 @@
     {{-- المقاس من CSS لا من أصناف Tailwind: الحالة المغلقة 7rem (أنيميشن
          بارز وحده)، والمفتوحة/البديلة 3.5rem كما كانت — يُبدَّل الصنف
          support-fab--compact من setOpen()/showFallback(). --}}
+    {{-- الأيقونتان متراكبتان (absolute inset-0) لا متتاليتين: التبديل بينهما
+         تلاشٍ متقاطع بـopacity/scale لا بـhidden، فلو بقيتا في التدفق لدفعت
+         كلٌّ منهما الأخرى جانبًا. --}}
     <button type="button" id="support-widget-toggle"
             title="{{ __('chatbot.widget.open') }}" aria-label="{{ __('chatbot.widget.open') }}"
             aria-expanded="false" aria-controls="support-widget-panel"
-            class="support-fab rounded-full text-white flex items-center justify-center ms-auto">
+            class="support-fab relative rounded-full text-white flex items-center justify-center ms-auto">
 
-        <span id="support-widget-icon-open" class="block w-full h-full">
+        <span id="support-widget-icon-open" class="support-fab-icon absolute inset-0 flex items-center justify-center">
             {{-- حاوية الأنيميشن — بلا خلفية، يملؤها Lottie كـSVG شفاف.
                  التكبير على هذه الحاوية لا على الـsvg بداخلها، لأن Lottie
                  تكتب transform سطريًا على الـsvg فيتغلّب على أي قاعدة CSS. --}}
@@ -89,13 +100,13 @@
 
             {{-- بديل يظهر فقط لو تعذّر تحميل مكتبة Lottie من الـCDN، حتى لا
                  يبقى الزر فارغًا بلا أي أيقونة --}}
-            <svg id="support-widget-icon-fallback" class="hidden w-6 h-6 m-auto" fill="none" viewBox="0 0 24 24" stroke-width="1.7" stroke="currentColor">
+            <svg id="support-widget-icon-fallback" class="hidden w-6 h-6" fill="none" viewBox="0 0 24 24" stroke-width="1.7" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm3.75 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm3.75 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 20.25c4.556 0 8.25-3.19 8.25-7.125S16.556 6 12 6s-8.25 3.19-8.25 7.125c0 1.85.816 3.535 2.153 4.8.09.653-.132 1.503-.51 2.19-.203.371.023.865.44.803a7.87 7.87 0 003.037-1.242A9.66 9.66 0 0012 20.25z" />
             </svg>
         </span>
 
-        <svg id="support-widget-icon-close" class="hidden w-6 h-6" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+        <svg id="support-widget-icon-close" class="support-fab-icon support-fab-icon--off absolute inset-0 m-auto w-6 h-6" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
         </svg>
     </button>
@@ -221,8 +232,12 @@
 
         function setOpen(open) {
             panel.classList.toggle('hidden', !open);
-            iconOpen.classList.toggle('hidden', open);
-            iconClose.classList.toggle('hidden', !open);
+
+            // تلاشٍ متقاطع في الاتجاهين بدل hidden — راجع .support-fab-icon
+            // بملف الأنماط: display:none كان يلغي الانتقال بالاتجاه العائد
+            // (X ← الأنيميشن) فيقفز فجأة بينما الذهاب إليه يبدو ناعمًا.
+            iconOpen.classList.toggle('support-fab-icon--off', open);
+            iconClose.classList.toggle('support-fab-icon--off', !open);
             toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
 
             // الخلفية والظل للحالة المفتوحة فقط: المغلقة تعرض الأنيميشن وحده
@@ -320,9 +335,14 @@
         function showFallback() {
             const fallback = document.getElementById('support-widget-icon-fallback');
             const toggle = document.getElementById('support-widget-toggle');
+            const mount = document.getElementById('support-widget-lottie');
             if (!fallback || !toggle) return;
 
             fallback.classList.remove('hidden');
+
+            // حاوية الأنيميشن الفارغة تبقى عنصرًا بعرض كامل داخل صف الأيقونة،
+            // فتزيح الأيقونة البديلة عن المنتصف — تُطوى ما دام لا شيء بداخلها
+            if (mount) mount.classList.add('hidden');
 
             // الأيقونة البديلة بيضاء، فتحتاج خلفية الزر السابقة لتبقى مرئية —
             // وبمقاس الدائرة الأصلي (56px) لا المقاس الكبير المخصص للأنيميشن
