@@ -32,6 +32,52 @@ class TimezoneBehaviorTest extends TestCase
         $this->assertSame('Asia/Amman', now()->getTimezone()->getName());
     }
 
+    /**
+     * هذا الاختبار يغطي الثغرة التي لم يغطها test_app_timezone_reflects_amman_not_utc
+     * أعلاه: ذاك يتحقق من config('app.timezone') كما يُحمَّل هنا محليًا، حيث
+     * .env يضبط APP_TIMEZONE=Asia/Amman فعليًا — فيمر بنجاح سواء كان fallback
+     * بـ config/app.php صحيحًا أو لا، ولا يكشف شيئًا.
+     *
+     * البيئة الحقيقية المُعطّلة (Render) لا تملك .env على الإطلاق — هو مستبعد
+     * صراحة من كل من .gitignore و.dockerignore، فلا ينتقل للحاوية أبدًا. القيمة
+     * الوحيدة التي تصل APP_TIMEZONE هناك هي متغيرات بيئة المضيف نفسه؛ لو لم
+     * يضبطها أحد يدويًا هناك، يسقط env('APP_TIMEZONE', ...) على القيمة
+     * الافتراضية المكتوبة حرفيًا داخل config/app.php. فحص ذلك محليًا يستوجب
+     * محاكاة غياب المتغير فعليًا (لا الاعتماد على .env المحلي)، فنُفرغه من كل
+     * مصادر env() الثلاثة (putenv/$_ENV/$_SERVER) ثم نعيد تحميل config/app.php
+     * كملف مستقل تمامًا كما يفعل Laravel عند الإقلاع.
+     */
+    public function test_timezone_config_falls_back_to_amman_when_app_timezone_unset_in_host_env(): void
+    {
+        $original = [
+            'putenv' => getenv('APP_TIMEZONE'),
+            'env' => $_ENV['APP_TIMEZONE'] ?? null,
+            'server' => $_SERVER['APP_TIMEZONE'] ?? null,
+        ];
+
+        putenv('APP_TIMEZONE');
+        unset($_ENV['APP_TIMEZONE'], $_SERVER['APP_TIMEZONE']);
+
+        try {
+            $resolved = (require config_path('app.php'))['timezone'];
+        } finally {
+            if ($original['putenv'] !== false) {
+                putenv("APP_TIMEZONE={$original['putenv']}");
+            }
+            if ($original['env'] !== null) {
+                $_ENV['APP_TIMEZONE'] = $original['env'];
+            }
+            if ($original['server'] !== null) {
+                $_SERVER['APP_TIMEZONE'] = $original['server'];
+            }
+        }
+
+        // لو كانت هذه القيمة 'UTC' (القيمة الافتراضية القديمة لـ Laravel)،
+        // فهذا بالضبط ما جعل توقيت حضور/انصراف الدكاترة يظهر مُبكِّرًا بـ 3
+        // ساعات على أي بيئة نسي أحد ضبط APP_TIMEZONE عليها صراحةً.
+        $this->assertSame('Asia/Amman', $resolved);
+    }
+
     public function test_auto_checkout_command_runs_at_local_4pm_not_utc_4pm(): void
     {
         // الساعة 4:05 عصرًا بتوقيت عمّان المحلي — لو كان الإعداد ما زال UTC
