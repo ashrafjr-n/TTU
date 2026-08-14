@@ -1,7 +1,12 @@
 {{--
     مودال "العيادة مغلقة اليوم" — يظهر بدل قائمة الأوقات في صفحة /booking حين
-    يكون اليوم الحالي جمعة أو سبتًا (عطلة العيادة)، فنافذة الحجز حينها فارغة
-    تمامًا: لا يوم عمل متبقٍ بهذا الأسبوع، ولا نمتد لأسبوع لاحق.
+    تكون نافذة الحجز مغلقة فعليًا (Booking::isBookingWindowClosed: من الخميس
+    الساعة 4 عصرًا حتى نهاية الجمعة). لا يشمل هذا السبت — السبت يعيد فتح
+    الحجز لأول يومي عمل بالأسبوع القادم بدل إغلاق الصفحة كليًا.
+
+    $clinicClosedMessage (من Booking::closedWindowDescription()) يُبنى من
+    نفس ثوابت isBookingWindowClosed()، فلا يتكرر هنا نص أيام مكتوب حرفيًا
+    قد يفترق عن المنطق الفعلي لاحقًا.
 
     نفس بنية مودال الحد الفصلي (لا autoOpen — يفتح دائمًا) لأن الحالتين
     تتشاركان المعنى: لا شيء للحجز الآن على هذه الصفحة.
@@ -25,7 +30,7 @@
         </div>
 
         <h3 class="font-display text-xl font-extrabold mb-2">{{ __('booking.closed_modal.heading') }}</h3>
-        <p class="text-sm text-ttu-gray mb-8">{{ __('booking.closed_modal.intro') }}</p>
+        <p class="text-sm text-ttu-gray mb-8">{{ $clinicClosedMessage }}</p>
 
         <a href="{{ route('dashboard') }}"
            class="w-full inline-flex items-center justify-center neu-icon-btn bg-ttu-red text-white text-sm font-bold py-3 rounded-xl hover:!bg-ttu-red-dark">

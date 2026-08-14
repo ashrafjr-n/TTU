@@ -327,6 +327,32 @@ class Booking extends Model
     }
 
     /**
+     * نص "العيادة مغلقة" المعروض بمودال صفحة الحجز حين تكون نافذة الحجز
+     * مغلقة (isBookingWindowClosed()) — يُبنى من نفس الثوابت التي تحكم تلك
+     * الدالة (Carbon::THURSDAY/FRIDAY/SATURDAY وCLOSE_HOUR)، لا من أسماء أيام
+     * مكتوبة حرفيًا ومستقلة عنها في ملف الترجمة. لو تغيّرت حدود الإغلاق
+     * لاحقًا (مثلًا ساعة إغلاق مختلفة)، يتغيّر هذا النص تلقائيًا معها بدل أن
+     * يبقى نصًا ثابتًا يفترق عن المنطق الفعلي (وهذا بالضبط ما حدث سابقًا حين
+     * ظل النص يذكر "الجمعة والسبت" و"يفتح الأحد" بعد أن صار السبت يعيد فتح
+     * الحجز فعليًا).
+     */
+    public static function closedWindowDescription(): string
+    {
+        $days = __('common.days');
+
+        $hour = self::CLOSE_HOUR;
+        $period = $hour < 12 ? __('common.time.am') : __('common.time.pm');
+        $closeTime = sprintf('%d:00 %s', $hour <= 12 ? $hour : $hour - 12, $period);
+
+        return __('booking.closed_modal.intro', [
+            'close_day' => $days[Carbon::THURSDAY],
+            'close_time' => $closeTime,
+            'end_day' => $days[Carbon::FRIDAY],
+            'reopen_day' => $days[Carbon::SATURDAY],
+        ]);
+    }
+
+    /**
      * الأيام القابلة للحجز/العرض بصفحة الحجز: أيام دوام العيادة (الأحد–الخميس)
      * من اليوم حتى نهاية أسبوع العيادة الحالي، بحد أقصى 3 أيام — نافذة
      * BookingController حصرًا. لوحة الدكتور أسبوعية كاملة (currentWeekDates).

@@ -53,7 +53,7 @@ return [
     'closed_modal' => [
         'close' => 'Close',
         'heading' => 'The clinic is closed today',
-        'intro' => 'Friday and Saturday are the clinic weekend, and no days are available to book until the next working week begins. Booking reopens on Sunday.',
+        'intro' => 'Booking is closed from :close_day at :close_time until the end of :end_day, and reopens from :reopen_day until :close_day at :close_time.',
     ],
 
     'semester_limit_modal' => [

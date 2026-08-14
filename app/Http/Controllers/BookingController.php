@@ -44,6 +44,7 @@ class BookingController extends Controller
                 'activeBooking' => null,
                 'semesterLimitReached' => false,
                 'clinicClosed' => true,
+                'clinicClosedMessage' => Booking::closedWindowDescription(),
             ]);
         }
 
