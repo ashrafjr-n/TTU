@@ -6,6 +6,7 @@ use App\Models\ChatbotUsage;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use Tests\TestCase;
 
 /**
@@ -192,6 +193,58 @@ class ChatbotChatModeTest extends TestCase
             'reply' => "Live chat isn't available right now. You can still use the quick topics — booking, logging in, or contacting the clinic administration — or reach the clinic through the Contact page.",
             'fallback' => true,
         ]);
+    }
+
+    /**
+     * قبل هذا التصحيح، غياب المفتاح كان يعيد الرسالة الثابتة بصمت تام — لا
+     * استثناء ولا حالة HTTP فاشلة يلتقطها catch()/failed() أدناه بالخدمة،
+     * فلا أثر بالسجلّات يميّز هذا السبب تحديدًا عن أي سبب فشل آخر. هذا بالضبط
+     * ما جعل تشخيص عطل "وضع المحادثة" على الاستضافة الفعلية صعبًا — المفتاح
+     * محلي فقط (.env مستبعد من النشر) بينما الفشل صامت كليًا هناك.
+     */
+    public function test_a_missing_api_key_logs_a_warning_for_diagnosis(): void
+    {
+        Log::spy();
+        Http::fake();
+        config(['services.openrouter.key' => null]);
+
+        $this->ask()->assertOk();
+
+        Log::shouldHaveReceived('warning')
+            ->once()
+            ->with('Chatbot request skipped: OPENROUTER_API_KEY is not configured.');
+    }
+
+    public function test_the_daily_cap_logs_a_warning_with_usage_context(): void
+    {
+        Log::spy();
+        Http::fake();
+
+        ChatbotUsage::create(['usage_date' => ChatbotUsage::dateKey(), 'requests_count' => 3]);
+
+        $this->ask()->assertOk();
+
+        Log::shouldHaveReceived('warning')
+            ->once()
+            ->with('Chatbot request skipped: daily request limit reached.', [
+                'daily_limit' => 3,
+                'used_today' => 3,
+            ]);
+    }
+
+    public function test_an_api_error_status_logs_the_response_body_for_diagnosis(): void
+    {
+        Log::spy();
+        Http::fake(['openrouter.test/*' => Http::response(['error' => ['message' => 'Invalid API key']], 401)]);
+
+        $this->ask()->assertOk();
+
+        Log::shouldHaveReceived('warning')
+            ->once()
+            ->with('Chatbot request returned an error status', \Mockery::on(function ($context) {
+                return $context['status'] === 401
+                    && str_contains($context['body'], 'Invalid API key');
+            }));
     }
 
     public function test_the_message_is_validated(): void
