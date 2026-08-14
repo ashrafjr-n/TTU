@@ -66,14 +66,14 @@ return [
         'login' => [
             'label' => 'How do I log in?',
 
-            'short' => 'From the home page pick your account type, then sign in with your university or staff ID number — or the email on your account — plus your password. After signing in you go straight to the dashboard for your role.',
+            'short' => 'From the home page pick your account type, then sign in with your university or staff ID number plus your password — only the admin account uses an email instead of a number. After signing in you go straight to the dashboard for your role.',
 
-            'detailed' => 'The login field accepts either your university/staff ID number or the email address registered on your account, together with your password. There is no public sign-up: accounts are created by the clinic administration, so if you do not have one yet, contact the clinic instead of trying to register. For security, login is locked for a short period after 5 failed attempts, and a deactivated account cannot sign in at all until an administrator re-enables it. Doctors and administrators use the same login page and are routed to their own dashboards automatically.',
+            'detailed' => 'The login field accepts your university or staff ID number (doctors use their staff ID number too), together with your password — the admin account is the only exception and signs in with the email address registered on it instead of a number. There is no public sign-up: accounts are created by the clinic administration, so if you do not have one yet, contact the clinic instead of trying to register. For security, login is locked for a short period after 5 failed attempts, and a deactivated account cannot sign in at all until an administrator re-enables it. Everyone uses the same login page and is routed to their own dashboard automatically.',
 
             'followups' => [
                 [
                     'question' => 'I forgot my password, or my login is not working.',
-                    'answer' => 'First check that you are entering your ID number exactly as it was issued, or the email on your account, and that Caps Lock is off. If you see a message about too many attempts, wait for the timer to finish before trying again. There is no self-service password reset in the system, so a forgotten password — or an account that has been deactivated — has to be reset by the clinic administration: reach them through the Contact page or at the clinic desk.',
+                    'answer' => 'First check that you are entering your ID number exactly as it was issued (or your email address if you have an admin account), and that Caps Lock is off. If you see a message about too many attempts, wait for the timer to finish before trying again. There is no self-service password reset in the system, so a forgotten password — or an account that has been deactivated — has to be reset by the clinic administration: reach them through the Contact page or at the clinic desk.',
                 ],
                 [
                     'question' => 'Which account type should I choose?',

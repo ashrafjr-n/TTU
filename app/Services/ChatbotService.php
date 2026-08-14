@@ -129,7 +129,7 @@ class ChatbotService
         - Students book the earlier slots of each hour; the last slots of each hour are reserved for staff, and are released to students later the same day if unbooked.
         - A user may hold only one active booking at a time, and is limited to 4 confirmed bookings per semester.
         - There is no public sign-up and no self-service password reset; accounts are created and reset by the clinic administration.
-        - Users log in with their university/staff ID number or their account email, plus a password.
+        - Users log in with their university/staff ID number (doctors too), plus a password. The admin account is the only exception and logs in with its email address instead of a number.
         - Messages are sent from the "Contact" page and always go to the clinic administration (there is no doctor to choose), with a 700-character limit; the administration's reply arrives as a notification (bell icon in the header) that says a reply is waiting without showing its text, and clicking it opens the reply in a panel on the page.
         - Visit reports and prescribed medications appear under "My Medications".
 
