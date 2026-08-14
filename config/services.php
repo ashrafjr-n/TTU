@@ -37,7 +37,7 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | OpenRouter — مساعد الدعم (وضع "محادثة" في ويدجت الدعم)
+    | Groq — مساعد الدعم (وضع "محادثة" في ويدجت الدعم)
     |--------------------------------------------------------------------------
     |
     | المفتاح يُقرأ من .env فقط ولا يُكتب أبدًا داخل أي ملف يُرفع للمستودع.
@@ -49,11 +49,11 @@ return [
     |
     */
 
-    'openrouter' => [
-        'key' => env('OPENROUTER_API_KEY'),
-        'base_url' => env('OPENROUTER_BASE_URL', 'https://openrouter.ai/api/v1'),
-        'model' => env('OPENROUTER_MODEL', 'meta-llama/llama-3.3-70b-instruct:free'),
-        'timeout' => (int) env('OPENROUTER_TIMEOUT', 12),
+    'groq' => [
+        'key' => env('GROQ_API_KEY'),
+        'base_url' => env('GROQ_BASE_URL', 'https://api.groq.com/openai/v1'),
+        'model' => env('GROQ_MODEL', 'llama-3.3-70b-versatile'),
+        'timeout' => (int) env('GROQ_TIMEOUT', 12),
         'daily_limit' => (int) env('CHATBOT_DAILY_LIMIT', 40),
     ],
 

@@ -9,7 +9,7 @@ use Illuminate\Support\Str;
 use Throwable;
 
 /**
- * وضع "محادثة" في ويدجت الدعم — المسار الوحيد الذي يستدعي OpenRouter.
+ * وضع "محادثة" في ويدجت الدعم — المسار الوحيد الذي يستدعي Groq.
  *
  * كل الطبقات الثابتة بالويدجت لا تمر من هنا إطلاقًا. وأي فشل بهذا المسار
  * (لا مفتاح، نفاد السقف اليومي، خطأ HTTP، انتهاء المهلة، رد بشكل غير متوقع)
@@ -23,25 +23,25 @@ class ChatbotService
      */
     public function reply(string $message): array
     {
-        $apiKey = config('services.openrouter.key');
+        $apiKey = config('services.groq.key');
 
         if (blank($apiKey)) {
-            // أشيع سبب لهذا: OPENROUTER_API_KEY موجود بـ.env محليًا فقط — وهو
+            // أشيع سبب لهذا: GROQ_API_KEY موجود بـ.env محليًا فقط — وهو
             // مُستبعد من كل من .gitignore وDockerfile (.dockerignore)، فلا
             // يصل الحاوية المنشورة أبدًا إلا لو ضُبط صراحةً كمتغيّر بيئة على
             // المضيف نفسه (نفس نمط علة APP_TIMEZONE سابقًا). بدون هذا السطر
             // كان هذا المسار صامتًا تمامًا — لا استثناء ولا حالة HTTP فاشلة
             // يُسجَّلها catch/failed() أدناه، فلا أثر بالسجلّات يدلّ على السبب.
-            Log::warning('Chatbot request skipped: OPENROUTER_API_KEY is not configured.');
+            Log::warning('Chatbot request skipped: GROQ_API_KEY is not configured.');
 
             return $this->fallback();
         }
 
         // السقف اليومي — يُحجز قبل الاستدعاء (الطلب الفاشل يستهلك حصة عند
         // المزوّد أيضًا)، فنفاد السقف يعني الرسالة الثابتة دون أي طلب شبكة.
-        if (! ChatbotUsage::reserveSlot((int) config('services.openrouter.daily_limit'))) {
+        if (! ChatbotUsage::reserveSlot((int) config('services.groq.daily_limit'))) {
             Log::warning('Chatbot request skipped: daily request limit reached.', [
-                'daily_limit' => (int) config('services.openrouter.daily_limit'),
+                'daily_limit' => (int) config('services.groq.daily_limit'),
                 'used_today' => ChatbotUsage::usedToday(),
             ]);
 
@@ -50,11 +50,11 @@ class ChatbotService
 
         try {
             $response = Http::withToken($apiKey)
-                ->timeout((int) config('services.openrouter.timeout'))
+                ->timeout((int) config('services.groq.timeout'))
                 ->asJson()
                 ->acceptJson()
-                ->post(rtrim((string) config('services.openrouter.base_url'), '/').'/chat/completions', [
-                    'model' => config('services.openrouter.model'),
+                ->post(rtrim((string) config('services.groq.base_url'), '/').'/chat/completions', [
+                    'model' => config('services.groq.model'),
                     'max_tokens' => 400,
                     'temperature' => 0.3,
                     'messages' => [
@@ -70,7 +70,7 @@ class ChatbotService
         }
 
         if ($response->failed()) {
-            // نُسجّل جسم الرد أيضًا لا الحالة (status) وحدها: رسالة OpenRouter
+            // نُسجّل جسم الرد أيضًا لا الحالة (status) وحدها: رسالة Groq
             // نفسها (401 مفتاح غير صالح، 402 حساب بلا رصيد، 429 تجاوز حد
             // المزوّد، …) هي ما يميّز فعليًا بين "المفتاح خطأ" و"مشكلة أخرى" —
             // الحالة الرقمية وحدها لا تكفي لمن يراجع السجلّات لاحقًا.
