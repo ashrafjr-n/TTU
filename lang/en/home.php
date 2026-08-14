@@ -14,7 +14,8 @@ return [
         'fee_label' => 'Medication fee',
         'fee_value' => 'JD 0.20 per medication',
         'status_label' => 'Status',
-        'status_value' => 'Booking is open now',
+        'status_value_open' => 'Booking is open now',
+        'status_value_closed' => 'Booking is currently closed',
     ],
 
     'roles_section' => [

@@ -77,12 +77,12 @@
 
                 <div class="flex items-center gap-3 px-5 py-4">
                     <span class="relative flex h-2.5 w-2.5 shrink-0">
-                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-500 opacity-60"></span>
-                        <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-green-500"></span>
+                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full {{ $bookingOpen ? 'bg-green-500' : 'bg-red-500' }} opacity-60"></span>
+                        <span class="relative inline-flex rounded-full h-2.5 w-2.5 {{ $bookingOpen ? 'bg-green-500' : 'bg-red-500' }}"></span>
                     </span>
                     <div class="leading-tight">
                         <p class="text-[10px] text-ttu-gray font-semibold">{{ __('home.hero.status_label') }}</p>
-                        <p class="text-xs font-bold text-ttu-black">{{ __('home.hero.status_value') }}</p>
+                        <p class="text-xs font-bold text-ttu-black">{{ $bookingOpen ? __('home.hero.status_value_open') : __('home.hero.status_value_closed') }}</p>
                     </div>
                 </div>
             </div>

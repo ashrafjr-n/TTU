@@ -14,7 +14,8 @@ return [
         'fee_label' => 'رسوم الدواء',
         'fee_value' => '0.20 د.أ لكل دواء',
         'status_label' => 'الحالة',
-        'status_value' => 'الحجز متاح الآن',
+        'status_value_open' => 'الحجز متاح الآن',
+        'status_value_closed' => 'الحجز مغلق حاليًا',
     ],
 
     'roles_section' => [

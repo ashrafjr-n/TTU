@@ -10,6 +10,7 @@ use App\Http\Controllers\LocaleController;
 use App\Http\Controllers\MessageController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\VisitReportController;
+use App\Models\Booking;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/locale/{locale}', [LocaleController::class, 'switch'])->name('locale.switch');
@@ -32,7 +33,10 @@ Route::middleware(['auth', 'role:doctor'])->group(function () {
 
 // الصفحة الرئيسية - اختيار الدور
 Route::get('/', function () {
-    return view('welcome');
+    // نفس القاعدة التي تحكم bookableDates() بالضبط (Booking::isBookingWindowClosed)
+    // — لا فحص وقت منفصل هنا، وإلا افترق تعريف "مغلق" بين شارة الحالة هذه
+    // وصفحة الحجز الفعلية.
+    return view('welcome', ['bookingOpen' => !Booking::isBookingWindowClosed()]);
 })->name('home');
 
 Route::view('/about', 'about')->name('about');
