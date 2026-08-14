@@ -60,12 +60,20 @@ return [
     |--------------------------------------------------------------------------
     |
     | Here you may specify the default timezone for your application, which
-    | will be used by the PHP date and date-time functions. The timezone
-    | is set to "UTC" by default as it is suitable for most use cases.
+    | will be used by the PHP date and date-time functions.
+    |
+    | The fallback is "Asia/Amman", not "UTC": this app only ever runs the
+    | TTU clinic in Jordan, and .env is both gitignored and dockerignored
+    | (see .dockerignore), so APP_TIMEZONE only reaches a deployed
+    | container if it's set explicitly in that host's env vars. Falling
+    | back to UTC meant a host where nobody remembered to set it silently
+    | ran (and stored/displayed every timestamp) in UTC instead of Amman
+    | time — a 3-hour drift with no error to signal it. Falling back to
+    | the correct timezone instead removes that single point of failure.
     |
     */
 
-    'timezone' => env('APP_TIMEZONE', 'UTC'),
+    'timezone' => env('APP_TIMEZONE', 'Asia/Amman'),
 
     /*
     |--------------------------------------------------------------------------

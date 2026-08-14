@@ -21,6 +21,7 @@ return [
         'toggle_language' => 'Switch language',
         'dark_mode' => 'Dark mode',
         'menu' => 'Menu',
+        'jordan_time' => 'Jordan Time',
     ],
 
     'buttons' => [

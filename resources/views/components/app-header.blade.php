@@ -96,6 +96,22 @@
                 </a>
             </nav>
 
+            {{-- ساعة مرجعية بتوقيت الأردن (Asia/Amman) — تُحسب بجافاسكربت في
+                 المتصفح بصرف النظر عن منطقة الزائر، فتبقى صحيحة دومًا بغض
+                 النظر عن ضبط المتصفح/الجهاز. غير موجودة بالهيدر الشفاف
+                 (الرئيسية) — فقط بهيدر الصفحات الداخلية. --}}
+            @unless ($transparent)
+                <div id="jordan-clock" title="{{ __('common.header.jordan_time') }}"
+                     class="hidden sm:flex items-center gap-2 neu-pressed rounded-full px-3.5 py-2 shrink-0">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 text-ttu-red shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <circle cx="12" cy="12" r="9" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 7.5V12l3 2" />
+                    </svg>
+                    <span class="text-[10px] font-bold text-ttu-gray leading-none whitespace-nowrap">{{ __('common.header.jordan_time') }}</span>
+                    <span id="jordan-clock-time" class="text-xs font-bold text-ttu-black dark:text-ttu-white tabular-nums leading-none">--:--:--</span>
+                </div>
+            @endunless
+
         </div>
 
         {{-- اللوجو --}}
@@ -149,5 +165,30 @@
             localStorage.setItem('ttu-theme', isDark ? 'dark' : 'light');
             document.dispatchEvent(new CustomEvent('ttu-theme-change', { detail: { dark: isDark } }));
         });
+    })();
+</script>
+
+<script>
+    (function () {
+        const clockEl = document.getElementById('jordan-clock-time');
+        if (!clockEl) return;
+
+        // timeZone: 'Asia/Amman' صريحة هنا — هذا ما يجعل الساعة تعرض توقيت
+        // الأردن الحقيقي دومًا بصرف النظر عن منطقة/جهاز الزائر، بدل new
+        // Date().toLocaleTimeString() التي كانت ستعرض توقيته المحلي هو.
+        const formatter = new Intl.DateTimeFormat('en-GB', {
+            timeZone: 'Asia/Amman',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
+            hour12: false,
+        });
+
+        function tick() {
+            clockEl.textContent = formatter.format(new Date());
+        }
+
+        tick();
+        setInterval(tick, 1000);
     })();
 </script>

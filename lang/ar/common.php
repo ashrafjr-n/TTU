@@ -21,6 +21,7 @@ return [
         'toggle_language' => 'تبديل اللغة',
         'dark_mode' => 'الوضع الليلي',
         'menu' => 'القائمة',
+        'jordan_time' => 'توقيت الأردن',
     ],
 
     'buttons' => [
