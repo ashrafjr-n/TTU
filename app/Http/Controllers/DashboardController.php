@@ -57,6 +57,7 @@ class DashboardController extends Controller
     private function recentBookingsFor(User $user): Collection
     {
         return $user->bookings()
+            ->with('visitReport')
             ->where('status', 'confirmed')
             ->orderByDesc('booking_date')
             ->orderByDesc('booking_hour')

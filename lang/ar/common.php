@@ -42,6 +42,13 @@ return [
         'admin' => 'مدير',
     ],
 
+    'booking_status' => [
+        'confirmed' => 'مؤكد',
+        'ended_undocumented' => 'منتهي',
+        'ended_documented' => 'منتهي',
+        'cancelled' => 'ملغى',
+    ],
+
     'time' => [
         'am' => 'صباحًا',
         'pm' => 'مساءً',

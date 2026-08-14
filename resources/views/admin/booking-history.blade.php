@@ -70,9 +70,7 @@
                                 {{ __('common.roles.'.$booking->user->role) }}
                             </span>
 
-                            <span class="text-xs font-bold px-3 py-1.5 rounded-full {{ $booking->status === 'confirmed' ? 'bg-green-50 dark:bg-green-500/15 text-green-600 dark:text-green-400' : 'bg-red-50 dark:bg-red-500/15 text-red-500 dark:text-red-400' }}">
-                                {{ $booking->status === 'confirmed' ? __('admin_booking_history.table.status_confirmed') : __('admin_booking_history.table.status_cancelled') }}
-                            </span>
+                            <x-booking-status-badge :booking="$booking" />
                         </div>
                     </div>
                 @empty

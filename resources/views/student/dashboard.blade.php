@@ -159,7 +159,7 @@
                                     <p class="text-xs text-ttu-gray mt-0.5">{{ __('dashboard.visits.hour_prefix') }} {{ sprintf('%d:%02d', $booking->booking_hour, $booking->booking_minute) }}</p>
                                 </div>
                             </div>
-                            <span class="text-xs font-bold text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-500/15 rounded-full px-3 py-1.5">{{ __('dashboard.visits.confirmed') }}</span>
+                            <x-booking-status-badge :booking="$booking" />
                         </div>
                     @endforeach
                 </div>

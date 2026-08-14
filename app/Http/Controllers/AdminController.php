@@ -553,7 +553,7 @@ class AdminController extends Controller
             'search' => 'nullable|string|max:255',
         ]);
 
-        $query = Booking::with('user')
+        $query = Booking::with(['user', 'visitReport'])
             ->orderByDesc('booking_date')
             ->orderByDesc('booking_hour')
             ->orderByDesc('booking_minute');

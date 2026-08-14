@@ -42,6 +42,13 @@ return [
         'admin' => 'Admin',
     ],
 
+    'booking_status' => [
+        'confirmed' => 'Confirmed',
+        'ended_undocumented' => 'Ended',
+        'ended_documented' => 'Ended',
+        'cancelled' => 'Cancelled',
+    ],
+
     'time' => [
         'am' => 'AM',
         'pm' => 'PM',

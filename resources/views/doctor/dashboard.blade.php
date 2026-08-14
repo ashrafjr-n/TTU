@@ -194,6 +194,8 @@
                                     {{ $b->user->role == 'student' ? __('common.roles.student') : __('common.roles.staff') }}
                                 </span>
 
+                                <x-booking-status-badge :booking="$b" />
+
                                 @if ($reportAvailable)
                                     <button type="button" onclick='openVisitReportModal(@json($reportPayload))'
                                             class="neu-icon-btn bg-ttu-cream text-ttu-black text-xs font-bold px-3.5 py-2 rounded-xl flex items-center gap-1.5">
