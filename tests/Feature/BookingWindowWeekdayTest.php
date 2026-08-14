@@ -94,11 +94,39 @@ class BookingWindowWeekdayTest extends TestCase
         $this->assertSame([], $this->windowOn('2026-08-21'));
     }
 
-    public function test_saturday_offers_nothing(): void
+    public function test_thursday_before_close_hour_still_offers_thursday(): void
     {
-        // السبت بداية أسبوع العيادة لكنه يوم مغلق: لا نفتح منه نافذة تمتد
-        // إلى أحد/اثنين/ثلاثاء، فالصفحة نفسها حينها على يوم عطلة
-        $this->assertSame([], $this->windowOn('2026-08-15'));
+        Carbon::setTestNow(Carbon::parse('2026-08-20')->setTime(15, 59));
+
+        $this->assertSame(['2026-08-20'], collect(Booking::bookableDates())->map->toDateString()->all());
+    }
+
+    public function test_thursday_at_close_hour_closes_the_window(): void
+    {
+        // 4 عصرًا بالضبط (Booking::CLOSE_HOUR) — لحظة الإغلاق نفسها، لا بعدها
+        Carbon::setTestNow(Carbon::parse('2026-08-20')->setTime(16, 0));
+
+        $this->assertSame([], Booking::bookableDates());
+    }
+
+    public function test_saturday_reopens_with_next_sunday_and_monday(): void
+    {
+        // السبت حالة خاصة: يعاد فتح الحجز لأول يومي عمل بالأسبوع القادم
+        // (الأحد والاثنين)، لا نافذة فارغة كما كان سابقًا
+        $this->assertSame(
+            ['2026-08-16', '2026-08-17'],
+            $this->windowOn('2026-08-15')
+        );
+    }
+
+    public function test_saturday_reopening_is_not_gated_by_time_of_day(): void
+    {
+        Carbon::setTestNow(Carbon::parse('2026-08-15')->setTime(23, 30));
+
+        $this->assertSame(
+            ['2026-08-16', '2026-08-17'],
+            collect(Booking::bookableDates())->map->toDateString()->all()
+        );
     }
 
     // ------------------------------------------------------------------
@@ -191,9 +219,39 @@ class BookingWindowWeekdayTest extends TestCase
         $response->assertDontSee('id="day-tab-0"', false);
     }
 
-    public function test_the_booking_page_shows_the_closed_state_on_saturday(): void
+    public function test_the_booking_page_reopens_with_two_day_tabs_on_saturday(): void
     {
         Carbon::setTestNow(Carbon::parse('2026-08-15')->setTime(8, 0));
+
+        $response = $this->actingAs($this->student())->get(route('booking.index'));
+
+        $response->assertOk();
+        $response->assertDontSee('العيادة مغلقة اليوم');
+        $response->assertSee('id="day-tab-0"', false);
+        $response->assertSee('id="day-tab-1"', false);
+        $response->assertDontSee('id="day-tab-2"', false);
+    }
+
+    public function test_the_booking_page_labels_saturdays_two_tabs_as_tomorrow_and_day_after(): void
+    {
+        // الأحد (تبويب 0) هو غدًا فعليًا بالنسبة للسبت، لا "اليوم" — وهذا بالضبط
+        // ما كسره الاعتماد القديم على ترتيب المصفوفة (index) بدل علاقة التاريخ
+        // الحقيقية بـ"اليوم" (راجع Booking::dayLabel)
+        Carbon::setTestNow(Carbon::parse('2026-08-15')->setTime(8, 0));
+
+        $response = $this->actingAs($this->student())->get(route('booking.index'));
+
+        // لا نفحص غياب booking.day.today ("اليوم") عبر assertDontSee: النص
+        // يظهر بصرف النظر عن هذا التبويب ضمن نصوص أخرى بالصفحة (مثل aria-label
+        // "اختر اليوم") فليس علامة موثوقة على غياب تبويب "اليوم" تحديدًا
+        $response->assertOk();
+        $response->assertSee(__('booking.day.tomorrow'));
+        $response->assertSee(__('booking.day.day_after'));
+    }
+
+    public function test_thursday_after_close_hour_shows_the_closed_state(): void
+    {
+        Carbon::setTestNow(Carbon::parse('2026-08-20')->setTime(16, 0));
 
         $response = $this->actingAs($this->student())->get(route('booking.index'));
 
@@ -226,6 +284,37 @@ class BookingWindowWeekdayTest extends TestCase
         $response->assertSessionHas('error');
         $this->assertSame(__('booking.errors.clinic_closed'), session('error'));
         $this->assertDatabaseCount('bookings', 0);
+    }
+
+    public function test_store_rejects_booking_today_on_saturday_since_saturday_itself_has_no_slots(): void
+    {
+        Carbon::setTestNow(Carbon::parse('2026-08-15')->setTime(8, 0)); // سبت
+        $user = $this->student();
+
+        // بلا 'date' — يفترض المتحكّم "اليوم" (السبت نفسه)، وهو ليس ضمن
+        // bookableDates() رغم أن النافذة معاد فتحها (الأحد/الاثنين فقط)
+        $response = $this->actingAs($user)->post(route('booking.store'), ['hour' => 9, 'minute' => 0]);
+
+        $response->assertSessionHas('error');
+        $this->assertSame(__('booking.errors.clinic_closed'), session('error'));
+        $this->assertDatabaseCount('bookings', 0);
+    }
+
+    public function test_store_accepts_an_explicit_sunday_date_booked_from_saturday(): void
+    {
+        Carbon::setTestNow(Carbon::parse('2026-08-15')->setTime(8, 0)); // سبت
+        $user = $this->student();
+
+        $response = $this->actingAs($user)->post(route('booking.store'), [
+            'date' => '2026-08-16', 'hour' => 9, 'minute' => 0,
+        ]);
+
+        $response->assertSessionHas('success');
+        $this->assertDatabaseHas('bookings', [
+            'user_id' => $user->id,
+            'booking_date' => '2026-08-16 00:00:00',
+            'status' => 'confirmed',
+        ]);
     }
 
     public function test_store_rejects_an_explicit_friday_date(): void
