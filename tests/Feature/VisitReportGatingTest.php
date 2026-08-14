@@ -176,6 +176,36 @@ class VisitReportGatingTest extends TestCase
         $response->assertDontSee(__('doctor.bookings_table.attach_report'));
     }
 
+    /**
+     * قائمة اختيار الدواء بمودال تقرير الزيارة كانت تُغلق فورًا تقريبًا بعد
+     * فتحها: x-on:click.outside كانت على لوحة النتائج وحدها (شقيقة لحقل
+     * البحث، لا أب له)، فأي نقرة على الحقل نفسه لفتحها تُحتسب "نقرة خارجية"
+     * فتُغلقها فورًا. هذا الاختبار يقفل البنية المُصحَّحة (الخاصية على العنصر
+     * الأب الذي يضم الحقل ولوحة النتائج معًا) كي لا يعود أحد يفصلهما لاحقًا
+     * بلا انتباه لهذا التفاعل بين focus وclick.outside.
+     */
+    public function test_medication_dropdown_outside_click_guard_wraps_the_input_not_just_the_results_panel(): void
+    {
+        Carbon::setTestNow($this->today()->copy()->setTime(9, 30));
+
+        $this->bookingAt($this->today(), 9, 0);
+
+        $response = $this->actingAs($this->doctor())->get(route('dashboard.doctor'));
+
+        $response->assertOk();
+        $html = $response->getContent();
+
+        $this->assertStringContainsString(
+            'class="flex-1 min-w-0 relative" x-on:click.outside="row.open = false"',
+            $html
+        );
+        // النمط القديم المعطوب: click.outside على لوحة النتائج (x-show) نفسها
+        $this->assertStringNotContainsString(
+            'x-show="row.open" x-on:click.outside="row.open = false"',
+            $html
+        );
+    }
+
     public function test_a_doctor_cannot_attach_a_report_for_a_booking_on_another_doctors_day(): void
     {
         Carbon::setTestNow($this->today()->copy()->setTime(9, 30));
