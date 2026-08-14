@@ -21,11 +21,6 @@ return [
         'clear' => 'Clear filters',
     ],
 
-    'table' => [
-        'status_confirmed' => 'Confirmed',
-        'status_cancelled' => 'Cancelled',
-    ],
-
     'empty' => 'No matching bookings',
 
 ];

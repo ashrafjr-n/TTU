@@ -43,7 +43,6 @@ return [
         'empty' => "You don't have any visits recorded yet",
         'first_booking_cta' => 'Book your first appointment',
         'hour_prefix' => 'At',
-        'confirmed' => 'Confirmed',
     ],
 
 ];

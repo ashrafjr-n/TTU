@@ -73,7 +73,7 @@ class AdminBookingHistoryTest extends TestCase
 
         $response->assertOk();
         $response->assertSee($student->name);
-        $response->assertSee(__('admin_booking_history.table.status_cancelled'));
+        $response->assertSee(__('common.booking_status.cancelled'));
     }
 
     public function test_history_is_not_scoped_by_doctor_day_assignment(): void

@@ -21,11 +21,6 @@ return [
         'clear' => 'إلغاء التصفية',
     ],
 
-    'table' => [
-        'status_confirmed' => 'مؤكد',
-        'status_cancelled' => 'ملغى',
-    ],
-
     'empty' => 'لا توجد حجوزات مطابقة',
 
 ];

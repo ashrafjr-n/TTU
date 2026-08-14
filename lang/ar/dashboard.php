@@ -43,7 +43,6 @@ return [
         'empty' => 'لا توجد لديك أي زيارة مسجلة بعد',
         'first_booking_cta' => 'احجز موعدك الأول',
         'hour_prefix' => 'الساعة',
-        'confirmed' => 'مؤكد',
     ],
 
 ];
