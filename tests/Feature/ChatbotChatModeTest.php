@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Log;
 use Tests\TestCase;
 
 /**
- * وضع "محادثة" — المسار الوحيد الذي يستدعي OpenRouter. لا يُستدعى الـAPI
+ * وضع "محادثة" — المسار الوحيد الذي يستدعي Groq. لا يُستدعى الـAPI
  * الحقيقي هنا إطلاقًا: كل الاختبارات تستخدم Http::fake مع
  * preventStrayRequests، والمفتاح بالاختبارات فارغ افتراضيًا (phpunit.xml).
  */
@@ -25,17 +25,17 @@ class ChatbotChatModeTest extends TestCase
         Http::preventStrayRequests();
 
         config([
-            'services.openrouter.key' => 'test-key',
-            'services.openrouter.model' => 'test/model',
-            'services.openrouter.base_url' => 'https://openrouter.test/api/v1',
-            'services.openrouter.daily_limit' => 3,
+            'services.groq.key' => 'test-key',
+            'services.groq.model' => 'test/model',
+            'services.groq.base_url' => 'https://groq.test/api/v1',
+            'services.groq.daily_limit' => 3,
         ]);
     }
 
     private function fakeReply(string $content): void
     {
         Http::fake([
-            'openrouter.test/*' => Http::response([
+            'groq.test/*' => Http::response([
                 'choices' => [['message' => ['role' => 'assistant', 'content' => $content]]],
             ]),
         ]);
@@ -63,7 +63,7 @@ class ChatbotChatModeTest extends TestCase
         Http::assertSent(function ($request) {
             $body = $request->data();
 
-            return $request->url() === 'https://openrouter.test/api/v1/chat/completions'
+            return $request->url() === 'https://groq.test/api/v1/chat/completions'
                 && $request->hasHeader('Authorization', 'Bearer test-key')
                 && $body['model'] === 'test/model'
                 && $body['messages'][0]['role'] === 'system'
@@ -139,7 +139,7 @@ class ChatbotChatModeTest extends TestCase
 
     public function test_an_api_error_status_falls_back(): void
     {
-        Http::fake(['openrouter.test/*' => Http::response(['error' => 'rate limited'], 429)]);
+        Http::fake(['groq.test/*' => Http::response(['error' => 'rate limited'], 429)]);
 
         $response = $this->ask();
 
@@ -159,7 +159,7 @@ class ChatbotChatModeTest extends TestCase
 
     public function test_an_unexpected_response_shape_falls_back(): void
     {
-        Http::fake(['openrouter.test/*' => Http::response(['choices' => []])]);
+        Http::fake(['groq.test/*' => Http::response(['choices' => []])]);
 
         $response = $this->ask();
 
@@ -170,7 +170,7 @@ class ChatbotChatModeTest extends TestCase
     public function test_a_missing_api_key_falls_back_without_calling_the_api_or_spending_quota(): void
     {
         Http::fake();
-        config(['services.openrouter.key' => null]);
+        config(['services.groq.key' => null]);
 
         $response = $this->ask();
 
@@ -184,7 +184,7 @@ class ChatbotChatModeTest extends TestCase
     public function test_the_fallback_message_follows_the_site_locale(): void
     {
         Http::fake();
-        config(['services.openrouter.key' => null]);
+        config(['services.groq.key' => null]);
 
         $response = $this->withSession(['locale' => 'en'])->ask();
 
@@ -206,13 +206,13 @@ class ChatbotChatModeTest extends TestCase
     {
         Log::spy();
         Http::fake();
-        config(['services.openrouter.key' => null]);
+        config(['services.groq.key' => null]);
 
         $this->ask()->assertOk();
 
         Log::shouldHaveReceived('warning')
             ->once()
-            ->with('Chatbot request skipped: OPENROUTER_API_KEY is not configured.');
+            ->with('Chatbot request skipped: GROQ_API_KEY is not configured.');
     }
 
     public function test_the_daily_cap_logs_a_warning_with_usage_context(): void
@@ -235,7 +235,7 @@ class ChatbotChatModeTest extends TestCase
     public function test_an_api_error_status_logs_the_response_body_for_diagnosis(): void
     {
         Log::spy();
-        Http::fake(['openrouter.test/*' => Http::response(['error' => ['message' => 'Invalid API key']], 401)]);
+        Http::fake(['groq.test/*' => Http::response(['error' => ['message' => 'Invalid API key']], 401)]);
 
         $this->ask()->assertOk();
 

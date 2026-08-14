@@ -29,9 +29,9 @@
         <env name="DATABASE_URL" value=""/>
         <env name="MAIL_MAILER" value="array"/>
         <!-- مساعد الدعم: بلا مفتاح افتراضيًا بالاختبارات، فلا يمكن لأي اختبار
-             أن يستدعي OpenRouter فعليًا بالخطأ؛ اختبارات المحادثة تضبط
+             أن يستدعي Groq فعليًا بالخطأ؛ اختبارات المحادثة تضبط
              المفتاح صراحةً بالـconfig مع Http::fake. -->
-        <env name="OPENROUTER_API_KEY" value=""/>
+        <env name="GROQ_API_KEY" value=""/>
         <env name="QUEUE_CONNECTION" value="sync"/>
         <env name="SESSION_DRIVER" value="array"/>
         <env name="PULSE_ENABLED" value="false"/>
