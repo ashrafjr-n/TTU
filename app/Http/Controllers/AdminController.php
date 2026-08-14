@@ -43,16 +43,25 @@ class AdminController extends Controller
 
         $dayLabels = __('common.days');
 
-        // الأسبوع الحالي: أحد إلى سبت (بغض النظر عن لغة النظام)، متسق مع
-        // تسمية الأيام المستخدمة في صفحة جدول عمل الأطباء
-        $weekStart = Carbon::today()->startOfWeek(Carbon::SUNDAY);
-        $weekEnd = $weekStart->copy()->endOfWeek(Carbon::SATURDAY);
+        // الأسبوع الحالي: نفس عُرف السبت→الجمعة المستخدم بكل مكان آخر بالتطبيق
+        // (bookableDates، currentWeekDates، فلتر سجل الحجوزات) — كان هذا
+        // المخطط تحديدًا يستخدم أحد→سبت مستقلًا عن البقية، فيُنتج "أسبوعًا"
+        // مختلفًا عن كل الصفحات الأخرى رغم تسميته "الأسبوع الحالي" أيضًا.
+        // weekRange(0) هي نفس الدالة المستخدمة بفلتر سجل الحجوزات، بدل حساب
+        // مستقل مكرَّر هنا.
+        [$weekStart, $weekEnd] = Booking::weekRange(0);
 
+        // DATE(booking_date) لا booking_date مباشرة: عمود booking_date (date
+        // cast) يُخزَّن فعليًا بصيغة "Y-m-d H:i:s" (راجع نفس الملاحظة
+        // بـRecordDoctorAttendanceOnLogin) — استعلام خام (selectRaw/groupBy)
+        // لا يمر بتحويل Eloquent فيُعيد المفتاح الخام بجزء الوقت هذا، فيفشل
+        // بصمت أي بحث لاحق بمفتاح "Y-m-d" فقط (toDateString()) ويُظهر المخطط
+        // صفرًا دائمًا مهما كانت البيانات فعليًا.
         $dailyCounts = Booking::where('status', 'confirmed')
             ->whereBetween('booking_date', [$weekStart->toDateString(), $weekEnd->toDateString()])
-            ->selectRaw('booking_date, count(*) as c')
-            ->groupBy('booking_date')
-            ->pluck('c', 'booking_date');
+            ->selectRaw('DATE(booking_date) as booking_day, count(*) as c')
+            ->groupBy('booking_day')
+            ->pluck('c', 'booking_day');
 
         $weekChart = ['labels' => [], 'data' => []];
         for ($d = $weekStart->copy(); $d->lte($weekEnd); $d->addDay()) {

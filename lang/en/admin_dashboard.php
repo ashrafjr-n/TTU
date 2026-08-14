@@ -16,7 +16,7 @@ return [
     'week_chart' => [
         'heading' => 'Weekly bookings',
         'total' => 'Total: :total',
-        'subheading' => 'Daily breakdown (Sunday–Saturday)',
+        'subheading' => 'Daily breakdown (Saturday–Friday)',
     ],
 
     'students_series' => 'Students',

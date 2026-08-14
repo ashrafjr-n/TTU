@@ -16,7 +16,7 @@ return [
     'week_chart' => [
         'heading' => 'حجوزات الأسبوع',
         'total' => 'المجموع: :total',
-        'subheading' => 'التوزيع اليومي (الأحد–السبت)',
+        'subheading' => 'التوزيع اليومي (السبت–الجمعة)',
     ],
 
     'students_series' => 'طلاب',
