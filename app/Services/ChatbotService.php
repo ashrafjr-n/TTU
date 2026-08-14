@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\ChatbotUsage;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 use Throwable;
 
 /**
@@ -25,12 +26,25 @@ class ChatbotService
         $apiKey = config('services.openrouter.key');
 
         if (blank($apiKey)) {
+            // أشيع سبب لهذا: OPENROUTER_API_KEY موجود بـ.env محليًا فقط — وهو
+            // مُستبعد من كل من .gitignore وDockerfile (.dockerignore)، فلا
+            // يصل الحاوية المنشورة أبدًا إلا لو ضُبط صراحةً كمتغيّر بيئة على
+            // المضيف نفسه (نفس نمط علة APP_TIMEZONE سابقًا). بدون هذا السطر
+            // كان هذا المسار صامتًا تمامًا — لا استثناء ولا حالة HTTP فاشلة
+            // يُسجَّلها catch/failed() أدناه، فلا أثر بالسجلّات يدلّ على السبب.
+            Log::warning('Chatbot request skipped: OPENROUTER_API_KEY is not configured.');
+
             return $this->fallback();
         }
 
         // السقف اليومي — يُحجز قبل الاستدعاء (الطلب الفاشل يستهلك حصة عند
         // المزوّد أيضًا)، فنفاد السقف يعني الرسالة الثابتة دون أي طلب شبكة.
         if (! ChatbotUsage::reserveSlot((int) config('services.openrouter.daily_limit'))) {
+            Log::warning('Chatbot request skipped: daily request limit reached.', [
+                'daily_limit' => (int) config('services.openrouter.daily_limit'),
+                'used_today' => ChatbotUsage::usedToday(),
+            ]);
+
             return $this->fallback();
         }
 
@@ -56,7 +70,14 @@ class ChatbotService
         }
 
         if ($response->failed()) {
-            Log::warning('Chatbot request returned an error status', ['status' => $response->status()]);
+            // نُسجّل جسم الرد أيضًا لا الحالة (status) وحدها: رسالة OpenRouter
+            // نفسها (401 مفتاح غير صالح، 402 حساب بلا رصيد، 429 تجاوز حد
+            // المزوّد، …) هي ما يميّز فعليًا بين "المفتاح خطأ" و"مشكلة أخرى" —
+            // الحالة الرقمية وحدها لا تكفي لمن يراجع السجلّات لاحقًا.
+            Log::warning('Chatbot request returned an error status', [
+                'status' => $response->status(),
+                'body' => Str::limit($response->body(), 500),
+            ]);
 
             return $this->fallback();
         }
