@@ -133,7 +133,7 @@
                 <div class="space-y-3">
                     <template x-for="(row, index) in medRows" :key="row.uid">
                         <div class="flex gap-3 items-start rounded-xl neu-pressed p-3">
-                            <div class="flex-1 min-w-0 relative">
+                            <div class="flex-1 min-w-0 relative" x-on:click.outside="row.open = false">
                                 <input type="text" x-model="row.search"
                                        x-on:focus="row.open = true"
                                        x-on:input="row.open = true; row.medicationId = null"
@@ -142,7 +142,7 @@
                                        class="w-full rounded-lg border-0 bg-white dark:bg-ttu-white px-3 py-2 text-sm focus:ring-2 focus:ring-ttu-red/30 outline-none">
                                 <input type="hidden" x-bind:name="'medications[' + index + '][medication_id]'" x-bind:value="row.medicationId">
 
-                                <div x-show="row.open" x-on:click.outside="row.open = false"
+                                <div x-show="row.open"
                                      class="absolute z-10 mt-1 w-full max-h-48 overflow-y-auto rounded-xl neu-raised-white p-2">
                                     <template x-for="med in filteredCatalog(row)" :key="med.id">
                                         <button type="button" x-on:click="selectMed(row, med)"
