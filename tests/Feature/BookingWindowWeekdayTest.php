@@ -273,6 +273,61 @@ class BookingWindowWeekdayTest extends TestCase
         $response->assertDontSee('العيادة مغلقة اليوم');
     }
 
+    public function test_closed_window_description_is_built_from_the_same_constants_as_the_closed_check(): void
+    {
+        $this->assertSame(
+            'الحجز مغلق من يوم الخميس الساعة 4:00 مساءً حتى نهاية يوم الجمعة، ويعاد فتحه من يوم السبت حتى يوم الخميس الساعة 4:00 مساءً.',
+            Booking::closedWindowDescription()
+        );
+    }
+
+    public function test_the_closed_state_message_reflects_the_real_thursday_to_friday_window_not_saturday(): void
+    {
+        Carbon::setTestNow(Carbon::parse('2026-08-20')->setTime(16, 0)); // خميس، بعد الإغلاق
+
+        $response = $this->actingAs($this->student())->get(route('booking.index'));
+
+        $response->assertOk();
+        $response->assertSee(Booking::closedWindowDescription());
+        // النص القديم الخاطئ (كان يذكر السبت كيوم عطلة ويفتح الأحد فقط)
+        $response->assertDontSee('يفتح الحجز من جديد يوم الأحد');
+    }
+
+    public function test_the_closed_state_message_is_localized_in_english(): void
+    {
+        Carbon::setTestNow(Carbon::parse('2026-08-21')->setTime(8, 0)); // جمعة
+
+        $response = $this->actingAs($this->student())
+            ->withSession(['locale' => 'en'])
+            ->get(route('booking.index'));
+
+        $response->assertOk();
+        $response->assertSee('Booking is closed from Thursday at 4:00 PM until the end of Friday, and reopens from Saturday until Thursday at 4:00 PM.');
+        $response->assertDontSee('Booking reopens on Sunday');
+    }
+
+    public function test_chatbot_static_content_and_system_prompt_do_not_claim_saturday_is_closed(): void
+    {
+        // نفس الخلل الذي أُصلح بمودال صفحة الحجز كان موجودًا أيضًا بمحتوى
+        // الشات بوت الثابت (سؤال "كيف أحجز موعدًا؟") وبتعليمات نموذج الذكاء
+        // الاصطناعي نفسها — كلاهما بقي يذكر "الجمعة والسبت عطلة... يفتح الحجز
+        // من جديد يوم الأحد" بعد أن صار السبت يعيد فتح الحجز فعليًا
+        foreach (['ar', 'en'] as $locale) {
+            $chatbot = require base_path("lang/{$locale}/chatbot.php");
+            $flat = json_encode($chatbot, JSON_UNESCAPED_UNICODE);
+
+            $this->assertStringNotContainsString('يفتح الحجز من جديد يوم الأحد', $flat);
+            $this->assertStringNotContainsString('reopening on Sunday', $flat);
+        }
+
+        $method = new \ReflectionMethod(\App\Services\ChatbotService::class, 'systemPrompt');
+        $method->setAccessible(true);
+        $prompt = $method->invoke(new \App\Services\ChatbotService());
+
+        $this->assertStringNotContainsString('booking reopens on Sunday', $prompt);
+        $this->assertStringContainsString('Saturday is a special case', $prompt);
+    }
+
     public function test_store_rejects_a_booking_on_a_closed_day_even_without_an_explicit_date(): void
     {
         Carbon::setTestNow(Carbon::parse('2026-08-21')->setTime(8, 0)); // جمعة
