@@ -107,8 +107,14 @@
                         <circle cx="12" cy="12" r="9" />
                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 7.5V12l3 2" />
                     </svg>
-                    <span class="text-[10px] font-bold text-ttu-gray leading-none whitespace-nowrap">{{ __('common.header.jordan_time') }}</span>
-                    <span id="jordan-clock-time" class="text-xs font-bold text-ttu-black dark:text-ttu-white tabular-nums leading-none">--:--:--</span>
+                    {{-- text-ttu-black لا text-ttu-gray/dark:text-ttu-white: هذا
+                         المتغيّر نفسه يتبدّل تلقائيًا بين أسود شبه خالص بالوضع
+                         العادي وأبيض شبه خالص بالوضع الليلي (راجع .dark بملف
+                         app.css) — فيبقى واضحًا بالحالتين بلا حاجة لـdark: صريحة،
+                         بعكس اللون الرمادي الباهت السابق أو dark:text-ttu-white
+                         التي كانت تُحل فعليًا للون داكن أيضًا تحت .dark. --}}
+                    <span class="text-[10px] font-bold text-ttu-black leading-none whitespace-nowrap">{{ __('common.header.jordan_time') }}</span>
+                    <span id="jordan-clock-time" class="text-xs font-bold text-ttu-black tabular-nums leading-none">--:--:--</span>
                 </div>
             @endunless
 
