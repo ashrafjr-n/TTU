@@ -31,10 +31,13 @@ class BookingController extends Controller
 
         $bookableDates = Booking::bookableDates();
 
-        // العيادة مغلقة اليوم (جمعة/سبت) فلا نافذة حجز إطلاقًا. الفحص قبل فحص
+        // نافذة الحجز مغلقة الآن (من الخميس 4 عصرًا حتى نهاية الجمعة —
+        // Booking::isBookingWindowClosed()) فلا أيام قابلة للحجز إطلاقًا. لا
+        // يشمل هذا السبت: bookableDates() تعيد له الأحد والاثنين القادمين
+        // خصيصًا، فمصفوفة فارغة هنا تعني الإغلاق الفعلي حصرًا. الفحص قبل فحص
         // الحد الفصلي أدناه عمدًا: every() على مجموعة فارغة تعود true، فبدون
         // هذا الترتيب كانت الصفحة ستعرض "بلغت الحد الأقصى للفصل" وهي رسالة
-        // خاطئة تمامًا في يوم عطلة.
+        // خاطئة تمامًا في فترة إغلاق.
         if (empty($bookableDates)) {
             return view('booking.index', [
                 'days' => [],
@@ -78,7 +81,7 @@ class BookingController extends Controller
             $days[] = [
                 'index' => $index,
                 'date' => $date->toDateString(),
-                'label' => Booking::dayLabel($index, $date),
+                'label' => Booking::dayLabel($date),
                 'hours' => $hours,
                 'default_hour' => $this->defaultHour($hours),
             ];

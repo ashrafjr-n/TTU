@@ -307,6 +307,26 @@ class Booking extends Model
     }
 
     /**
+     * هل الحجز مغلق تمامًا الآن؟ من الخميس الساعة CLOSE_HOUR (4 عصرًا) —
+     * نهاية دوام العيادة، راجع Booking::CLOSE_HOUR — حتى نهاية الجمعة،
+     * بتوقيت التطبيق (Asia/Amman عبر now()، لا توقيت الخادم/المتصفح).
+     *
+     * السبت متعمَّد أنه خارج هذه النافذة رغم كونه يوم عطلة أيضًا: هو حالة
+     * إعادة فتح خاصة (راجع bookableDates())، لا استمرارًا للإغلاق — لذلك
+     * الفحص هنا صريح على الخميس/الجمعة فقط، لا "أي يوم غير يوم عمل".
+     *
+     * مصدر وحيد للحقيقة يُستخدم من كل من bookableDates() (لوحة الحجز) وشارة
+     * حالة الحجز بالصفحة الرئيسية، كي لا يفترق تعريف "مغلق" بين الاثنين.
+     */
+    public static function isBookingWindowClosed(): bool
+    {
+        $now = now();
+
+        return $now->dayOfWeek === Carbon::FRIDAY
+            || ($now->dayOfWeek === Carbon::THURSDAY && $now->hour >= self::CLOSE_HOUR);
+    }
+
+    /**
      * الأيام القابلة للحجز/العرض بصفحة الحجز: أيام دوام العيادة (الأحد–الخميس)
      * من اليوم حتى نهاية أسبوع العيادة الحالي، بحد أقصى 3 أيام — نافذة
      * BookingController حصرًا. لوحة الدكتور أسبوعية كاملة (currentWeekDates).
@@ -316,8 +336,9 @@ class Booking extends Model
      *   الاثنين  → الاثنين، الثلاثاء، الأربعاء (3)
      *   الثلاثاء → الثلاثاء، الأربعاء، الخميس (3)
      *   الأربعاء → الأربعاء، الخميس           (2)
-     *   الخميس   → الخميس                     (1)
-     *   الجمعة/السبت → لا شيء                 (0)
+     *   الخميس (قبل 4 عصرًا) → الخميس          (1)
+     *   الخميس (من 4 عصرًا)/الجمعة → لا شيء     (0) — isBookingWindowClosed()
+     *   السبت    → الأحد، الاثنين القادمين      (2) — حالة خاصة، انظر أدناه
      *
      * قبل هذا كانت النافذة "اليوم + يومين" تقويميًا بلا وعي بأيام العمل، فكانت
      * تعرض الجمعة/السبت (عطلة العيادة) كأيام قابلة للحجز، وتمتد لأسبوع لاحق.
@@ -326,18 +347,26 @@ class Booking extends Model
      * الدكتور (startOfWeek(Carbon::SATURDAY))، فالنظامان يتفقان على معنى "هذا
      * الأسبوع": يبدأ سبتًا وآخر أيام عمله الخميس (weekStart + 5).
      *
-     * الجمعة/السبت يومان مغلقان أصلًا، فلا نافذة لهما إطلاقًا (مصفوفة فارغة)
-     * بدل بدء أسبوع جديد منهما — لأن الصفحة نفسها حينها على يوم مغلق،
-     * ويعرض BookingController حالة "العيادة مغلقة" بدل شبكة الأوقات.
+     * السبت حالة خاصة: أول يوم بعد إغلاق الأسبوع (خميس 4 عصرًا→جمعة)، فبدل
+     * إبقاء النافذة فارغة كالجمعة تمامًا، يُعاد فتحها لأول يومي عمل بالأسبوع
+     * القادم (الأحد والاثنين) — فالسبت نفسه ليس يوم عمل، لكنه ليس ضمن نافذة
+     * الإغلاق (isBookingWindowClosed()) أيضًا، فيصلح "معاينة مبكرة" للأسبوع
+     * القادم بدل يوم ميت بلا فائدة.
      *
      * @return list<Carbon>
      */
     public static function bookableDates(): array
     {
+        if (self::isBookingWindowClosed()) {
+            return [];
+        }
+
         $today = Carbon::today();
 
-        if (!in_array($today->dayOfWeek, DoctorDayAssignment::CLINIC_DAYS, true)) {
-            return [];
+        if ($today->dayOfWeek === Carbon::SATURDAY) {
+            $sunday = $today->copy()->addDay();
+
+            return [$sunday, $sunday->copy()->addDay()];
         }
 
         // آخر يوم عمل بأسبوع العيادة الحالي: السبت (بداية الأسبوع) + 5 = الخميس
@@ -349,8 +378,9 @@ class Booking extends Model
                 break;
             }
 
-            // الفلتر هنا احترازي (المدى أعلاه لا يشمل جمعة/سبت أصلًا) ويجعل
-            // شرط "لا يوم مغلق ضمن النافذة" صريحًا لا ضمنيًا
+            // الفلتر هنا احترازي (المدى أعلاه لا يشمل جمعة أصلًا، والسبت
+            // مُعالَج أعلاه قبل الوصول هنا) ويجعل شرط "لا يوم مغلق ضمن
+            // النافذة" صريحًا لا ضمنيًا
             if (in_array($date->dayOfWeek, DoctorDayAssignment::CLINIC_DAYS, true)) {
                 $dates[] = $date->copy();
             }
@@ -361,12 +391,18 @@ class Booking extends Model
 
     /**
      * تسمية اليوم المعروضة فوق تبويبه بصفحة الحجز (مثال: "اليوم — 4 أغسطس").
+     *
+     * مبنية على علاقة $date الفعلية بـ"اليوم" (isToday/isTomorrow)، لا على
+     * ترتيب $date ضمن مصفوفة bookableDates() كما كانت سابقًا — فذلك الترتيب
+     * لم يعد يطابق "اليوم/غدًا/بعد الغد" حرفيًا بعد حالة السبت الخاصة
+     * (bookableDates() تعيد الأحد والاثنين القادمين، فأول عنصر بالمصفوفة هو
+     * غدًا فعليًا لا اليوم، والسبت نفسه ليس ضمن المصفوفة أصلًا).
      */
-    public static function dayLabel(int $index, Carbon $date): string
+    public static function dayLabel(Carbon $date): string
     {
-        $prefix = match ($index) {
-            0 => __('booking.day.today'),
-            1 => __('booking.day.tomorrow'),
+        $prefix = match (true) {
+            $date->isToday() => __('booking.day.today'),
+            $date->isTomorrow() => __('booking.day.tomorrow'),
             default => __('booking.day.day_after'),
         };
 
@@ -382,9 +418,9 @@ class Booking extends Model
      * بداية الأسبوع سبت (لا الأحد المعتاد) لأنها أول يوم بعد إغلاق العيادة
      * الأسبوعي (خميس آخر يوم عمل، فالجمعة والسبت عطلة) — فالأسبوع "يتصفّر"
      * فعليًا مع افتتاح العيادة يوم الأحد التالي، والسبت هو أنسب حد فاصل بلا
-     * لبس. startOfWeek(Carbon::SATURDAY) نفس الأسلوب المستخدم أصلًا بمخطط
-     * لوحة المدير الأسبوعي (AdminController::index — startOfWeek(SUNDAY)),
-     * بدل حساب الفرق يدويًا.
+     * لبس. startOfWeek(Carbon::SATURDAY) نفس العُرف المستخدم بكل مكان آخر
+     * بالتطبيق يقصد بـ"الأسبوع" شيئًا (weekRange، bookableDates، ومخطط لوحة
+     * المدير الأسبوعي عبر weekRange نفسها)، بدل حساب الفرق يدويًا.
      */
     public static function currentWeekDates(): array
     {
