@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\Medication;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -53,5 +54,26 @@ class AdminPaginationTest extends TestCase
         $response->assertSee('Previous');
         $response->assertSee('Next');
         $response->assertSee('Showing 1 to 15 of 20 results');
+    }
+
+    public function test_pagination_renders_on_the_medications_page_too(): void
+    {
+        $admin = $this->admin();
+        foreach (range(1, 18) as $i) {
+            Medication::create([
+                'name_ar' => "دواء {$i}",
+                'name_en' => "Medication {$i}",
+                'stock_quantity' => 5,
+                'low_stock_threshold' => 10,
+            ]);
+        }
+
+        $response = $this->actingAs($admin)->get(route('admin.medications'));
+
+        $response->assertOk();
+        $response->assertSee('السابق');
+        $response->assertSee('عرض 1 إلى 15 من أصل 18 نتيجة');
+        $response->assertSee('neu-icon-btn', false);
+        $response->assertDontSee('border-gray-300', false);
     }
 }
